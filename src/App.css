@@ -1,10 +1,26 @@
+/* #rootはアプリケーション全体のコンテナです */
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
+  max-width: 1280px; /* コンテンツの最大幅を指定 */
+  margin: 0 auto;    /* 上下マージン0、左右マージンautoで中央揃え */
   padding: 2rem;
-  text-align: center;
+  width: 100%;
+  text-align: center; /* 念のためテキストも中央揃えに */
 }
 
+/* bodyの基本スタイル */
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #F9FAFB;
+  font-family: 'Noto Sans JP', 'Helvetica', 'Arial', sans-serif;
+}
+
+/* 全ての要素でborder-boxを適用し、paddingやborderが幅に影響しないようにします */
+* {
+  box-sizing: border-box;
+}
+
+/* 以下はViteのデフォルトスタイルですが、今回のレイアウトには不要なためコメントアウトまたは削除しても構いません */
 .logo {
   height: 6em;
   padding: 1.5em;
