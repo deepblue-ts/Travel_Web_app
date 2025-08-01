@@ -1,3 +1,4 @@
+/* :rootのスタイルはデフォルトのままで問題ありません */
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -13,6 +14,15 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* bodyのレイアウト関連の指定を削除し、基本的なマージンリセットのみ残します */
+body {
+  margin: 0;
+  /* font-familyとbackgroundはApp.cssで指定するため、ここでは不要です */
+}
+
+
+/* 以下のデフォルトスタイルは、必要に応じて残したり、削除・修正してください */
+/* 今回のレイアウト問題とは直接関係ありません */
 a {
   font-weight: 500;
   color: #646cff;
@@ -20,14 +30,6 @@ a {
 }
 a:hover {
   color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
 }
 
 h1 {
