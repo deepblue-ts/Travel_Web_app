@@ -1,27 +1,66 @@
-export default function StepButtons({ onBack }) {
+// src/components/StepButtons.jsx
+
+import React from 'react';
+import styled from 'styled-components';
+
+// ボタンのスタイル定義
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-top: 36px;
+`;
+
+const BaseButton = styled.button`
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  padding: 12px 24px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+`;
+
+const BackButton = styled(BaseButton)`
+  background: #f0f2f5;
+  color: #495057;
+
+  &:hover {
+    background: #e9ecef;
+  }
+`;
+
+const SubmitButton = styled(BaseButton)`
+  background: #00c0b8;
+  color: #fff;
+
+  &:hover {
+    background: #00a39e;
+  }
+`;
+
+
+export default function StepButtons({ onBack, onSubmit }) {
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", marginTop: 36 }}>
-      <button
-        onClick={onBack}
-        style={{
-          background: "#eee", color: "#444", border: "none",
-          borderRadius: 7, fontSize: 16, padding: "9px 36px", fontWeight: 600,
-          cursor: "pointer"
-        }}
-      >
+    <ButtonContainer>
+      {/* 戻るボタン */}
+      <BackButton onClick={onBack}>
         ◀ 戻る
-      </button>
-      <button
-        style={{
-          background: "#00C0B8", color: "#fff", border: "none",
-          borderRadius: 7, fontSize: 16, padding: "9px 36px", fontWeight: 600,
-          cursor: "pointer"
-        }}
-        // ここでAPIを呼ぶように
-        onClick={() => alert("APIを叩いてプラン生成！")}
-      >
-        進む ▶
-      </button>
-    </div>
+      </BackButton>
+
+      {/* 
+        onSubmitプロパティが渡された場合のみ、プラン作成ボタンを表示します。
+        これにより、このコンポーネントが他の場面でも再利用しやすくなります。
+      */}
+      {onSubmit && (
+         <SubmitButton onClick={onSubmit}>
+           プランを作成する 🚀
+         </SubmitButton>
+      )}
+    </ButtonContainer>
   );
 }

@@ -1,4 +1,4 @@
-// components/AreaSelector.jsx
+// src/components/AreaSelector.jsx
 
 import React from 'react';
 import styled from 'styled-components';
@@ -22,6 +22,8 @@ const TagContainer = styled.div`
   gap: 10px;
 `;
 
+// ★★★ ここからが修正箇所です ★★★
+
 const AreaTag = styled.button`
   font-size: 15px;
   font-weight: 500;
@@ -30,25 +32,21 @@ const AreaTag = styled.button`
   cursor: pointer;
   transition: all 0.2s;
   
-  /* props.isSelectedに応じてスタイルを変更 */
-  background-color: ${props => props.isSelected ? '#00C0B8' : '#f0f0f0'};
-  color: ${props => props.isSelected ? '#fff' : '#333'};
-  border: 1px solid ${props => props.isSelected ? '#00C0B8' : '#ddd'};
+  /* props.$isSelectedに応じてスタイルを変更 (プロパティ名の先頭に $ を追加) */
+  background-color: ${props => props.$isSelected ? '#00C0B8' : '#f0f0f0'};
+  color: ${props => props.$isSelected ? '#fff' : '#333'};
+  border: 1px solid ${props => props.$isSelected ? '#00C0B8' : '#ddd'};
 
   &:hover {
     opacity: 0.8;
   }
 `;
 
-// propsでエリア候補、選択済みエリア、変更用関数を受け取る
 export default function AreaSelector({ areaOptions, selectedAreas, onAreaChange }) {
   const handleToggleArea = (areaName) => {
-    // すでに選択されているか？
     if (selectedAreas.includes(areaName)) {
-      // 選択されていれば、配列から除外する
       onAreaChange(selectedAreas.filter(a => a !== areaName));
     } else {
-      // 選択されていなければ、配列に追加する
       onAreaChange([...selectedAreas, areaName]);
     }
   };
@@ -63,7 +61,8 @@ export default function AreaSelector({ areaOptions, selectedAreas, onAreaChange 
           {areaOptions.map(area => (
             <AreaTag
               key={area}
-              isSelected={selectedAreas.includes(area)}
+              // isSelected を $isSelected に変更
+              $isSelected={selectedAreas.includes(area)}
               onClick={() => handleToggleArea(area)}
             >
               {area}
