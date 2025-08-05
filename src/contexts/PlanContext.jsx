@@ -42,7 +42,7 @@ export function PlanProvider({ children }) {
 
     try {
       // --- フェーズ1: リソース確保 (並列) ---
-      setLoadingStatus({ active: true, message: "使える手札（食事・宿・アクティビティ）を集めています...", progress: 10 });
+      setLoadingStatus({ active: true, message: "食事・宿・アクティビティを集めています...", progress: 10 });
       const availableResources = await Promise.all([
         findDiningOptions(plan),
         findAccommodation(plan),
