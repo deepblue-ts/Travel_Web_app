@@ -25,31 +25,58 @@ const fetchFromApi = async (endpoint, body) => {
   }
 };
 
-// --- 各エージェント関数を、実際のAPI呼び出しに置き換え ---
+// --- 各エージェント関数 ---
 
+/**
+ * おすすめのレストランを検索する
+ * @param {object} plan - 旅行プランの条件
+ */
 export const findDiningOptions = (plan) => fetchFromApi('/api/find-dining', plan);
 
+/**
+ * おすすめの宿泊施設を検索する
+ * @param {object} plan - 旅行プランの条件
+ */
 export const findAccommodation = (plan) => fetchFromApi('/api/find-accommodation', plan);
 
+/**
+ * おすすめのアクティビティを検索する
+ * @param {object} plan - 旅行プランの条件
+ */
 export const findActivities = (plan) => fetchFromApi('/api/find-activities', plan);
 
-// 新しい1日プラン作成APIを呼び出す関数
+/**
+ * 特定の日の旅行プランを作成する
+ * @param {object} dayPlanRequest - 1日のプラン作成に必要な情報
+ */
 export const createDayPlan = (dayPlanRequest) => fetchFromApi('/api/create-day-plan', dayPlanRequest);
 
 
-// --- 既存のエリア取得API (ここはモックのまま) ---
-export const fetchAreasForDestination = async (destination) => {
-  console.log(`「${destination}」のエリアを検索中...`);
-  const areaDatabase = {
-    "京都": ["祇園・清水寺", "嵐山・嵯峨野", "金閣寺周辺", "京都駅周辺"],
-    "箱根": ["箱根湯本", "強羅", "仙石原", "芦ノ湖・元箱根"],
-    "沖縄": ["那覇市内", "恩納村", "美ら海水族館周辺", "石垣島"],
-    "札幌": ["大通公園", "すすきの", "札幌駅周辺", "定山渓温泉"],
-  };
+// --- LLMを利用してエリア候補を取得する新しい関数 ---
 
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve(areaDatabase[destination] || []);
-    }, 1000); // 1秒の遅延をシミュレート
-  });
+/**
+ * 目的地に基づいたエリア候補をバックエンドAPIから取得する
+ * @param {string} destination - ユーザーが入力した目的地 (例: "京都")
+ * @returns {Promise<string[]>} - エリア名の配列 (例: ["祇園・清水寺", "嵐山"])
+ */
+export const fetchAreasForDestination = async (destination) => {
+  // 目的地が空、または未入力の場合はAPIを呼び出さずに空の配列を返す
+  if (!destination) {
+    return [];
+  }
+  
+  console.log(`「${destination}」のエリアをAPIから検索中...`);
+  try {
+    // バックエンドに { destination: "目的地の名前" } という形式でPOSTリクエストを送信
+    const response = await fetchFromApi('/api/get-areas', { destination });
+    
+    // バックエンドからのレスポンスは { areas: ["エリア1", "エリア2"] } という形式を期待
+    // response.areasが存在すればその値を、なければ空配列を返すことでエラーを防ぐ
+    return response.areas || [];
+    
+  } catch (error) {
+    console.error("エリア候補の取得に失敗しました:", error);
+    // エラーが発生した場合も、アプリケーションが停止しないように空配列を返す
+    return [];
+  }
 };
