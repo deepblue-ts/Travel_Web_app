@@ -4,11 +4,20 @@ import express from 'express';
 import OpenAI from 'openai';
 import 'dotenv/config';
 
+console.log("Reading OPENAI_API_KEY from .env file...");
+// 重要：以下の行でAPIキーの一部が表示されます。第三者には見せないでください。
+// 'sk-...' のように表示されればOK、'undefined' と表示されたらNGです。
+console.log("Loaded API Key starts with:", process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.substring(0, 6) : 'undefined');
+
+
 const app = express();
 const port = 3001;
 app.use(express.json());
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({ 
+  apiKey: process.env.OPENAI_API_KEY,
+  timeout: 5 * 1000, // 30秒
+ });
 if (!process.env.OPENAI_API_KEY) {
   console.error("\x1b[31m%s\x1b[0m", "FATAL ERROR: OPENAI_API_KEY is not defined.");
   process.exit(1);
@@ -29,6 +38,11 @@ const createApiHandler = (systemPrompt) => async (req, res) => {
       model: 'gpt-4o-mini', 
       response_format: { type: "json_object" },
     });
+
+    const llmResponseContent = chatCompletion.choices[0].message.content;
+    console.log("\x1b[36m%s\x1b[0m", "--- LLM Raw Response (from createApiHandler) ---"); // 色付きで出力
+    console.log(llmResponseContent);
+    console.log("\x1b[36m%s\x1b[0m", "------------------------------------------------");
 
     const jsonResponse = JSON.parse(chatCompletion.choices[0].message.content);
     res.status(200).json(jsonResponse);
@@ -80,4 +94,37 @@ app.post('/api/create-day-plan', createApiHandler(dayPlanSystemPrompt));
 
 app.listen(port, () => {
   console.log(`\x1b[32m%s\x1b[0m`, `Backend server listening at http://localhost:${port}`);
+});
+
+
+// ★★★ エリア候補取得エージェント ★★★
+const areaSystemPrompt = `あなたは日本の地理と観光に精通した旅行プランナーです。ユーザーから提示された目的地（都道府県や市など）に基づき、観光客に人気のある代表的なエリアや地域を最大5つ提案してください。JSON以外の文字列は不要。出力は必ず以下のJSON形式にしてください: {"areas": ["エリア名1", "エリア名2", "エリア名3"]}`;
+
+app.post('/api/get-areas', async (req, res) => {
+  try {
+    // フロントからは { destination: "京都" } のような形式で送信されることを想定
+    const { destination } = req.body;
+    if (!destination) {
+      return res.status(400).json({ error: "目的地が指定されていません。" });
+    }
+
+    // ユーザーからの入力として、目的地の文字列をそのまま渡す
+    const userPrompt = destination;
+
+    const chatCompletion = await openai.chat.completions.create({
+      messages: [
+        { role: 'system', content: areaSystemPrompt },
+        { role: 'user', content: userPrompt }
+      ],
+      model: 'gpt-4o-mini',
+      response_format: { type: "json_object" },
+    });
+
+    const jsonResponse = JSON.parse(chatCompletion.choices[0].message.content);
+    res.status(200).json(jsonResponse);
+
+  } catch (error) {
+    console.error("Backend Server Error (get-areas):", error.message);
+    res.status(500).json({ error: "AIによるエリア候補の取得中にエラーが発生しました。" });
+  }
 });
