@@ -1,5 +1,3 @@
-// src/pages/PlanWizard.jsx
-
 import React, { useState, useEffect } from "react";
 import { usePlan } from "../contexts/PlanContext";
 import { fetchAreasForDestination } from "../api/llmService";
@@ -22,36 +20,62 @@ import BudgetInput from "../components/BudgetInput";
 import StepButtons from "../components/StepButtons";
 import TransportSelector from "../components/TransportSelector";
 
-// ★ Props名を onGenerateStart に変更
+
 export default function PlanWizard({ onBack, onGenerateStart }) {
   const { plan, setPlan, generatePlan } = usePlan();
+  
+  // ★ 1. 目的地の入力欄専用のローカルstateを定義
+  // これで、入力のたびにグローバルな `plan` stateが更新されるのを防ぐ
+  const [destinationInput, setDestinationInput] = useState(plan.destination || "");
+
   const [areaOptions, setAreaOptions] = useState([]);
   const [isAreaLoading, setIsAreaLoading] = useState(false);
 
+  // ★ 2. デバウンス処理のためのuseEffect
+  // destinationInput（入力欄の値）が変更されたら、このeffectが実行される
+  useEffect(() => {
+    // 500ミリ秒後に実行されるタイマーを設定
+    const debounceTimer = setTimeout(() => {
+      // 500ミリ秒間、新しい入力がなければ、
+      // 入力値をグローバルな `plan.destination` に反映させる
+      setPlan(p => ({ ...p, destination: destinationInput }));
+    }, 500); // 500ミリ秒（0.5秒）の待機時間を設定
+
+    // クリーンアップ関数
+    // このeffectが再実行される前（＝ユーザーが新しい文字を入力した時）に
+    // 前回のタイマーを解除する。これにより、最後の入力から500ミリ秒が経過した時だけ
+    // タイマーが実行されることになる。
+    return () => {
+      clearTimeout(debounceTimer);
+    };
+  }, [destinationInput, setPlan]); // destinationInputが変更されるたびに監視
+
+  
+  // ★ 3. APIを呼び出すuseEffect (ここは変更なし)
+  // このeffectは `plan.destination` を監視している。
+  // `plan.destination` はデバウンス処理によって更新が遅延されるため、
+  // 結果的にこのAPI呼び出しもデバウンスされることになる。
   useEffect(() => {
     if (!plan.destination) {
       setAreaOptions([]);
       return;
     }
     setIsAreaLoading(true);
+    // 目的地が変わったら、選択済みのエリアをリセットする
+    setPlan(p => ({ ...p, areas: [] }));
+
     fetchAreasForDestination(plan.destination).then(areas => {
       setAreaOptions(areas);
       setIsAreaLoading(false);
-      setPlan(p => ({ ...p, areas: [] }));
     });
-  }, [plan.destination, setPlan]);
+  }, [plan.destination]); // 依存配列からsetPlanを削除してもOK
 
-  // ★ handleSubmitの処理を修正
+
   const handleSubmit = async () => {
-    // 1. ローディングページへの遷移を開始するようApp.jsxに通知
     if(onGenerateStart) {
       onGenerateStart();
     }
-    
-    // 2. プラン生成の非同期処理を開始 (完了を待つ)
     await generatePlan();
-    
-    // 3. この後のページ遷移はApp.jsxのuseEffectが担当する
   };
 
   return (
@@ -78,14 +102,15 @@ export default function PlanWizard({ onBack, onGenerateStart }) {
           label="目的地 (都道府県・市など)"
           icon={<MapPin size={20} />}
           type="text"
-          value={plan.destination}
-          onChange={e => setPlan(p => ({ ...p, destination: e.target.value }))}
+          // ★ 4. valueとonChangeをローカルstateに接続する
+          value={destinationInput}
+          onChange={e => setDestinationInput(e.target.value)}
           placeholder="例: 京都"
         />
         {isAreaLoading ? (
             <LoadingText>エリア候補を検索中...</LoadingText>
         ) : (
-            (plan.destination || areaOptions.length > 0) && (
+            (destinationInput || areaOptions.length > 0) && (
                 <AreaSelector
                     areaOptions={areaOptions}
                     selectedAreas={plan.areas}
@@ -114,7 +139,6 @@ export default function PlanWizard({ onBack, onGenerateStart }) {
         <BudgetInput value={plan} setValue={setPlan} />
       </FormSection>
       
-      {/* ★ onSubmitに関数を渡す */}
       <StepButtons onBack={onBack} onSubmit={handleSubmit} />
     </WizardContainer>
   );

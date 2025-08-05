@@ -1,5 +1,3 @@
-// src/api/llmService.js
-
 /**
  * バックエンドAPIを呼び出す共通関数
  * @param {string} endpoint - APIのエンドポイント (例: '/api/find-dining')
@@ -55,9 +53,9 @@ export const createDayPlan = (dayPlanRequest) => fetchFromApi('/api/create-day-p
 // --- LLMを利用してエリア候補を取得する新しい関数 ---
 
 /**
- * 目的地に基づいたエリア候補をバックエンドAPIから取得する
+ * 目的地に基づいたエリア候補と観光地情報をバックエンドAPIから取得する
  * @param {string} destination - ユーザーが入力した目的地 (例: "京都")
- * @returns {Promise<string[]>} - エリア名の配列 (例: ["祇園・清水寺", "嵐山"])
+ * @returns {Promise<{name: string, spots: string[]}[]>} - エリア情報（名前と観光地リスト）の配列
  */
 export const fetchAreasForDestination = async (destination) => {
   // 目的地が空、または未入力の場合はAPIを呼び出さずに空の配列を返す
@@ -65,12 +63,12 @@ export const fetchAreasForDestination = async (destination) => {
     return [];
   }
   
-  console.log(`「${destination}」のエリアをAPIから検索中...`);
+  console.log(`「${destination}」のエリアと観光地情報をAPIから検索中...`);
   try {
     // バックエンドに { destination: "目的地の名前" } という形式でPOSTリクエストを送信
     const response = await fetchFromApi('/api/get-areas', { destination });
     
-    // バックエンドからのレスポンスは { areas: ["エリア1", "エリア2"] } という形式を期待
+    // バックエンドからのレスポンスは { areas: [{ name: "...", spots: [...] }] } という形式を期待
     // response.areasが存在すればその値を、なければ空配列を返すことでエラーを防ぐ
     return response.areas || [];
     
