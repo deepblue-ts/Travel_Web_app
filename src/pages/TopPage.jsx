@@ -1,3 +1,5 @@
+// src\pages\TopPage.jsx
+
 export default function TopPage({ onStart }) {
   return (
     <div style={{
@@ -5,7 +7,7 @@ export default function TopPage({ onStart }) {
       justifyContent: "center", height: "100vh", background: "#fff"
     }}>
       <h1 style={{ color: "#00C0B8", fontSize: 48, marginBottom: 24 }}>
-        AIトラベルプランナー
+        AI Travel Planner
       </h1>
       <button
         style={{
