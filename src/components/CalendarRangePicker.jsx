@@ -1,11 +1,109 @@
+// src/components/CalendarRangePicker.jsx
+
 import { useState } from "react";
+import styled from "styled-components";
 import { DateRange } from "react-date-range";
 import { ja } from "date-fns/locale";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
+import { Calendar as CalendarIcon } from 'lucide-react'; // アイコンをインポート
 
-// 【修正点①】タイムゾーンの影響を受けずに日付をフォーマットするヘルパー関数を追加
+// --- スタイル定義 (ここから) ---
+const colors = {
+  primary: '#00A8A0',
+  text: '#2D3748',
+  white: '#FFFFFF',
+  border: '#E2E8F0',
+};
+
+const Wrapper = styled.div`
+  margin-bottom: 24px;
+  position: relative; /* ポップアップの位置の基準点とする */
+`;
+
+const Label = styled.label`
+  font-weight: 600;
+  display: block;
+  margin-bottom: 8px;
+  font-size: 16px;
+  color: ${colors.text};
+`;
+
+const DateButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid ${colors.border};
+  background: ${colors.white};
+  color: ${colors.text};
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: ${colors.primary};
+    color: ${colors.primary};
+  }
+
+  svg {
+    color: ${colors.primary};
+  }
+`;
+
+const CalendarPopup = styled.div`
+  position: absolute;
+  z-index: 10;
+  background: ${colors.white};
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+  border-radius: 12px;
+  margin-top: 8px;
+
+  /* react-date-rangeのスタイルを上書き */
+  .rdrCalendarWrapper {
+    color: ${colors.text};
+  }
+  .rdrDateDisplayWrapper, .rdrMonthAndYearWrapper {
+    background-color: transparent;
+  }
+  .rdrMonthAndYearPickers select {
+    color: ${colors.text};
+  }
+  .rdrNextPrevButton {
+    background: #f1f5f9;
+  }
+  .rdrDayNumber span {
+    color: ${colors.text};
+  }
+  .rdrDayToday .rdrDayNumber span:after {
+    background: ${colors.primary};
+  }
+  .rdrSelected, .rdrInRange, .rdrStartEdge, .rdrEndEdge {
+    background: ${colors.primary} !important;
+  }
+`;
+
+const CloseButton = styled.button`
+  margin: 0 10px 10px 10px;
+  background: ${colors.primary};
+  color: ${colors.white};
+  border: none;
+  border-radius: 6px;
+  padding: 7px 16px;
+  cursor: pointer;
+  float: right; /* 右寄せにする */
+
+  &:hover {
+    opacity: 0.9;
+  }
+`;
+
+// --- スタイル定義 (ここまで) ---
+
 const formatDateToYMD = (date) => {
+  if (!date) return null; // dateがnullの場合に対応
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
@@ -14,21 +112,19 @@ const formatDateToYMD = (date) => {
 
 export default function CalendarRangePicker({ value, setValue }) {
   const [open, setOpen] = useState(false);
-  const [isSelectingStartDate, setIsSelectingStartDate] = useState(true);
+  
+  // ★★★ エラー修正の核心部分 ★★★
+  // value.datesがundefinedの場合でも、安全なデフォルト値を使用する
+  const dates = value?.dates || { start: null, end: null };
 
-  const getRange = () => {
-    // 日付文字列をDateオブジェクトに変換する際、タイムゾーンのズレを考慮する
-    // YYYY-MM-DD形式だとUTCとして解釈されるため、明示的にローカルタイムとして扱う
-    if (value.dates.start && value.dates.end) {
-      return [{
-        startDate: new Date(value.dates.start + "T00:00:00"),
-        endDate: new Date(value.dates.end + "T00:00:00"),
-        key: "selection"
-      }];
-    }
+  const getRangeForPicker = () => {
+    // dates.start, dates.endがnullや空文字列の場合も考慮
+    const startDate = dates.start ? new Date(dates.start + "T00:00:00") : new Date();
+    const endDate = dates.end ? new Date(dates.end + "T00:00:00") : startDate;
+
     return [{
-      startDate: new Date(),
-      endDate: new Date(),
+      startDate: startDate,
+      endDate: endDate,
       key: "selection"
     }];
   };
@@ -38,87 +134,46 @@ export default function CalendarRangePicker({ value, setValue }) {
     setValue((prev) => ({
       ...prev,
       dates: {
-        // 【修正点②】新しいヘルパー関数を使って日付を文字列に変換
         start: formatDateToYMD(startDate),
         end: formatDateToYMD(endDate),
       },
     }));
 
-    if (isSelectingStartDate) {
-      if (startDate.getTime() !== endDate.getTime()) {
-        setOpen(false);
-      } else {
-        setIsSelectingStartDate(false);
-      }
-    } else {
+    // 開始日と終了日が両方選択されたら、自動でカレンダーを閉じる
+    if (startDate && endDate && startDate.getTime() !== endDate.getTime()) {
       setOpen(false);
-      setIsSelectingStartDate(true);
     }
   };
 
   return (
-    <div style={{ marginBottom: 24 }}>
-      <label style={{ fontWeight: 600, marginBottom: 8, display: "block" }}>
-        日程
-      </label>
-      <button
-        onClick={() => {
-          setOpen(true);
-          setIsSelectingStartDate(true);
-        }}
-        style={{
-          padding: "10px 20px",
-          borderRadius: 8,
-          border: "1px solid #00C0B8",
-          background: "#fff",
-          color: "#00C0B8",
-          fontWeight: 700,
-          fontSize: 18,
-          cursor: "pointer"
-        }}
-      >
-        {value.dates.start && value.dates.end
-          ? `${value.dates.start} ～ ${value.dates.end}`
+    <Wrapper>
+      <Label>日程</Label>
+      <DateButton onClick={() => setOpen(true)}>
+        <CalendarIcon size={18} />
+        {/* ★ 安全な `dates` オブジェクトから値を取得 */}
+        {dates.start && dates.end
+          ? `${dates.start} ～ ${dates.end}`
           : "日程を選択"}
-      </button>
+      </DateButton>
+      
       {open && (
-        <div style={{
-          position: "absolute",
-          zIndex: 10,
-          background: "#fff",
-          boxShadow: "0 4px 16px rgba(0,0,0,0.10)",
-          borderRadius: 8,
-        }}>
+        <CalendarPopup>
           <DateRange
             editableDateInputs={true}
             onChange={handleSelect}
             moveRangeOnFirstSelection={false}
-            ranges={getRange()}
+            ranges={getRangeForPicker()}
             locale={ja}
             months={1}
             direction="horizontal"
             showMonthAndYearPickers={true}
             minDate={new Date()}
           />
-          <button
-            onClick={() => {
-                setOpen(false)
-                setIsSelectingStartDate(true)
-            }}
-            style={{
-              margin: "10px 0 10px 10px",
-              background: "#00C0B8",
-              color: "#fff",
-              border: "none",
-              borderRadius: 6,
-              padding: "7px 16px",
-              cursor: "pointer"
-            }}
-          >
+          <CloseButton onClick={() => setOpen(false)}>
             閉じる
-          </button>
-        </div>
+          </CloseButton>
+        </CalendarPopup>
       )}
-    </div>
+    </Wrapper>
   );
 }

@@ -1,3 +1,7 @@
+/* src\index.css */
+/* フォントファミリー、マージンリセットなど、サイト全体の土台となる最低限のグローバルスタイルを定義します。 */
+
+
 /* :rootのスタイルはデフォルトのままで問題ありません */
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;

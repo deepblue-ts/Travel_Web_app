@@ -2,15 +2,35 @@
 
 import React from 'react';
 import styled from 'styled-components';
+// ★ 戻るアイコンと、魔法の杖（作成）アイコンをインポート
+import { ArrowLeft, Wand2 } from 'lucide-react';
 
-// ボタンのスタイル定義
+// --- スタイル定義 (ここから) ---
+
+const colors = {
+  primary: '#00A8A0',
+  primaryHover: '#008F88',
+  text: '#2D3748',
+  border: '#E2E8F0',
+  borderHover: '#DDE2E8',
+  white: '#FFFFFF',
+};
+
+// ★ 上部に区切り線を追加して、セクションの終わりを明確にする
 const ButtonContainer = styled.div`
   display: flex;
   justify-content: space-between;
-  margin-top: 36px;
+  margin-top: 48px;
+  border-top: 1px solid ${colors.border};
+  padding-top: 24px;
 `;
 
+// ★ アイコンとテキストをきれいに並べるためにflexbox関連のスタイルを追加
 const BaseButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; /* アイコンとテキストの間隔 */
   border: none;
   border-radius: 8px;
   font-size: 16px;
@@ -21,44 +41,54 @@ const BaseButton = styled.button`
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* 影をより柔らかく */
+  }
+
+  svg {
+    stroke-width: 2.5; /* アイコンの線を少し太くして見やすくする */
   }
 `;
 
+// ★ BackButtonは「目立たないが、そこにある」デザインに
 const BackButton = styled(BaseButton)`
-  background: #f0f2f5;
-  color: #495057;
+  background-color: ${colors.white};
+  color: ${colors.text};
+  border: 1px solid ${colors.border};
 
   &:hover {
-    background: #e9ecef;
+    background-color: #F7FAFC; /* ほんのり色を変える */
+    border-color: ${colors.borderHover};
   }
 `;
 
+// ★ SubmitButtonはメインのアクションであることが明確なデザインに
 const SubmitButton = styled(BaseButton)`
-  background: #00c0b8;
-  color: #fff;
+  background: ${colors.primary};
+  color: ${colors.white};
 
   &:hover {
-    background: #00a39e;
+    background: ${colors.primaryHover};
   }
 `;
 
+// --- スタイル定義 (ここまで) ---
 
 export default function StepButtons({ onBack, onSubmit }) {
   return (
     <ButtonContainer>
       {/* 戻るボタン */}
       <BackButton onClick={onBack}>
-        ◀ 戻る
+        {/* ★ lucide-reactのアイコンを使用 */}
+        <ArrowLeft size={18} />
+        戻る
       </BackButton>
 
-      {/* 
-        onSubmitプロパティが渡された場合のみ、プラン作成ボタンを表示します。
-        これにより、このコンポーネントが他の場面でも再利用しやすくなります。
-      */}
+      {/* プラン作成ボタン */}
       {onSubmit && (
          <SubmitButton onClick={onSubmit}>
-           プランを作成する 🚀
+           プランを作成する
+           {/* ★ lucide-reactのアイコンを使用 */}
+           <Wand2 size={18} />
          </SubmitButton>
       )}
     </ButtonContainer>

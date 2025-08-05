@@ -14,8 +14,6 @@ export default defineConfig({
         target: 'http://localhost:3001',
         // オリジンを偽装する（CORSエラー対策）
         changeOrigin: true,
-        // パスを書き換える ('/api/generate-plan' -> '/generate-plan')
-        rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },

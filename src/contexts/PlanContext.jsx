@@ -1,7 +1,13 @@
 // src/contexts/PlanContext.jsx
 
 import { createContext, useContext, useState } from "react";
-import { createTravelPlan } from '../api/llmService';
+import moment from 'moment'; // 日数計算のためにmoment.jsをインポート
+import { 
+  findDiningOptions, 
+  findAccommodation, 
+  findActivities,
+  createDayPlan 
+} from '../api/llmService';
 
 const PlanContext = createContext();
 
@@ -17,41 +23,93 @@ export function PlanProvider({ children }) {
   });
 
   // LLMが生成したプランの結果
-  const [planResult, setPlanResult] = useState(null);
-  // ローディング状態（プラン生成中かどうか）
-  const [isLoading, setIsLoading] = useState(false);
+  const [planJsonResult, setPlanJsonResult] = useState(null);
+  
   // エラー情報
   const [error, setError] = useState(null);
+  
+  // ローディング状態（進捗メッセージと進捗率）
+  const [loadingStatus, setLoadingStatus] = useState({
+    active: false,
+    message: "",
+    progress: 0,
+  });
 
-  /**
-   * インポートしたcreateTravelPlan関数を呼び出し、
-   * その状態（ローディング、成功、失敗）を管理する
-   */
   const generatePlan = async () => {
-    setIsLoading(true);
+    setLoadingStatus({ active: true, message: "プランニングの準備をしています...", progress: 0 });
     setError(null);
-    setPlanResult(null);
+    setPlanJsonResult(null); // 前回の結果をクリア
 
     try {
-      // 外部のAPIサービスを呼び出す
-      const result = await createTravelPlan(plan);
-      setPlanResult(result);
+      // --- フェーズ1: リソース確保 (並列) ---
+      setLoadingStatus({ active: true, message: "使える手札（食事・宿・アクティビティ）を集めています...", progress: 10 });
+      const availableResources = await Promise.all([
+        findDiningOptions(plan),
+        findAccommodation(plan),
+        findActivities(plan)
+      ]).then(([dining, accommodation, activities]) => ({ dining, accommodation, activities }));
+
+      // --- フェーズ2: 日毎プランニング (逐次リレー) ---
+      const startDate = moment(plan.dates.start);
+      const endDate = moment(plan.dates.end);
+      
+      // 日数が無効な場合はエラー処理
+      if (!startDate.isValid() || !endDate.isValid() || endDate.isBefore(startDate)) {
+        throw new Error("旅行の日程が正しく設定されていません。");
+      }
+      
+      const duration = endDate.diff(startDate, 'days') + 1;
+      
+      let finalItinerary = [];
+      let previousItinerary = null; // 前日の旅程を保持する変数
+
+      for (let i = 0; i < duration; i++) {
+        const currentDay = i + 1;
+        // プログレスバーの進捗を計算
+        const progress = 10 + Math.round((80 / duration) * (i + 1));
+        setLoadingStatus({ active: true, message: `${currentDay}日目のプランを作成中...`, progress });
+
+        // バックエンドに送信するリクエストデータ
+        const dayPlanRequest = {
+          day: currentDay,
+          planConditions: plan,
+          availableResources,
+          previousItinerary
+        };
+
+        const dayPlanData = await createDayPlan(dayPlanRequest);
+
+        finalItinerary.push(dayPlanData);
+        previousItinerary = finalItinerary; // 次の日のために、これまでの全旅程を渡す
+      }
+      
+      // --- フェーズ3: 最終化 ---
+      setLoadingStatus({ active: true, message: "最終仕上げをしています...", progress: 95 });
+
+      const finalJson = {
+        title: `${plan.destination}への${duration}日間の旅`,
+        introduction: "あなただけの特別な旅行プランが完成しました！最高の旅を楽しんできてくださいね。",
+        itinerary: finalItinerary,
+        conclusion: "この旅が、あなたにとって忘れられない素晴らしい思い出になりますように。"
+      };
+      
+      setPlanJsonResult(finalJson);
+      setLoadingStatus({ active: true, message: "完成！", progress: 100 });
+
     } catch (err) {
       console.error("PlanContextでのエラー:", err);
-      setError("プランの生成に失敗しました。時間をおいてもう一度お試しください。");
-    } finally {
-      setIsLoading(false);
+      setError(err.message || "プランの生成中に不明なエラーが発生しました。");
+      setLoadingStatus({ active: false, message: "", progress: 0 });
     }
   };
 
-  // アプリケーション全体で共有したい値と関数をまとめる
   const value = {
     plan,
     setPlan,
-    planResult,
-    isLoading,
+    planJsonResult,
     error,
-    generatePlan, // この関数をPlanWizardから呼び出す
+    loadingStatus,
+    generatePlan,
   };
 
   return (
@@ -61,7 +119,6 @@ export function PlanProvider({ children }) {
   );
 }
 
-// コンテキストの値を簡単に利用するためのカスタムフック
 export function usePlan() {
   return useContext(PlanContext);
 }
