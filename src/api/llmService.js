@@ -1,3 +1,5 @@
+// src\api\llmService.js
+
 /**
  * バックエンドAPIを呼び出す共通関数
  * @param {string} endpoint - APIのエンドポイント (例: '/api/find-dining')
@@ -48,6 +50,12 @@ export const findActivities = (plan) => fetchFromApi('/api/find-activities', pla
  * @param {object} dayPlanRequest - 1日のプラン作成に必要な情報
  */
 export const createDayPlan = (dayPlanRequest) => fetchFromApi('/api/create-day-plan', dayPlanRequest);
+
+/**
+ * ★★★【新設】旅行の日ごとの地理的な骨格（エリア分け）を作成する ★★★
+ * @param {object} planConditions - 目的地、日数、こだわり条件など
+ */
+export const createGeographicalPlan = (planConditions) => fetchFromApi('/api/create-geographical-plan', planConditions);
 
 
 // --- LLMを利用してエリア候補を取得する新しい関数 ---

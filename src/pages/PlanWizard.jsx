@@ -1,7 +1,10 @@
+// src/pages/PlanWizard.jsx (修正後)
+
 import React, { useState, useEffect } from "react";
 import { usePlan } from "../contexts/PlanContext";
 import { fetchAreasForDestination } from "../api/llmService";
-import { MapPin, CalendarDays, Wallet, PlaneTakeoff } from 'lucide-react';
+// ★ Sparkles アイコンをインポート
+import { MapPin, CalendarDays, Wallet, PlaneTakeoff, Sparkles } from 'lucide-react';
 
 import {
   WizardContainer,
@@ -20,71 +23,70 @@ import BudgetInput from "../components/BudgetInput";
 import StepButtons from "../components/StepButtons";
 import TransportSelector from "../components/TransportSelector";
 
+// ★ Textarea のためのスタイルを追加（PlanWizard.styles.js に定義してもOK）
+import styled from 'styled-components';
+
+const StyledTextArea = styled.textarea`
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #E2E8F0;
+  font-size: 16px;
+  line-height: 1.5;
+  margin-top: 16px;
+  min-height: 100px;
+  resize: vertical; /* 縦方向のリサイズを許可 */
+
+  &:focus {
+    outline: none;
+    border-color: #00A8A0; /* プライマリーカラー */
+    box-shadow: 0 0 0 2px rgba(0, 168, 160, 0.2);
+  }
+`;
+
 
 export default function PlanWizard({ onBack, onGenerateStart }) {
+  // ... (既存のロジックは変更なし) ...
   const { plan, setPlan, generatePlan } = usePlan();
-  
-  // ★ 1. 目的地の入力欄専用のローカルstateを定義
-  // これで、入力のたびにグローバルな `plan` stateが更新されるのを防ぐ
   const [destinationInput, setDestinationInput] = useState(plan.destination || "");
-
   const [areaOptions, setAreaOptions] = useState([]);
   const [isAreaLoading, setIsAreaLoading] = useState(false);
 
-  // ★ 2. デバウンス処理のためのuseEffect
-  // destinationInput（入力欄の値）が変更されたら、このeffectが実行される
   useEffect(() => {
-    // 500ミリ秒後に実行されるタイマーを設定
     const debounceTimer = setTimeout(() => {
-      // 500ミリ秒間、新しい入力がなければ、
-      // 入力値をグローバルな `plan.destination` に反映させる
       setPlan(p => ({ ...p, destination: destinationInput }));
-    }, 500); // 500ミリ秒（0.5秒）の待機時間を設定
+    }, 500);
+    return () => clearTimeout(debounceTimer);
+  }, [destinationInput, setPlan]);
 
-    // クリーンアップ関数
-    // このeffectが再実行される前（＝ユーザーが新しい文字を入力した時）に
-    // 前回のタイマーを解除する。これにより、最後の入力から500ミリ秒が経過した時だけ
-    // タイマーが実行されることになる。
-    return () => {
-      clearTimeout(debounceTimer);
-    };
-  }, [destinationInput, setPlan]); // destinationInputが変更されるたびに監視
-
-  
-  // ★ 3. APIを呼び出すuseEffect (ここは変更なし)
-  // このeffectは `plan.destination` を監視している。
-  // `plan.destination` はデバウンス処理によって更新が遅延されるため、
-  // 結果的にこのAPI呼び出しもデバウンスされることになる。
   useEffect(() => {
     if (!plan.destination) {
       setAreaOptions([]);
       return;
     }
     setIsAreaLoading(true);
-    // 目的地が変わったら、選択済みのエリアをリセットする
     setPlan(p => ({ ...p, areas: [] }));
-
     fetchAreasForDestination(plan.destination).then(areas => {
       setAreaOptions(areas);
       setIsAreaLoading(false);
     });
-  }, [plan.destination]); // 依存配列からsetPlanを削除してもOK
-
+  }, [plan.destination]);
 
   const handleSubmit = async () => {
-    if(onGenerateStart) {
-      onGenerateStart();
-    }
+    if(onGenerateStart) onGenerateStart();
     await generatePlan();
   };
 
+
   return (
     <WizardContainer>
+      {/* --- ヘッダー (変更なし) --- */}
       <Header>
         <Title>AI Travel Planner</Title>
         <SubTitle>いくつかの情報を入力するだけで、あなただけの旅行プランを作成します。</SubTitle>
       </Header>
 
+      {/* --- どこへ行きますか？ (変更なし) --- */}
       <FormSection>
         <SectionTitle>
           <MapPin size={22} />
@@ -102,7 +104,6 @@ export default function PlanWizard({ onBack, onGenerateStart }) {
           label="目的地 (都道府県・市など)"
           icon={<MapPin size={20} />}
           type="text"
-          // ★ 4. valueとonChangeをローカルstateに接続する
           value={destinationInput}
           onChange={e => setDestinationInput(e.target.value)}
           placeholder="例: 京都"
@@ -120,6 +121,7 @@ export default function PlanWizard({ onBack, onGenerateStart }) {
         )}
       </FormSection>
 
+      {/* --- いつ、どうやって行きますか？ (変更なし) --- */}
       <FormSection>
         <SectionTitle>
           <CalendarDays size={22} />
@@ -130,7 +132,8 @@ export default function PlanWizard({ onBack, onGenerateStart }) {
             <TransportSelector />
         </div>
       </FormSection>
-
+      
+      {/* --- 予算はどのくらいですか？ (変更なし) --- */}
       <FormSection>
         <SectionTitle>
           <Wallet size={22} />
@@ -138,6 +141,20 @@ export default function PlanWizard({ onBack, onGenerateStart }) {
         </SectionTitle>
         <BudgetInput value={plan} setValue={setPlan} />
       </FormSection>
+      
+      {/* ★★★ ここから新しいセクションを追加 ★★★ */}
+      <FormSection>
+        <SectionTitle>
+          <Sparkles size={22} />
+          こだわり条件はありますか？
+        </SectionTitle>
+        <StyledTextArea
+          value={plan.preferences}
+          onChange={e => setPlan(p => ({ ...p, preferences: e.target.value }))}
+          placeholder="例：子供が楽しめるアクティビティを入れたい、歴史的な建物を巡るのが好き、海鮮が美味しいお店に行きたい...など"
+        />
+      </FormSection>
+      {/* ★★★ ここまで ★★★ */}
       
       <StepButtons onBack={onBack} onSubmit={handleSubmit} />
     </WizardContainer>

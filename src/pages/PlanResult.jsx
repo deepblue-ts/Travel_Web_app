@@ -40,7 +40,6 @@ export default function PlanResult({ onBackToTop }) {
 
   // planJsonResultがまだ存在しない、またはitineraryが空の場合
   if (!planJsonResult || !planJsonResult.itinerary || planJsonResult.itinerary.length === 0) {
-    // このページが直接表示されることは少ないが、念のためのフォールバック
     return <FallbackDisplay message="有効なプランデータがありません。" />;
   }
 

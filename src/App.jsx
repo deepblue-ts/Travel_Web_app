@@ -41,7 +41,7 @@ export default function App() {
   const renderStep = () => {
     switch (step) {
       case 1:
-        return <PlanWizard onGenerateStart={handlePlanGenerationStart} />;
+        return <PlanWizard onBack={handleBackToTop} onGenerateStart={handlePlanGenerationStart} />;
       case 2:
         return <GeneratingPlanPage />; // ★ ローディングページ
       case 3:

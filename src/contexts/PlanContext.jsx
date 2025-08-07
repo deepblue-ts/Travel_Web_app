@@ -1,8 +1,10 @@
-// src/contexts/PlanContext.jsx
-
 import { createContext, useContext, useState } from "react";
 import moment from 'moment'; // 日数計算のためにmoment.jsをインポート
+
+// api/llmService.js から利用するAPI関数をインポート
+// ★ 新しいAPI createGeographicalPlan を追加
 import { 
+  createGeographicalPlan,
   findDiningOptions, 
   findAccommodation, 
   findActivities,
@@ -20,6 +22,7 @@ export function PlanProvider({ children }) {
     dates: { start: null, end: null },
     transport: "public",
     budget: 50000,
+    preferences: "", // こだわり条件
   });
 
   // LLMが生成したプランの結果
@@ -35,46 +38,78 @@ export function PlanProvider({ children }) {
     progress: 0,
   });
 
+  /**
+   * AIによる旅行プランを生成するメイン関数。
+   * 「地理プランナー」と「デイリー・スケジューラー」の2段階構成でプランを生成する。
+   */
   const generatePlan = async () => {
     setLoadingStatus({ active: true, message: "プランニングの準備をしています...", progress: 0 });
     setError(null);
     setPlanJsonResult(null); // 前回の結果をクリア
 
     try {
-      // --- フェーズ1: リソース確保 (並列) ---
-      setLoadingStatus({ active: true, message: "食事・宿・アクティビティを集めています...", progress: 10 });
-      const availableResources = await Promise.all([
-        findDiningOptions(plan),
-        findAccommodation(plan),
-        findActivities(plan)
-      ]).then(([dining, accommodation, activities]) => ({ dining, accommodation, activities }));
-
-      // --- フェーズ2: 日毎プランニング (逐次リレー) ---
+      // --- 日数計算 ---
       const startDate = moment(plan.dates.start);
       const endDate = moment(plan.dates.end);
-      
-      // 日数が無効な場合はエラー処理
       if (!startDate.isValid() || !endDate.isValid() || endDate.isBefore(startDate)) {
         throw new Error("旅行の日程が正しく設定されていません。");
       }
-      
       const duration = endDate.diff(startDate, 'days') + 1;
+
+      // ★★★ フェーズ0: 地理プランニング (新設) ★★★
+      setLoadingStatus({ active: true, message: "旅行の骨格を組み立てています...", progress: 5 });
+
+      // 地理プランナーAPIを呼び出し、日ごとのエリア計画を立てさせる
+      const geoPlanResponse = await createGeographicalPlan({
+        destination: plan.destination,
+        duration: duration,
+        preferences: plan.preferences, // こだわり条件も渡す
+      });
+      const geographicalPlan = geoPlanResponse.geographical_plan;
       
+      if (!geographicalPlan || geographicalPlan.length === 0) {
+        throw new Error("旅行の基本計画（エリア分け）を作成できませんでした。");
+      }
+
+      // ★★★ フェーズ1: "エリア特化型"リソース確保 ★★★
+      setLoadingStatus({ active: true, message: "各エリアのおすすめスポットを収集中...", progress: 15 });
+      
+      // 各日のリソース（食事、宿、アクティビティ）を格納するオブジェクト
+      const resourcesByDay = {};
+      for (const dayPlan of geographicalPlan) {
+        const dayIndex = dayPlan.day;
+        const area = dayPlan.area;
+
+        // planオブジェクトに「現在のエリア」情報を一時的に追加してAPIに渡す
+        const areaSpecificPlanConditions = { ...plan, currentArea: area };
+
+        // 各エリアに特化した情報を並列で取得
+        const [dining, accommodation, activities] = await Promise.all([
+          findDiningOptions(areaSpecificPlanConditions),
+          findAccommodation(areaSpecificPlanConditions),
+          findActivities(areaSpecificPlanConditions)
+        ]);
+        resourcesByDay[dayIndex] = { dining, accommodation, activities };
+      }
+
+      // ★★★ フェーズ2: 日毎のタイムスケジュール作成 ★★★
       let finalItinerary = [];
-      let previousItinerary = null; // 前日の旅程を保持する変数
+      let previousItinerary = null;
 
-      for (let i = 0; i < duration; i++) {
-        const currentDay = i + 1;
-        // プログレスバーの進捗を計算
-        const progress = 10 + Math.round((80 / duration) * (i + 1));
-        setLoadingStatus({ active: true, message: `${currentDay}日目のプランを作成中...`, progress });
+      for (const dayPlan of geographicalPlan) {
+        const currentDay = dayPlan.day;
+        // 進捗を計算（30%〜90%の範囲を使用）
+        const progress = 30 + Math.round((60 / duration) * (currentDay -1));
+        setLoadingStatus({ active: true, message: `${currentDay}日目（${dayPlan.area}）のプランを作成中...`, progress });
 
-        // バックエンドに送信するリクエストデータ
+        // デイリー・スケジューラーに渡すリクエストデータ
         const dayPlanRequest = {
           day: currentDay,
           planConditions: plan,
-          availableResources,
-          previousItinerary
+          availableResources: resourcesByDay[currentDay], // その日のエリアに特化したリソース
+          previousItinerary,
+          area: dayPlan.area, // その日のエリアを明確に指示
+          theme: dayPlan.theme, // その日のテーマを明確に指示
         };
 
         const dayPlanData = await createDayPlan(dayPlanRequest);
@@ -83,7 +118,7 @@ export function PlanProvider({ children }) {
         previousItinerary = finalItinerary; // 次の日のために、これまでの全旅程を渡す
       }
       
-      // --- フェーズ3: 最終化 ---
+      // ★★★ フェーズ3: 最終化 ★★★
       setLoadingStatus({ active: true, message: "最終仕上げをしています...", progress: 95 });
 
       const finalJson = {
