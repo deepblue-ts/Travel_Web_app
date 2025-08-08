@@ -12,6 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-google-maps/api": "^2.20.7",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "lucide-react": "^0.536.0",
