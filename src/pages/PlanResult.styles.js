@@ -1,192 +1,205 @@
-// src/pages/PlanResult.styles.js
+// src\pages\PlanResult.styles.js
 
-import styled, { keyframes } from "styled-components";
+import styled, { keyframes } from 'styled-components';
 
-// --- カラーパレット ---
-const colors = {
-  primary: '#00A8A0',
-  text: '#2D3748',
-  textSecondary: '#667085',
-  border: '#E2E8F0',
-  background: '#F7FAFC',
-  white: '#FFFFFF',
-};
-
-// --- アニメーション ---
-export const fadeIn = keyframes`
-  from { opacity: 0; transform: translateY(20px); } 
-  to { opacity: 1; transform: translateY(0); }
+// --- アニメーション定義 ---
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 `;
 
-// --- コンポーネントスタイル ---
+
+// --- 全体を囲むラッパー ---
 export const Wrapper = styled.div`
   max-width: 800px;
   margin: 40px auto;
-  padding: 24px;
-  font-family: 'Noto Sans JP', sans-serif;
-  animation: ${fadeIn} 0.5s ease-out;
+  padding: 0 20px;
+  font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
 `;
 
+
+// --- ページ上部のヘッダー ---
 export const Header = styled.header`
   text-align: center;
-  margin-bottom: 48px;
+  margin-bottom: 40px;
 `;
 
 export const Title = styled.h1`
-  font-size: 38px;
-  font-weight: 800;
-  color: ${colors.primary};
-  margin: 0;
-  line-height: 1.3;
-`;
-
-export const Introduction = styled.p`
-  font-size: 18px;
-  color: ${colors.textSecondary};
-  margin-top: 16px;
-  line-height: 1.8;
-`;
-
-export const ItineraryContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 48px;
-`;
-
-export const DayCard = styled.div`
-  background: ${colors.white};
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  padding: 24px 32px;
-  opacity: 0; /* アニメーションの初期状態 */
-  animation: ${fadeIn} 0.6s ease-out forwards;
-  animation-delay: ${props => props.delay || '0s'};
-`;
-
-export const DayHeader = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  border-bottom: 1px solid ${colors.border};
-  padding-bottom: 16px;
-  margin-bottom: 24px;
-`;
-
-export const DayLabel = styled.span`
-  background-color: ${colors.primary};
-  color: ${colors.white};
-  font-weight: 700;
-  font-size: 20px;
-  padding: 8px 16px;
-  border-radius: 8px;
-  line-height: 1;
-`;
-
-export const DayTheme = styled.h2`
-  font-size: 24px;
-  color: ${colors.text};
-  margin: 0;
-  font-weight: 700;
-`;
-
-export const Timeline = styled.div`
-  position: relative;
-  padding-left: 30px;
-  border-left: 2px solid ${colors.border};
-`;
-
-export const ScheduleItem = styled.div`
-  position: relative;
-  padding-bottom: 32px;
-  
-  &:last-child {
-    padding-bottom: 0;
-  }
-
-  /* タイムラインの丸 */
-  &::before {
-    content: '';
-    position: absolute;
-    left: -39px;
-    top: 5px;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background-color: ${colors.background};
-    border: 3px solid ${colors.primary};
-  }
-`;
-
-export const Time = styled.div`
-  font-weight: 700;
-  color: ${colors.primary};
+  font-size: 2.5rem;
+  color: #101828;
   margin-bottom: 8px;
 `;
 
-export const ActivityName = styled.h3`
-  font-size: 18px;
-  color: ${colors.text};
-  margin: 0 0 8px 0;
+export const Introduction = styled.p`
+  font-size: 1.1rem;
+  color: #667085;
+  max-width: 600px;
+  margin: 0 auto;
+`;
+
+
+// --- 日程カード全体をまとめるコンテナ ---
+export const ItineraryContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 32px; /* 各DayCardの間のスペース */
+`;
+
+
+// --- 各日のプランを表示するカード ---
+export const DayCard = styled.div`
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #EAECF0;
+  animation: ${fadeIn} 0.6s ease-out forwards;
+  opacity: 0;
+  animation-delay: ${props => props.delay || '0s'};
+`;
+
+
+// --- 日付、Dayラベルのヘッダー部分 ---
+export const DayHeader = styled.div`
+  display: flex;
+  align-items: center; /* DayLabelと日付を垂直方向の中央に揃える */
+  gap: 16px; /* DayLabelと日付の間のスペースを確保 */
+  margin-bottom: 24px;
+`;
+
+// --- "Day 1" の緑色のラベル ---
+export const DayLabel = styled.div`
+  background-color: #00A699;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  white-space: nowrap;
+`;
+
+// --- 日付 ---
+export const DayDate = styled.div`
+  display: flex;
+  align-items: center;
+  color: #667085;
+  font-size: 1.3rem;
+  gap: 6px;
+`;
+
+
+// --- タイムラインのコンテナ ---
+export const Timeline = styled.div`
+  border-left: 2px solid #EAECF0;
+  padding-left: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+`;
+
+
+// --- スケジュール内の各項目 ---
+export const ScheduleItem = styled.div`
+  position: relative;
+  padding-bottom: 8px;
+
+  /* タイムライン上の丸い点 */
+  &::before {
+    content: '';
+    position: absolute;
+    left: -34px; /* (padding-left + 線の太さ +点の半径)で調整 */
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    background-color: #00A699;
+    border-radius: 50%;
+    border: 2px solid #FFFFFF;
+  }
+`;
+
+
+// --- 時刻・アクティビティ名・詳細 ---
+export const Time = styled.div`
   font-weight: 600;
+  font-size: 1rem;
+  color: #101828;
+`;
+
+export const ActivityName = styled.h4`
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #344054;
+  margin: 4px 0;
 `;
 
 export const Description = styled.p`
-  font-size: 15px;
-  color: ${colors.textSecondary};
-  line-height: 1.7;
-  margin: 0 0 16px 0;
+  font-size: 0.95rem;
+  color: #667085;
+  margin: 4px 0;
+  line-height: 1.6;
 `;
 
+
+// --- 価格やリンクのメタ情報 ---
 export const MetaInfo = styled.div`
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
+  flex-wrap: wrap;
   gap: 16px;
-  font-size: 14px;
-  color: #4A5568;
+  margin-top: 12px;
 `;
 
-export const MetaItem = styled.span`
+export const MetaItem = styled.div`
   display: flex;
   align-items: center;
+  color: #475467;
+  font-size: 0.9rem;
   gap: 6px;
 
   a {
-    color: inherit;
+    color: #00A699;
     text-decoration: none;
     font-weight: 500;
     &:hover {
       text-decoration: underline;
-      color: ${colors.primary};
     }
   }
 `;
 
-export const Conclusion = styled(Introduction)`
+
+// --- 結びの言葉 ---
+export const Conclusion = styled.p`
   text-align: center;
-  margin-top: 48px;
-  font-weight: 600;
+  font-size: 1.1rem;
+  color: #475467;
+  margin: 40px 0;
+  line-height: 1.8;
 `;
 
+
+// --- 戻るボタン ---
 export const BackButton = styled.button`
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 8px;
-  margin: 40px auto 0;
-  border: 1px solid ${colors.border};
-  background-color: ${colors.white};
-  color: ${colors.text};
+  background-color: #FFFFFF;
+  color: #344054;
+  border: 1px solid #D0D5DD;
+  padding: 10px 18px;
   border-radius: 8px;
-  font-size: 16px;
-  padding: 12px 24px;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  transition: background-color 0.2s, box-shadow 0.2s;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    border-color: #ccc;
+    background-color: #F9FAFB;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
   }
 `;
