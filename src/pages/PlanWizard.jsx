@@ -46,7 +46,6 @@ const StyledTextArea = styled.textarea`
 
 
 export default function PlanWizard({ onBack, onGenerateStart }) {
-  // ... (既存のロジックは変更なし) ...
   const { plan, setPlan, generatePlan } = usePlan();
   const [destinationInput, setDestinationInput] = useState(plan.destination || "");
   const [areaOptions, setAreaOptions] = useState([]);
