@@ -42,3 +42,39 @@ export const createMasterPlan = (planConditions) => postToApi('/api/create-maste
 
 // --- デイリースケジューラー（バッチ） ---
 export const createDayPlans = (daysArray) => postToApi('/api/create-day-plans', { days: daysArray });
+
+
+export const geocodeItinerary = async (destination, itinerary) => {
+  const items = [];
+  for (const day of itinerary) {
+    for (const s of day.schedule || []) {
+      items.push({ name: s.activity_name, area: day.area, day: day.day, time: s.time });
+    }
+  }
+  const res = await fetch('/api/geocode-batch', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ destination, items }),
+  });
+  if (!res.ok) {
+    const j = await res.json().catch(()=>null);
+    throw new Error(j?.error || `geocode-batch failed: ${res.status}`);
+  }
+  return res.json(); // { results: [{query, lat, lon, ...}] }
+};
+
+
+// 末尾あたりに追加
+export const geocodePlace = async (name) => {
+  const res = await fetch('/api/geocode-batch', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ destination: '', items: [{ name }] }),
+  });
+  if (!res.ok) {
+    const j = await res.json().catch(()=>null);
+    throw new Error(j?.error || `geocode-place failed: ${res.status}`);
+  }
+  const j = await res.json();
+  return j?.results?.[0] || null;
+};

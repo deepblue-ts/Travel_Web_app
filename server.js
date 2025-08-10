@@ -356,3 +356,73 @@ app
     }
     process.exit(1)
   })
+
+
+
+  // 先頭のパス定義群のすぐ下あたりに追加
+const GEOCODE_CACHE_FILE = path.join(__dirname, 'cache', 'geocode-cache.json');
+
+async function ensureGeocodeCache() {
+  await fs.mkdir(path.dirname(GEOCODE_CACHE_FILE), { recursive: true });
+  try { await fs.access(GEOCODE_CACHE_FILE); }
+  catch { await fs.writeFile(GEOCODE_CACHE_FILE, '{}\n', 'utf8'); }
+}
+async function readGeocodeCache() {
+  await ensureGeocodeCache();
+  const raw = await fs.readFile(GEOCODE_CACHE_FILE, 'utf8');
+  return raw.trim() ? JSON.parse(raw) : {};
+}
+async function writeGeocodeCache(obj) {
+  await fs.writeFile(GEOCODE_CACHE_FILE, JSON.stringify(obj, null, 2) + '\n', 'utf8');
+}
+const sleep = (ms)=> new Promise(r=>setTimeout(r, ms));
+
+/**
+ * Nominatim(OSM)でジオコーディング
+ * - レート制限配慮のため1件ずつ約1秒ウェイト
+ * - まずキャッシュ命中を確認、ミスのみ外部問い合わせ
+ */
+app.post('/api/geocode-batch', async (req, res) => {
+  try {
+    const { destination, items } = req.body || {};
+    if (!Array.isArray(items)) {
+      return res.status(400).json({ error: 'items は配列である必要があります' });
+    }
+    const cache = await readGeocodeCache();
+    const results = [];
+
+    for (const it of items) {
+      // 例: "梅田スカイビル 梅田 大阪 日本"
+      const query = [it.name, it.area, destination, '日本'].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+      if (cache[query]) {
+        results.push({ query, ...cache[query], source: 'cache' });
+        continue;
+      }
+
+      const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=0&limit=1&accept-language=ja&q=${encodeURIComponent(query)}`;
+      const resp = await fetch(url, {
+        headers: {
+          // ここはあなたの連絡先に変えてください（Nominatimの利用規約推奨）
+          'User-Agent': 'webapp-travel/1.0 (contact: you@example.com)'
+        }
+      });
+      const arr = await resp.json();
+      if (Array.isArray(arr) && arr.length > 0) {
+        const top = arr[0];
+        const entry = { lat: Number(top.lat), lon: Number(top.lon), display_name: top.display_name };
+        cache[query] = entry;
+        results.push({ query, ...entry, source: 'nominatim' });
+        await writeGeocodeCache(cache);
+      } else {
+        results.push({ query, lat: null, lon: null, error: 'not_found' });
+      }
+      // 負荷配慮（必要に応じて短くしてOK）
+      await sleep(1100);
+    }
+
+    res.json({ results });
+  } catch (e) {
+    console.error('geocode-batch error:', e);
+    res.status(500).json({ error: e.message });
+  }
+});

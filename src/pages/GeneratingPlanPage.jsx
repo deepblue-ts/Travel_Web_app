@@ -1,11 +1,13 @@
-// src\pages\GeneratingPlanPage.jsx
-
+// src/pages/GeneratingPlanPage.jsx
 import React from 'react';
 import styled, { keyframes } from 'styled-components';
 import { usePlan } from '../contexts/PlanContext';
 
 // --- スタイル定義 ---
-const rotate = keyframes`from {transform: rotate(0deg);} to {transform: rotate(360deg);}`;
+const rotate = keyframes`
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+`;
 const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -39,7 +41,8 @@ const ProgressBar = styled.div`
   overflow: hidden;
 `;
 const Progress = styled.div`
-  width: ${props => props.progress}%;
+  width: ${({ $progress = 0 }) =>
+    Math.max(0, Math.min(100, Number($progress) || 0))}%;
   height: 100%;
   background-color: #00A8A0;
   transition: width 0.5s ease;
@@ -48,13 +51,23 @@ const Progress = styled.div`
 // --- メインコンポーネント ---
 export default function GeneratingPlanPage() {
   const { loadingStatus } = usePlan();
+  const pct = Math.max(
+    0,
+    Math.min(100, Number(loadingStatus?.progress) || 0)
+  );
 
   return (
     <Container>
       <Spinner />
-      <Message>{loadingStatus.message}</Message>
+      <Message>{loadingStatus?.message || '準備中...'}</Message>
       <ProgressBar>
-        <Progress progress={loadingStatus.progress} />
+        <Progress
+          $progress={pct}                 // ← transient prop
+          role="progressbar"
+          aria-valuenow={pct}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        />
       </ProgressBar>
     </Container>
   );
