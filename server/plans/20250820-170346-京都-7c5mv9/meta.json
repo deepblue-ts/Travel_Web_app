@@ -1,0 +1,14 @@
+{
+  "planId": "20250820-170346-京都-7c5mv9",
+  "createdAt": "2025-08-20T08:03:46.933Z",
+  "status": "Done",
+  "origin": "東京",
+  "destination": "京都",
+  "dates": {
+    "start": "2025-08-27",
+    "end": "2025-08-28"
+  },
+  "duration": 2,
+  "budgetPerDay": 65000,
+  "transport": "public"
+}

@@ -1,0 +1,393 @@
+{
+  "user_input": [
+    {
+      "ts": "2025-08-18T12:20:05.938Z",
+      "field": "origin",
+      "value": "東京"
+    },
+    {
+      "ts": "2025-08-18T12:20:05.940Z",
+      "field": "destination",
+      "value": "大阪"
+    },
+    {
+      "ts": "2025-08-18T12:20:05.945Z",
+      "field": "dates",
+      "value": "{\"start\":\"2025-09-23\",\"end\":\"2025-09-24\"}"
+    },
+    {
+      "ts": "2025-08-18T12:20:05.947Z",
+      "field": "transport",
+      "value": "public"
+    },
+    {
+      "ts": "2025-08-18T12:20:05.950Z",
+      "field": "budget",
+      "value": "70000"
+    },
+    {
+      "ts": "2025-08-18T12:20:05.951Z",
+      "field": "preferences",
+      "value": ""
+    },
+    {
+      "ts": "2025-08-18T12:20:05.953Z",
+      "field": "areas",
+      "value": "[\"梅田\",\"天王寺\",\"心斎橋\"]"
+    }
+  ],
+  "llm_input": [
+    {
+      "ts": "2025-08-18T12:20:05.979Z",
+      "agent": "master",
+      "messages": [
+        {
+          "role": "system",
+          "content": "(omitted in code)"
+        },
+        {
+          "role": "user",
+          "content": "提供された情報: {\"origin\":\"東京\",\"destination\":\"大阪\",\"areas\":[\"梅田\",\"天王寺\",\"心斎橋\"],\"dates\":{\"start\":\"2025-09-23\",\"end\":\"2025-09-24\"},\"transport\":\"public\",\"budget\":70000,\"preferences\":\"\",\"duration\":2}"
+        }
+      ]
+    },
+    {
+      "ts": "2025-08-18T12:20:11.249Z",
+      "agent": "hotel",
+      "messages": [
+        {
+          "role": "system",
+          "content": "(omitted in code)"
+        },
+        {
+          "role": "user",
+          "content": "提供された情報: {\"origin\":\"東京\",\"destination\":\"大阪\",\"areas\":[\"梅田\",\"天王寺\",\"心斎橋\"],\"dates\":{\"start\":\"2025-09-23\",\"end\":\"2025-09-24\"},\"transport\":\"public\",\"budget\":70000,\"preferences\":\"\",\"currentArea\":\"心斎橋・難波エリア\"}"
+        }
+      ]
+    },
+    {
+      "ts": "2025-08-18T12:20:16.686Z",
+      "agent": "day-planner",
+      "messages": [
+        {
+          "role": "system",
+          "content": "(omitted in code)"
+        },
+        {
+          "role": "user",
+          "content": "提供された情報: {\"day\":1,\"date\":\"2025-09-23\",\"area\":\"梅田\",\"theme\":\"近代的な都市景観とショッピング\",\"planConditions\":{\"origin\":\"東京\",\"destination\":\"大阪\",\"areas\":[\"梅田\",\"天王寺\",\"心斎橋\"],\"dates\":{\"start\":\"2025-09-23\",\"end\":\"2025-09-24\"},\"transport\":\"public\",\"budget\":70000,\"preferences\":\"\"},\"availableResources\":{\"restaurants\":[{\"name\":\"串カツ田中 梅田店\",\"type\":\"串揚げ/居酒屋\",\"price\":\"1,500円〜3,000円\",\"url\":\"https://kushikatsu-tanaka.com\"},{\"name\":\"大阪ほんまもん焼肉 ひろ\",\"type\":\"焼肉\",\"price\":\"3,000円〜7,000円\",\"url\":\"https://hirokuzumi.com\"},{\"name\":\"心斎橋 花あかり\",\"type\":\"和食/割烹\",\"price\":\"2,500円〜5,000円\",\"url\":\"https://hanaakari.com\"}],\"hotels\":[{\"name\":\"ホテルグランヴィア大阪\",\"type\":\"ホテル\",\"price\":\"20,000円〜\",\"url\":\"https://www.granvia-osaka.co.jp/\"},{\"name\":\"大阪マリオット都ホテル\",\"type\":\"ホテル\",\"price\":\"30,000円〜\",\"url\":\"https://www.marriott.co.jp/hotels/travel/osakm-osaka-marriott-miyako-hotel/\"}],\"activities\":[{\"name\":\"グランフロント大阪 観光ギャラリー\",\"type\":\"観光\",\"price\":\"無料\",\"url\":\"https://www.garuso.com/osaka/\"},{\"name\":\"大阪城公園\",\"type\":\"公園\",\"price\":\"無料\",\"url\":\"https://www.osakacastle.net/park/\"}]}}"
+        }
+      ]
+    }
+  ],
+  "llm_output": [
+    {
+      "ts": "2025-08-18T12:20:11.229Z",
+      "agent": "master",
+      "payload": {
+        "master_plan": [
+          {
+            "day": 1,
+            "area": "梅田",
+            "theme": "近代的な都市景観とショッピング"
+          },
+          {
+            "day": 2,
+            "area": "心斎橋・難波エリア",
+            "theme": "食い倒れとエンターテイメント"
+          }
+        ]
+      }
+    },
+    {
+      "ts": "2025-08-18T12:20:13.750Z",
+      "agent": "activity",
+      "payload": {
+        "activities": [
+          {
+            "name": "グランフロント大阪 観光ギャラリー",
+            "type": "観光",
+            "price": "無料",
+            "url": "https://www.garuso.com/osaka/"
+          },
+          {
+            "name": "大阪城公園",
+            "type": "公園",
+            "price": "無料",
+            "url": "https://www.osakacastle.net/park/"
+          }
+        ]
+      }
+    },
+    {
+      "ts": "2025-08-18T12:20:14.040Z",
+      "agent": "hotel",
+      "payload": {
+        "hotels": [
+          {
+            "name": "ホテルグランヴィア大阪",
+            "type": "ホテル",
+            "price": "20,000円〜",
+            "url": "https://www.granvia-osaka.co.jp/"
+          },
+          {
+            "name": "大阪マリオット都ホテル",
+            "type": "ホテル",
+            "price": "30,000円〜",
+            "url": "https://www.marriott.co.jp/hotels/travel/osakm-osaka-marriott-miyako-hotel/"
+          }
+        ]
+      }
+    },
+    {
+      "ts": "2025-08-18T12:20:14.326Z",
+      "agent": "activity",
+      "payload": {
+        "activities": [
+          {
+            "name": "大阪城天守閣の見学",
+            "type": "観光",
+            "price": "600円",
+            "url": "https://www.osakacastle.net"
+          },
+          {
+            "name": "天王寺動物園",
+            "type": "レクリエーション",
+            "price": "500円",
+            "url": "https://www.tennojizoo.com"
+          },
+          {
+            "name": "心斎橋筋商店街の散策",
+            "type": "ショッピング",
+            "price": "無料",
+            "url": "https://www.shinsaibashi.or.jp"
+          }
+        ]
+      }
+    },
+    {
+      "ts": "2025-08-18T12:20:14.631Z",
+      "agent": "hotel",
+      "payload": {
+        "hotels": [
+          {
+            "name": "ホテルモントレ大阪",
+            "type": "ホテル",
+            "price": "18,000円〜",
+            "url": "https://www.hotelmonterey.co.jp/osaka/"
+          },
+          {
+            "name": "スイスホテル南海大阪",
+            "type": "ホテル",
+            "price": "25,000円〜",
+            "url": "https://www.swissotel.com/hotels/nankai-osaka/"
+          }
+        ]
+      }
+    },
+    {
+      "ts": "2025-08-18T12:20:14.832Z",
+      "agent": "dining",
+      "payload": {
+        "restaurants": [
+          {
+            "name": "心斎橋 鶴八",
+            "type": "寿司",
+            "price": "1,500円〜3,000円",
+            "url": "https://tsuruhachi.com"
+          },
+          {
+            "name": "梅田 焼肉 ふたご",
+            "type": "焼肉",
+            "price": "3,000円〜5,000円",
+            "url": "https://futago-yakiniku.com"
+          },
+          {
+            "name": "天王寺 和食 花見",
+            "type": "和食",
+            "price": "2,000円〜4,000円",
+            "url": "https://hanami-washoku.com"
+          }
+        ]
+      }
+    },
+    {
+      "ts": "2025-08-18T12:20:16.676Z",
+      "agent": "dining",
+      "payload": {
+        "restaurants": [
+          {
+            "name": "串カツ田中 梅田店",
+            "type": "串揚げ/居酒屋",
+            "price": "1,500円〜3,000円",
+            "url": "https://kushikatsu-tanaka.com"
+          },
+          {
+            "name": "大阪ほんまもん焼肉 ひろ",
+            "type": "焼肉",
+            "price": "3,000円〜7,000円",
+            "url": "https://hirokuzumi.com"
+          },
+          {
+            "name": "心斎橋 花あかり",
+            "type": "和食/割烹",
+            "price": "2,500円〜5,000円",
+            "url": "https://hanaakari.com"
+          }
+        ]
+      }
+    },
+    {
+      "ts": "2025-08-18T12:20:25.165Z",
+      "agent": "day-planner",
+      "payload": {
+        "day": 1,
+        "date": "2025-09-23",
+        "area": "梅田",
+        "theme": "近代的な都市景観とショッピング",
+        "schedule": [
+          {
+            "time": "14:00",
+            "activity_name": "グランフロント大阪 観光ギャラリー",
+            "description": "梅田エリアのシンボル、グランフロント大阪の併設観光ギャラリーで、最新のアートや街の歴史を楽しめるスポットです。展望台からの景色も絶品！",
+            "price": "0円",
+            "url": "https://www.garuso.com/osaka/"
+          },
+          {
+            "time": "15:30",
+            "activity_name": "梅田スカイビル 空中庭園展望台",
+            "description": "空中庭園展望台からの360度のパノラマビューを楽しむことができます。特に夕暮れ時の景色は、心に残る美しさです！",
+            "price": "1500円",
+            "url": "https://www.skybldg.co.jp/"
+          },
+          {
+            "time": "17:00",
+            "activity_name": "串カツ田中 梅田店でディナー",
+            "description": "名物の串カツを楽しめるお店。大阪の雰囲気を満喫しながら、美味しい料理を堪能できる絶好の場所です。",
+            "price": "3000円",
+            "url": "https://kushikatsu-tanaka.com"
+          },
+          {
+            "time": "19:00",
+            "activity_name": "大阪マリオット都ホテルのチェックイン",
+            "description": "優雅な空間で、贅沢なひとときを過ごせる大阪マリオット都ホテル。訪れるたびに特別感を味わえる宿泊施設です。",
+            "price": "30000円",
+            "url": "https://www.marriott.co.jp/hotels/travel/osakm-osaka-marriott-miyako-hotel/"
+          }
+        ],
+        "total_cost": 34500
+      }
+    },
+    {
+      "ts": "2025-08-18T12:20:26.176Z",
+      "agent": "day-planner",
+      "payload": {
+        "day": 2,
+        "date": "2025-09-24",
+        "area": "心斎橋・難波エリア",
+        "theme": "食い倒れとエンターテイメント",
+        "schedule": [
+          {
+            "time": "10:00",
+            "activity_name": "心斎橋筋商店街の散策",
+            "description": "大阪の真ん中に位置する心斎橋筋商店街でショッピングを楽しもう！最新のファッションから大阪名物のお土産まで何でも揃うよ。",
+            "price": "無料",
+            "url": "https://www.shinsaibashi.or.jp"
+          },
+          {
+            "time": "12:00",
+            "activity_name": "心斎橋 鶴八で寿司ランチ",
+            "description": "新鮮なネタが自慢の鶴八でとろける寿司を堪能して。ランチにもぴったりのリーズナブルさだよ。",
+            "price": "2000円",
+            "url": "https://tsuruhachi.com"
+          },
+          {
+            "time": "13:30",
+            "activity_name": "大阪城天守閣の見学",
+            "description": "歴史を感じる大阪城で、その美しい姿を堪能しよう。天守閣からの景色も最高だよ！",
+            "price": "600円",
+            "url": "https://www.osakacastle.net"
+          },
+          {
+            "time": "15:00",
+            "activity_name": "天王寺動物園の訪問",
+            "description": "動物たちとふれあえる天王寺動物園で、かわいい動物たちのパフォーマンスに癒される。家族連れにもおすすめ！",
+            "price": "500円",
+            "url": "https://www.tennojizoo.com"
+          },
+          {
+            "time": "18:00",
+            "activity_name": "梅田 焼肉 ふたごでディナー",
+            "description": "絶品焼肉を楽しむならここ！ふたごの肉はおいしいだけでなく、ボリュームも満点だよ。",
+            "price": "4000円",
+            "url": "https://futago-yakiniku.com"
+          }
+        ],
+        "total_cost": 8100
+      }
+    },
+    {
+      "ts": "2025-08-18T12:20:40.407Z",
+      "query": "グランフロント大阪 観光ギャラリー 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-18T12:20:40.410Z",
+      "query": "梅田スカイビル 空中庭園展望台 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-18T12:20:40.412Z",
+      "query": "串カツ田中 梅田店でディナー 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-18T12:20:40.414Z",
+      "query": "大阪マリオット都ホテルのチェックイン 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-18T12:20:40.416Z",
+      "query": "心斎橋筋商店街の散策 心斎橋・難波エリア 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-18T12:20:40.418Z",
+      "query": "心斎橋 鶴八で寿司ランチ 心斎橋・難波エリア 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-18T12:20:40.420Z",
+      "query": "大阪城天守閣の見学 心斎橋・難波エリア 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-18T12:20:40.422Z",
+      "query": "天王寺動物園の訪問 心斎橋・難波エリア 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-18T12:20:40.424Z",
+      "query": "梅田 焼肉 ふたごでディナー 心斎橋・難波エリア 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    }
+  ]
+}

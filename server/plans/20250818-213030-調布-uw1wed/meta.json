@@ -1,0 +1,14 @@
+{
+  "planId": "20250818-213030-調布-uw1wed",
+  "createdAt": "2025-08-18T12:30:30.962Z",
+  "status": "Done",
+  "origin": "八尾",
+  "destination": "調布",
+  "dates": {
+    "start": "2025-08-27",
+    "end": "2025-08-28"
+  },
+  "duration": 2,
+  "budgetPerDay": 50000,
+  "transport": "public"
+}

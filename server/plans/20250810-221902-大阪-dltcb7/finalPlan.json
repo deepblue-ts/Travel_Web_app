@@ -1,0 +1,150 @@
+{
+  "places": [
+    {
+      "id": "p1",
+      "name": "梅田スカイビル 空中庭園展望台",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 1000,
+      "url": "https://www.kuchu-teien.com/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p2",
+      "name": "グランフロント大阪でショッピング",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 5000,
+      "url": "https://www.grandfront-osaka.com/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p3",
+      "name": "リストランテ・ヒロでディナー",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 4000,
+      "url": "https://ristorante-hiro.com",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p4",
+      "name": "ホテルモントレグラスミア大阪にチェックイン",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 15000,
+      "url": "https://www.hotelmonterey.co.jp/osaka/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p5",
+      "name": "あべのハルカス",
+      "type": "poi",
+      "area": "天王寺",
+      "priceYen": 1500,
+      "url": "https://www.abenoharukas-300.jp/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p6",
+      "name": "天王寺 たこ焼き名人",
+      "type": "poi",
+      "area": "天王寺",
+      "priceYen": 1000,
+      "url": "https://takoyaki-meijin.com",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p7",
+      "name": "大阪城公園",
+      "type": "poi",
+      "area": "天王寺",
+      "priceYen": 0,
+      "url": "https://www.osakacastle.net/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p8",
+      "name": "ミート矢澤 天王寺店",
+      "type": "poi",
+      "area": "天王寺",
+      "priceYen": 4000,
+      "url": "https://www.meat-yazawa.com",
+      "lat": "",
+      "lon": ""
+    }
+  ],
+  "days": [
+    {
+      "day": 1,
+      "date": "2025-08-26",
+      "stops": [
+        {
+          "time": "14:00",
+          "placeId": "p1",
+          "note": "梅田スカイビルの空中庭園展望台からは、大阪の近代的な景観を一望できます。眺めを楽しみながら、写真をたくさん撮りましょう。",
+          "costYen": 1000
+        },
+        {
+          "time": "15:30",
+          "placeId": "p2",
+          "note": "グランフロント大阪は最新のショッピング、グルメ、エンターテイメントが揃う複合施設。センスの良いショップが揃っていて、買い物が楽しい場所です。",
+          "costYen": 5000
+        },
+        {
+          "time": "18:00",
+          "placeId": "p3",
+          "note": "おしゃれなイタリアンレストランで、本格的な料理を楽しみましょう。デートにも友人との集まりにもぴったりです。",
+          "costYen": 4000
+        },
+        {
+          "time": "20:30",
+          "placeId": "p4",
+          "note": "梅田周辺での宿泊はこのホテルがおすすめ！落ち着いた雰囲気で、周囲の観光スポットへもアクセスが良好です。",
+          "costYen": 15000
+        }
+      ]
+    },
+    {
+      "day": 2,
+      "date": "2025-08-27",
+      "stops": [
+        {
+          "time": "10:00",
+          "placeId": "p5",
+          "note": "日本一高いビルからの絶景を楽しむことができます。街の歴史を視点から感じることができ、素晴らしい写真スポットです。",
+          "costYen": 1500
+        },
+        {
+          "time": "12:00",
+          "placeId": "p6",
+          "note": "地元の人々に愛されるたこ焼き屋さんで、アツアツのたこ焼きを楽しみましょう！大阪の名物をぜひ味わってください。",
+          "costYen": 1000
+        },
+        {
+          "time": "13:30",
+          "placeId": "p7",
+          "note": "歴史的な大阪城を訪れ、その周囲の美しい公園で散策しながら歴史を感じることができます。入場も無料で、楽しめます。",
+          "costYen": 0
+        },
+        {
+          "time": "15:30",
+          "placeId": "p8",
+          "note": "最高級のステーキディナーを楽しむ絶好の場所。日常の喧騒から離れ、ゆっくりとした時間を味わえます。",
+          "costYen": 4000
+        }
+      ]
+    }
+  ],
+  "estimates": {
+    "totalCostYen": 31500
+  },
+  "title": "大阪への2日間の旅"
+}
