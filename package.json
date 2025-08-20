@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "homepage": "http://kazuki326.github.io",
   "scripts": {
     "start:frontend": "vite",
     "start:backend": "nodemon --config nodemon.json server.js",
@@ -16,6 +17,7 @@
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
+    "gh-pages": "^6.3.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.536.0",
     "moment": "^2.30.1",
