@@ -3,37 +3,37 @@
 import { useState, useEffect } from "react";
 import TopPage from "./pages/TopPage";
 import PlanWizard from "./pages/PlanWizard";
-import GeneratingPlanPage from "./pages/GeneratingPlanPage"; // ★ インポート
+import GeneratingPlanPage from "./pages/GeneratingPlanPage";
 import PlanResult from "./pages/PlanResult";
-import { usePlan } from "./contexts/PlanContext"; // ★ usePlanをインポート
+import { usePlan } from "./contexts/PlanContext";
 
 export default function App() {
   // 0: Top, 1: Wizard, 2: Generating, 3: Result
   const [step, setStep] = useState(0);
-  const { loadingStatus, error } = usePlan(); // ★ Contextから状態を取得
+  const { loadingStatus, error, planJsonResult } = usePlan();
 
-  // ★ プラン生成が完了したら自動で結果ページへ遷移させる
+  // 生成フローの画面遷移
   useEffect(() => {
-    // 実行中で、かつ100%に達したら結果ページへ
-    if (loadingStatus.active && loadingStatus.progress === 100) {
-      // 少し待ってから遷移することで「完成！」のメッセージを見せる
-      const timer = setTimeout(() => {
-        setStep(3);
-      }, 1000);
-      return () => clearTimeout(timer);
+    // 結果ができたら必ず結果ページへ
+    if (planJsonResult) {
+      setStep(3);
+      return;
     }
-    // 実行中でなくなった場合（エラーなど）はWizardに戻す
+
+    // 生成中ページ（step=2）なのに active=false になった = 何らかの中断/エラー
     if (!loadingStatus.active && step === 2) {
-      // エラーがあればアラートなども出せる
-      if(error) alert(error);
-      setStep(1); 
+      if (error) {
+        // 必要ならここで通知
+        // alert(error);
+      }
+      setStep(1); // Wizardに戻す
     }
-  }, [loadingStatus, error, step]);
+  }, [planJsonResult, loadingStatus.active, error, step]);
 
   const handleStart = () => setStep(1);
   const handleBackToTop = () => setStep(0);
-  
-  // ★ プラン生成"開始"時にローディングページへ遷移させる
+
+  // 「作成開始」を押した瞬間にローディング画面へ
   const handlePlanGenerationStart = () => {
     setStep(2);
   };
@@ -41,9 +41,14 @@ export default function App() {
   const renderStep = () => {
     switch (step) {
       case 1:
-        return <PlanWizard onBack={handleBackToTop} onGenerateStart={handlePlanGenerationStart} />;
+        return (
+          <PlanWizard
+            onBack={handleBackToTop}
+            onGenerateStart={handlePlanGenerationStart}
+          />
+        );
       case 2:
-        return <GeneratingPlanPage />; // ★ ローディングページ
+        return <GeneratingPlanPage />;
       case 3:
         return <PlanResult onBackToTop={handleBackToTop} />;
       default:
@@ -51,9 +56,5 @@ export default function App() {
     }
   };
 
-  return (
-    <div style={{ minHeight: "100vh" }}>
-      {renderStep()}
-    </div>
-  );
+  return <div style={{ minHeight: "100vh" }}>{renderStep()}</div>;
 }

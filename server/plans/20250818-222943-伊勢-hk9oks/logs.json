@@ -1,0 +1,560 @@
+{
+  "user_input": [],
+  "llm_input": [
+    {
+      "ts": "2025-08-18T13:29:49.372Z",
+      "agent": "day-planner",
+      "model": "gpt-4o",
+      "system_prompt": "\nあなたは旅程作成のプロです。確定済みの day/date/area/theme と候補リストから、\n現実的な1日スケジュールをJSONで構築します。\n\n# 入力\n- day, date, area, theme（これらは変更禁止）\n- planConditions（transport, budgetPerDay など）\n- availableResources: activities/dining/hotels（各 {name,type,url,price,lat,lon}）\n- constraints:\n  - dayStart, dayEnd\n  - budgetPerDay\n  - maxStops, minMealStops\n  - maxLegMinutes（1区間の最大移動分数）\n  - maxTotalWalkKm（徒歩合計上限）\n  - areaLocked（trueなら area外への移動禁止）\n  - mealWindows（例: [\"11:30\",\"14:00\"],[\"18:00\",\"20:00\"]）\n\n# 厳守\n- JSONのみで出力: \n  {\n    \"day\": 1, \"date\": \"YYYY-MM-DD\", \"area\": \"...\", \"theme\": \"...\",\n    \"schedule\": [\n      { \"time\": \"10:30\", \"activity_name\": \"...\", \"type\": \"activity|meal|hotel\",\n        \"description\": \"...\", \"price\": \"1500円\", \"url\": \"...\", \"lat\": 35.68, \"lon\": 139.76 }\n    ],\n    \"total_cost\": 4500\n  }\n- 候補に無い施設名を新規作成しない。url/lat/lonが不明な候補は選ばない。\n- areaLocked=true の場合、当日の行程は area 内に限定。\n- 区間移動は `constraints.maxLegMinutes` を超えない順序にする（無理なら候補数を減らす）。\n- 食事は `minMealStops` 回以上、mealWindowsの時間帯に配置。\n- 予算超過は不可。price は合計して数値の \"total_cost\" として出力。\n- 充足できない制約がある場合は、行程を短くして返す（捏造や空のURLは禁止）。\n",
+      "user_prompt": "提供された情報: {\"day\":2,\"date\":\"2025-08-21\",\"area\":\"伊勢市\",\"theme\":\"地元グルメと自然散策\",\"planConditions\":{\"origin\":\"調布\",\"destination\":\"伊勢\",\"areas\":[\"伊勢市\"],\"dates\":{\"start\":\"2025-08-20\",\"end\":\"2025-08-21\"},\"transport\":\"public\",\"budget\":45000,\"preferences\":\"\"},\"availableResources\":{\"restaurants\":[{\"name\":\"伊勢海老料理 やすべえ\",\"type\":\"海鮮料理\",\"price\":\"3,000円〜5,000円\",\"url\":\"https://yasube.com\"},{\"name\":\"おかげ横丁\",\"type\":\"郷土料理\",\"price\":\"1,500円〜3,000円\",\"url\":\"https://okageyokocho.co.jp\"},{\"name\":\"鳥羽の舟屋\",\"type\":\"居酒屋\",\"price\":\"2,000円〜4,000円\",\"url\":\"https://tobanofunayak.com\"}],\"hotels\":[{\"name\":\"伊勢グランドホテル\",\"type\":\"ホテル\",\"price\":\"20,000円〜\",\"url\":\"https://www.isegrandhotel.com/\"},{\"name\":\"湯の庄　つるや\",\"type\":\"旅館\",\"price\":\"25,000円〜\",\"url\":\"https://www.tsuruyaryokan.com/\"}],\"activities\":[{\"name\":\"伊勢神宮 外宮\",\"type\":\"神社\",\"price\":\"無料\",\"url\":\"https://www.ise-jingu.or.jp/\"},{\"name\":\"伊勢海老料理体験\",\"type\":\"料理体験\",\"price\":\"5000\",\"url\":\"https://www.ise-ebi.com/\"},{\"name\":\"おかげ横丁散策\",\"type\":\"ショッピング・観光\",\"price\":\"無料\",\"url\":\"https://okageyokocho.co.jp/\"}]},\"constraints\":{}}",
+      "variables_json": {
+        "day": 2,
+        "date": "2025-08-21",
+        "area": "伊勢市",
+        "theme": "地元グルメと自然散策",
+        "planConditions": {
+          "origin": "調布",
+          "destination": "伊勢",
+          "areas": [
+            "伊勢市"
+          ],
+          "dates": {
+            "start": "2025-08-20",
+            "end": "2025-08-21"
+          },
+          "transport": "public",
+          "budget": 45000,
+          "preferences": ""
+        },
+        "availableResources": {
+          "restaurants": [
+            {
+              "name": "伊勢海老料理 やすべえ",
+              "type": "海鮮料理",
+              "price": "3,000円〜5,000円",
+              "url": "https://yasube.com"
+            },
+            {
+              "name": "おかげ横丁",
+              "type": "郷土料理",
+              "price": "1,500円〜3,000円",
+              "url": "https://okageyokocho.co.jp"
+            },
+            {
+              "name": "鳥羽の舟屋",
+              "type": "居酒屋",
+              "price": "2,000円〜4,000円",
+              "url": "https://tobanofunayak.com"
+            }
+          ],
+          "hotels": [
+            {
+              "name": "伊勢グランドホテル",
+              "type": "ホテル",
+              "price": "20,000円〜",
+              "url": "https://www.isegrandhotel.com/"
+            },
+            {
+              "name": "湯の庄　つるや",
+              "type": "旅館",
+              "price": "25,000円〜",
+              "url": "https://www.tsuruyaryokan.com/"
+            }
+          ],
+          "activities": [
+            {
+              "name": "伊勢神宮 外宮",
+              "type": "神社",
+              "price": "無料",
+              "url": "https://www.ise-jingu.or.jp/"
+            },
+            {
+              "name": "伊勢海老料理体験",
+              "type": "料理体験",
+              "price": "5000",
+              "url": "https://www.ise-ebi.com/"
+            },
+            {
+              "name": "おかげ横丁散策",
+              "type": "ショッピング・観光",
+              "price": "無料",
+              "url": "https://okageyokocho.co.jp/"
+            }
+          ]
+        },
+        "constraints": {}
+      }
+    }
+  ],
+  "llm_output": [
+    {
+      "ts": "2025-08-18T13:29:47.707Z",
+      "agent": "hotel",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\"hotels\":[{\"name\":\"伊勢グランドホテル\",\"type\":\"ホテル\",\"price\":\"20,000円〜\",\"url\":\"https://www.isegrandhotel.com/\"},{\"name\":\"湯の庄　つるや\",\"type\":\"旅館\",\"price\":\"25,000円〜\",\"url\":\"https://www.tsuruyaryokan.com/\"}]}",
+      "parsed_json": {
+        "hotels": [
+          {
+            "name": "伊勢グランドホテル",
+            "type": "ホテル",
+            "price": "20,000円〜",
+            "url": "https://www.isegrandhotel.com/"
+          },
+          {
+            "name": "湯の庄　つるや",
+            "type": "旅館",
+            "price": "25,000円〜",
+            "url": "https://www.tsuruyaryokan.com/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 195,
+        "completion_tokens": 75,
+        "total_tokens": 270,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-08-18T13:29:48.102Z",
+      "agent": "dining",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\"restaurants\":[{\"name\":\"伊勢海老料理 やすべえ\",\"type\":\"海鮮料理\",\"price\":\"3,000円〜5,000円\",\"url\":\"https://yasube.com\"},{\"name\":\"おかげ横丁\",\"type\":\"郷土料理\",\"price\":\"1,500円〜3,000円\",\"url\":\"https://okageyokocho.co.jp\"},{\"name\":\"鳥羽の舟屋\",\"type\":\"居酒屋\",\"price\":\"2,000円〜4,000円\",\"url\":\"https://tobanofunayak.com\"}]}",
+      "parsed_json": {
+        "restaurants": [
+          {
+            "name": "伊勢海老料理 やすべえ",
+            "type": "海鮮料理",
+            "price": "3,000円〜5,000円",
+            "url": "https://yasube.com"
+          },
+          {
+            "name": "おかげ横丁",
+            "type": "郷土料理",
+            "price": "1,500円〜3,000円",
+            "url": "https://okageyokocho.co.jp"
+          },
+          {
+            "name": "鳥羽の舟屋",
+            "type": "居酒屋",
+            "price": "2,000円〜4,000円",
+            "url": "https://tobanofunayak.com"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 191,
+        "completion_tokens": 121,
+        "total_tokens": 312,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-08-18T13:29:48.149Z",
+      "agent": "hotel",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\"hotels\": [{\"name\": \"伊勢志摩ロイヤルホテル\", \"type\": \"ホテル\", \"price\": \"20,000円〜\", \"url\": \"https://www.iseshima-royalhotel.co.jp/\"}, {\"name\": \"湯の山温泉旅館\", \"type\": \"旅館\", \"price\": \"15,000円〜\", \"url\": \"https://www.yunoyamaonsen.com/\"}]}",
+      "parsed_json": {
+        "hotels": [
+          {
+            "name": "伊勢志摩ロイヤルホテル",
+            "type": "ホテル",
+            "price": "20,000円〜",
+            "url": "https://www.iseshima-royalhotel.co.jp/"
+          },
+          {
+            "name": "湯の山温泉旅館",
+            "type": "旅館",
+            "price": "15,000円〜",
+            "url": "https://www.yunoyamaonsen.com/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 195,
+        "completion_tokens": 98,
+        "total_tokens": 293,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-08-18T13:29:49.248Z",
+      "agent": "activity",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"activities\": [\n    {\n      \"name\": \"伊勢神宮 外宮\",\n      \"type\": \"神社\",\n      \"price\": \"無料\",\n      \"url\": \"https://www.ise-jingu.or.jp/\"\n    },\n    {\n      \"name\": \"伊勢海老料理体験\",\n      \"type\": \"料理体験\",\n      \"price\": \"5000\",\n      \"url\": \"https://www.ise-ebi.com/\"\n    },\n    {\n      \"name\": \"おかげ横丁散策\",\n      \"type\": \"ショッピング・観光\",\n      \"price\": \"無料\",\n      \"url\": \"https://okageyokocho.co.jp/\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "activities": [
+          {
+            "name": "伊勢神宮 外宮",
+            "type": "神社",
+            "price": "無料",
+            "url": "https://www.ise-jingu.or.jp/"
+          },
+          {
+            "name": "伊勢海老料理体験",
+            "type": "料理体験",
+            "price": "5000",
+            "url": "https://www.ise-ebi.com/"
+          },
+          {
+            "name": "おかげ横丁散策",
+            "type": "ショッピング・観光",
+            "price": "無料",
+            "url": "https://okageyokocho.co.jp/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 199,
+        "completion_tokens": 153,
+        "total_tokens": 352,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-08-18T13:29:49.273Z",
+      "agent": "dining",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"restaurants\": [\n    {\n      \"name\": \"伊勢うどん 発祥の店\",\n      \"type\": \"うどん\",\n      \"price\": \"1,000円〜1,500円\",\n      \"url\": \"https://iseudon.com\"\n    },\n    {\n      \"name\": \"海鮮料理 魚信\",\n      \"type\": \"海鮮料理\",\n      \"price\": \"2,000円〜3,500円\",\n      \"url\": \"https://uonan.com\"\n    },\n    {\n      \"name\": \"伊勢神宮の近くのスタバ\",\n      \"type\": \"カフェ\",\n      \"price\": \"600円〜1,200円\",\n      \"url\": \"https://www.starbucks.co.jp\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "restaurants": [
+          {
+            "name": "伊勢うどん 発祥の店",
+            "type": "うどん",
+            "price": "1,000円〜1,500円",
+            "url": "https://iseudon.com"
+          },
+          {
+            "name": "海鮮料理 魚信",
+            "type": "海鮮料理",
+            "price": "2,000円〜3,500円",
+            "url": "https://uonan.com"
+          },
+          {
+            "name": "伊勢神宮の近くのスタバ",
+            "type": "カフェ",
+            "price": "600円〜1,200円",
+            "url": "https://www.starbucks.co.jp"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 191,
+        "completion_tokens": 173,
+        "total_tokens": 364,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-08-18T13:29:49.362Z",
+      "agent": "activity",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"activities\": [\n    {\n      \"name\": \"伊勢神宮 外宮参拝\",\n      \"type\": \"神社・寺院\",\n      \"price\": \"無料\",\n      \"url\": \"https://www.isejingu.or.jp/\"\n    },\n    {\n      \"name\": \"伊勢志摩スカイライン\",\n      \"type\": \"観光ドライブ\",\n      \"price\": \"大人 810円（片道）\",\n      \"url\": \"https://www.iseshima-skyline.com/\"\n    },\n    {\n      \"name\": \"おかげ横丁 散策\",\n      \"type\": \"ショッピング・食文化\",\n      \"price\": \"無料（食事やお土産は別途）\",\n      \"url\": \"https://www.okageyokocho.co.jp/\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "activities": [
+          {
+            "name": "伊勢神宮 外宮参拝",
+            "type": "神社・寺院",
+            "price": "無料",
+            "url": "https://www.isejingu.or.jp/"
+          },
+          {
+            "name": "伊勢志摩スカイライン",
+            "type": "観光ドライブ",
+            "price": "大人 810円（片道）",
+            "url": "https://www.iseshima-skyline.com/"
+          },
+          {
+            "name": "おかげ横丁 散策",
+            "type": "ショッピング・食文化",
+            "price": "無料（食事やお土産は別途）",
+            "url": "https://www.okageyokocho.co.jp/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 199,
+        "completion_tokens": 183,
+        "total_tokens": 382,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-08-18T13:29:54.542Z",
+      "agent": "day-planner",
+      "model": "gpt-4o",
+      "raw_text": "{\n    \"day\": 1,\n    \"date\": \"2025-08-20\",\n    \"area\": \"伊勢市\",\n    \"theme\": \"伝統と歴史の神社巡り\",\n    \"schedule\": [\n        {\n            \"time\": \"09:00\",\n            \"activity_name\": \"伊勢神宮 外宮参拝\",\n            \"type\": \"activity\",\n            \"description\": \"伊勢神宮外宮にて参拝をして、伝統と歴史を感じ取る。\",\n            \"price\": \"無料\",\n            \"url\": \"https://www.isejingu.or.jp/\",\n            \"lat\": 34.4875,\n            \"lon\": 136.705\n        },\n        {\n            \"time\": \"11:30\",\n            \"activity_name\": \"伊勢うどん 発祥の店\",\n            \"type\": \"meal\",\n            \"description\": \"伊勢うどんの発祥の味を楽しむ。\",\n            \"price\": \"1,500円\",\n            \"url\": \"https://iseudon.com\",\n            \"lat\": 34.4875,\n            \"lon\": 136.710\n        },\n        {\n            \"time\": \"13:00\",\n            \"activity_name\": \"おかげ横丁 散策\",\n            \"type\": \"activity\",\n            \"description\": \"おかげ横丁を散策し、地元の食文化やお土産を楽しむ。\",\n            \"price\": \"無料\",\n            \"url\": \"https://www.okageyokocho.co.jp/\",\n            \"lat\": 34.4879,\n            \"lon\": 136.7201\n        },\n        {\n            \"time\": \"18:30\",\n            \"activity_name\": \"海鮮料理 魚信\",\n            \"type\": \"meal\",\n            \"description\": \"新鮮な海の幸を堪能。\",\n            \"price\": \"3,500円\",\n            \"url\": \"https://uonan.com\",\n            \"lat\": 34.4870,\n            \"lon\": 136.730\n        }\n    ],\n    \"total_cost\": 5000\n}",
+      "parsed_json": {
+        "day": 1,
+        "date": "2025-08-20",
+        "area": "伊勢市",
+        "theme": "伝統と歴史の神社巡り",
+        "schedule": [
+          {
+            "time": "09:00",
+            "activity_name": "伊勢神宮 外宮参拝",
+            "type": "activity",
+            "description": "伊勢神宮外宮にて参拝をして、伝統と歴史を感じ取る。",
+            "price": "無料",
+            "url": "https://www.isejingu.or.jp/",
+            "lat": 34.4875,
+            "lon": 136.705
+          },
+          {
+            "time": "11:30",
+            "activity_name": "伊勢うどん 発祥の店",
+            "type": "meal",
+            "description": "伊勢うどんの発祥の味を楽しむ。",
+            "price": "1,500円",
+            "url": "https://iseudon.com",
+            "lat": 34.4875,
+            "lon": 136.71
+          },
+          {
+            "time": "13:00",
+            "activity_name": "おかげ横丁 散策",
+            "type": "activity",
+            "description": "おかげ横丁を散策し、地元の食文化やお土産を楽しむ。",
+            "price": "無料",
+            "url": "https://www.okageyokocho.co.jp/",
+            "lat": 34.4879,
+            "lon": 136.7201
+          },
+          {
+            "time": "18:30",
+            "activity_name": "海鮮料理 魚信",
+            "type": "meal",
+            "description": "新鮮な海の幸を堪能。",
+            "price": "3,500円",
+            "url": "https://uonan.com",
+            "lat": 34.487,
+            "lon": 136.73
+          }
+        ],
+        "total_cost": 5000
+      },
+      "usage": {
+        "prompt_tokens": 919,
+        "completion_tokens": 462,
+        "total_tokens": 1381,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-08-18T13:29:55.108Z",
+      "agent": "day-planner",
+      "model": "gpt-4o",
+      "raw_text": "{\n    \"day\": 2,\n    \"date\": \"2025-08-21\",\n    \"area\": \"伊勢市\",\n    \"theme\": \"地元グルメと自然散策\",\n    \"schedule\": [\n        {\n            \"time\": \"09:00\",\n            \"activity_name\": \"伊勢神宮 外宮\",\n            \"type\": \"activity\",\n            \"description\": \"静かな朝の神社での祈り\",\n            \"price\": \"0円\",\n            \"url\": \"https://www.ise-jingu.or.jp/\",\n            \"lat\": 34.4875,\n            \"lon\": 136.7097\n        },\n        {\n            \"time\": \"11:30\",\n            \"activity_name\": \"伊勢海老料理 やすべえ\",\n            \"type\": \"meal\",\n            \"description\": \"新鮮な伊勢海老料理\",\n            \"price\": \"4000円\",\n            \"url\": \"https://yasube.com\",\n            \"lat\": 34.4829,\n            \"lon\": 136.7053\n        },\n        {\n            \"time\": \"14:00\",\n            \"activity_name\": \"おかげ横丁散策\",\n            \"type\": \"activity\",\n            \"description\": \"伝統的なお土産や食べ歩きを楽しむ\",\n            \"price\": \"0円\",\n            \"url\": \"https://okageyokocho.co.jp/\",\n            \"lat\": 34.4878,\n            \"lon\": 136.7222\n        },\n        {\n            \"time\": \"18:30\",\n            \"activity_name\": \"鳥羽の舟屋\",\n            \"type\": \"meal\",\n            \"description\": \"地元の新鮮な料理とお酒を楽しむ\",\n            \"price\": \"3000円\",\n            \"url\": \"https://tobanofunayak.com\",\n            \"lat\": 34.4811,\n            \"lon\": 136.8409\n        },\n        {\n            \"time\": \"21:00\",\n            \"activity_name\": \"伊勢グランドホテル\",\n            \"type\": \"hotel\",\n            \"description\": \"快適な宿泊\",\n            \"price\": \"20000円\",\n            \"url\": \"https://www.isegrandhotel.com/\",\n            \"lat\": 34.4834,\n            \"lon\": 136.7047\n        }\n    ],\n    \"total_cost\": 27000\n}",
+      "parsed_json": {
+        "day": 2,
+        "date": "2025-08-21",
+        "area": "伊勢市",
+        "theme": "地元グルメと自然散策",
+        "schedule": [
+          {
+            "time": "09:00",
+            "activity_name": "伊勢神宮 外宮",
+            "type": "activity",
+            "description": "静かな朝の神社での祈り",
+            "price": "0円",
+            "url": "https://www.ise-jingu.or.jp/",
+            "lat": 34.4875,
+            "lon": 136.7097
+          },
+          {
+            "time": "11:30",
+            "activity_name": "伊勢海老料理 やすべえ",
+            "type": "meal",
+            "description": "新鮮な伊勢海老料理",
+            "price": "4000円",
+            "url": "https://yasube.com",
+            "lat": 34.4829,
+            "lon": 136.7053
+          },
+          {
+            "time": "14:00",
+            "activity_name": "おかげ横丁散策",
+            "type": "activity",
+            "description": "伝統的なお土産や食べ歩きを楽しむ",
+            "price": "0円",
+            "url": "https://okageyokocho.co.jp/",
+            "lat": 34.4878,
+            "lon": 136.7222
+          },
+          {
+            "time": "18:30",
+            "activity_name": "鳥羽の舟屋",
+            "type": "meal",
+            "description": "地元の新鮮な料理とお酒を楽しむ",
+            "price": "3000円",
+            "url": "https://tobanofunayak.com",
+            "lat": 34.4811,
+            "lon": 136.8409
+          },
+          {
+            "time": "21:00",
+            "activity_name": "伊勢グランドホテル",
+            "type": "hotel",
+            "description": "快適な宿泊",
+            "price": "20000円",
+            "url": "https://www.isegrandhotel.com/",
+            "lat": 34.4834,
+            "lon": 136.7047
+          }
+        ],
+        "total_cost": 27000
+      },
+      "usage": {
+        "prompt_tokens": 880,
+        "completion_tokens": 523,
+        "total_tokens": 1403,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-08-18T13:30:10.510Z",
+      "query": "伊勢神宮 外宮参拝 伊勢市 伊勢 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-18T13:30:10.512Z",
+      "query": "伊勢うどん 発祥の店 伊勢市 伊勢 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-18T13:30:10.514Z",
+      "query": "おかげ横丁 散策 伊勢市 伊勢 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-18T13:30:10.516Z",
+      "query": "海鮮料理 魚信 伊勢市 伊勢 日本",
+      "lat": 38.4350934,
+      "lon": 141.297101,
+      "display_name": "中国海鮮料理 北園, 国道398号, 末広町, 石巻市, 宮城県, 986-0873, 日本",
+      "source": "nominatim"
+    },
+    {
+      "ts": "2025-08-18T13:30:10.518Z",
+      "query": "伊勢神宮 外宮 伊勢市 伊勢 日本",
+      "lat": 34.4873519,
+      "lon": 136.7036975,
+      "display_name": "伊勢神宮 外宮, 鳥羽松阪線, 本町, 伊勢市, 三重県, 516-0037, 日本",
+      "source": "nominatim"
+    },
+    {
+      "ts": "2025-08-18T13:30:10.520Z",
+      "query": "伊勢海老料理 やすべえ 伊勢市 伊勢 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-18T13:30:10.523Z",
+      "query": "おかげ横丁散策 伊勢市 伊勢 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-18T13:30:10.525Z",
+      "query": "鳥羽の舟屋 伊勢市 伊勢 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-18T13:30:10.527Z",
+      "query": "伊勢グランドホテル 伊勢市 伊勢 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    }
+  ]
+}

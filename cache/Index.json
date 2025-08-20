@@ -1,0 +1,28 @@
+{
+  "plans": [
+    {
+      "planId": "2025-08-10-12-43-53_72353adf",
+      "createdAt": "2025-08-10T12:43:53.842Z",
+      "origin": "東京",
+      "destination": "大阪",
+      "dates": {
+        "start": "2025-08-26",
+        "end": "2025-08-27"
+      },
+      "duration": 2,
+      "status": "Done"
+    },
+    {
+      "planId": "2025-08-10-12-34-37_5cf7de3d",
+      "createdAt": "2025-08-10T12:34:37.135Z",
+      "origin": "東京",
+      "destination": "大阪",
+      "dates": {
+        "start": "2025-08-26",
+        "end": "2025-08-27"
+      },
+      "duration": 2,
+      "status": "Done"
+    }
+  ]
+}

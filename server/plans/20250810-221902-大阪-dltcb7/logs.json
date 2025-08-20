@@ -1,0 +1,145 @@
+{
+  "user_input": [],
+  "llm_input": [],
+  "llm_output": [
+    {
+      "ts": "2025-08-10T13:19:19.879Z",
+      "agent": "day-planner",
+      "payload": {
+        "day": 2,
+        "date": "2025-08-27",
+        "area": "天王寺",
+        "theme": "歴史と文化探訪",
+        "schedule": [
+          {
+            "time": "10:00",
+            "activity_name": "あべのハルカス",
+            "description": "日本一高いビルからの絶景を楽しむことができます。街の歴史を視点から感じることができ、素晴らしい写真スポットです。",
+            "price": "1500円",
+            "url": "https://www.abenoharukas-300.jp/"
+          },
+          {
+            "time": "12:00",
+            "activity_name": "天王寺 たこ焼き名人",
+            "description": "地元の人々に愛されるたこ焼き屋さんで、アツアツのたこ焼きを楽しみましょう！大阪の名物をぜひ味わってください。",
+            "price": "1000円",
+            "url": "https://takoyaki-meijin.com"
+          },
+          {
+            "time": "13:30",
+            "activity_name": "大阪城公園",
+            "description": "歴史的な大阪城を訪れ、その周囲の美しい公園で散策しながら歴史を感じることができます。入場も無料で、楽しめます。",
+            "price": "無料",
+            "url": "https://www.osakacastle.net/"
+          },
+          {
+            "time": "15:30",
+            "activity_name": "ミート矢澤 天王寺店",
+            "description": "最高級のステーキディナーを楽しむ絶好の場所。日常の喧騒から離れ、ゆっくりとした時間を味わえます。",
+            "price": "4000円",
+            "url": "https://www.meat-yazawa.com"
+          }
+        ],
+        "total_cost": 6500
+      }
+    },
+    {
+      "ts": "2025-08-10T13:19:20.737Z",
+      "agent": "day-planner",
+      "payload": {
+        "day": 1,
+        "date": "2025-08-26",
+        "area": "梅田",
+        "theme": "近代的な都市景観とショッピング",
+        "schedule": [
+          {
+            "time": "14:00",
+            "activity_name": "梅田スカイビル 空中庭園展望台",
+            "description": "梅田スカイビルの空中庭園展望台からは、大阪の近代的な景観を一望できます。眺めを楽しみながら、写真をたくさん撮りましょう。",
+            "price": "1000円",
+            "url": "https://www.kuchu-teien.com/"
+          },
+          {
+            "time": "15:30",
+            "activity_name": "グランフロント大阪でショッピング",
+            "description": "グランフロント大阪は最新のショッピング、グルメ、エンターテイメントが揃う複合施設。センスの良いショップが揃っていて、買い物が楽しい場所です。",
+            "price": "買い物予算: 5000円",
+            "url": "https://www.grandfront-osaka.com/"
+          },
+          {
+            "time": "18:00",
+            "activity_name": "リストランテ・ヒロでディナー",
+            "description": "おしゃれなイタリアンレストランで、本格的な料理を楽しみましょう。デートにも友人との集まりにもぴったりです。",
+            "price": "4000円",
+            "url": "https://ristorante-hiro.com"
+          },
+          {
+            "time": "20:30",
+            "activity_name": "ホテルモントレグラスミア大阪にチェックイン",
+            "description": "梅田周辺での宿泊はこのホテルがおすすめ！落ち着いた雰囲気で、周囲の観光スポットへもアクセスが良好です。",
+            "price": "15000円",
+            "url": "https://www.hotelmonterey.co.jp/osaka/"
+          }
+        ],
+        "total_cost": 4000
+      }
+    },
+    {
+      "ts": "2025-08-10T13:19:31.512Z",
+      "query": "梅田スカイビル 空中庭園展望台 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-10T13:19:31.515Z",
+      "query": "グランフロント大阪でショッピング 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-10T13:19:31.518Z",
+      "query": "リストランテ・ヒロでディナー 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-10T13:19:31.520Z",
+      "query": "ホテルモントレグラスミア大阪にチェックイン 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-10T13:19:31.523Z",
+      "query": "あべのハルカス 天王寺 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-10T13:19:31.528Z",
+      "query": "天王寺 たこ焼き名人 天王寺 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-10T13:19:31.532Z",
+      "query": "大阪城公園 天王寺 大阪 日本",
+      "lat": 34.6852779,
+      "lon": 135.5238204,
+      "display_name": "大阪城公園案内図, 上町筋, 大阪城, 中央区, 大阪市, 大阪府, 540-0012, 日本",
+      "source": "cache"
+    },
+    {
+      "ts": "2025-08-10T13:19:31.536Z",
+      "query": "ミート矢澤 天王寺店 天王寺 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    }
+  ]
+}

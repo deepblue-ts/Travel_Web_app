@@ -1,0 +1,134 @@
+{
+  "places": [
+    {
+      "id": "p1",
+      "name": "首里城見学",
+      "type": "poi",
+      "area": "那覇市",
+      "priceYen": 1000,
+      "url": "https://www.shurijo.com",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p2",
+      "name": "琉球料理 いしぐふー",
+      "type": "poi",
+      "area": "那覇市",
+      "priceYen": 3000,
+      "url": "https://www.ishigufu.com",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p3",
+      "name": "国際通り散策",
+      "type": "poi",
+      "area": "那覇市",
+      "priceYen": 0,
+      "url": "https://www.okinawamonogatari.com/kokusai-street",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p4",
+      "name": "オリオンビールの庭",
+      "type": "poi",
+      "area": "那覇市",
+      "priceYen": 2000,
+      "url": "https://www.orionbeer.co.jp",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p5",
+      "name": "沖縄美ら海水族館",
+      "type": "poi",
+      "area": "那覇市",
+      "priceYen": 1880,
+      "url": "https://churaumi.okinawa/en/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p6",
+      "name": "琉球料理 いふう",
+      "type": "poi",
+      "area": "那覇市",
+      "priceYen": 2000,
+      "url": "https://www.ifuu.com",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p7",
+      "name": "国際通りの散策",
+      "type": "poi",
+      "area": "那覇市",
+      "priceYen": 0,
+      "url": "https://www.okinawainfo.net/international_street/",
+      "lat": "",
+      "lon": ""
+    }
+  ],
+  "days": [
+    {
+      "day": 1,
+      "date": "2025-08-29",
+      "stops": [
+        {
+          "time": "09:00",
+          "placeId": "p1",
+          "note": "歴史ある首里城を見学します。",
+          "costYen": 1000
+        },
+        {
+          "time": "12:00",
+          "placeId": "p2",
+          "note": "本場の琉球料理を楽しみます。",
+          "costYen": 3000
+        },
+        {
+          "time": "14:30",
+          "placeId": "p3",
+          "note": "国際通りでショッピングとグルメ探索。",
+          "costYen": 0
+        },
+        {
+          "time": "18:00",
+          "placeId": "p4",
+          "note": "オリオンビールを堪能します。",
+          "costYen": 2000
+        }
+      ]
+    },
+    {
+      "day": 2,
+      "date": "2025-08-30",
+      "stops": [
+        {
+          "time": "09:00",
+          "placeId": "p5",
+          "note": "沖縄の海洋生物を間近で見ることができる美しい水族館。",
+          "costYen": 1880
+        },
+        {
+          "time": "12:00",
+          "placeId": "p6",
+          "note": "琉球王国時代の伝統的な料理を楽しめるレストラン。",
+          "costYen": 2000
+        },
+        {
+          "time": "14:00",
+          "placeId": "p7",
+          "note": "地元の特産品店やレストランが立ち並ぶ賑やかな通り。",
+          "costYen": 0
+        }
+      ]
+    }
+  ],
+  "estimates": {
+    "totalCostYen": 9880
+  },
+  "title": "沖縄への2日間の旅"
+}

@@ -1,0 +1,652 @@
+{
+  "user_input": [
+    {
+      "ts": "2025-08-18T12:51:50.582Z",
+      "field": "origin",
+      "value": "大阪"
+    },
+    {
+      "ts": "2025-08-18T12:51:50.583Z",
+      "field": "destination",
+      "value": "東京"
+    },
+    {
+      "ts": "2025-08-18T12:51:50.585Z",
+      "field": "dates",
+      "value": "{\"start\":\"2025-08-28\",\"end\":\"2025-08-29\"}"
+    },
+    {
+      "ts": "2025-08-18T12:51:50.588Z",
+      "field": "transport",
+      "value": "public"
+    },
+    {
+      "ts": "2025-08-18T12:51:50.591Z",
+      "field": "budget",
+      "value": "50000"
+    },
+    {
+      "ts": "2025-08-18T12:51:50.592Z",
+      "field": "preferences",
+      "value": ""
+    },
+    {
+      "ts": "2025-08-18T12:51:50.594Z",
+      "field": "areas",
+      "value": "[\"新宿\",\"浅草\",\"上野\"]"
+    }
+  ],
+  "llm_input": [
+    {
+      "ts": "2025-08-18T12:51:50.616Z",
+      "agent": "master",
+      "model": "gpt-4o-mini",
+      "system_prompt": "\n# 命令\nあなたは旅行の戦略家です。提示された条件に基づき、旅行全体の骨格となる「エリア分割計画」をJSON形式で出力してください。\n# あなたのタスク\n1.  旅行日数を考慮し、各日に訪れるべきメインの「エリア」を決定する。\n2.  各日のテーマ（例：「食い倒れの1日」「歴史散策」など）を簡潔に設定する。\n3.  移動効率と体験の連続性を考慮する。\n# 制約条件\n- **絶対に指定されたJSON形式で出力してください。**\n- JSON以外のテキストは一切含めないでください。\n# 出力形式\n{ \"master_plan\": [ { \"day\": 1, \"area\": \"大阪駅・梅田周辺\", \"theme\": \"近代的な都市景観とショッピング\" }, { \"day\": 2, \"area\": \"難波・心斎橋エリア\", \"theme\": \"食い倒れとエンターテイメント\" } ] }\n",
+      "user_prompt": "提供された情報: {\"origin\":\"大阪\",\"destination\":\"東京\",\"areas\":[\"新宿\",\"浅草\",\"上野\"],\"dates\":{\"start\":\"2025-08-28\",\"end\":\"2025-08-29\"},\"transport\":\"public\",\"budget\":50000,\"preferences\":\"\",\"duration\":2}",
+      "variables_json": {
+        "origin": "大阪",
+        "destination": "東京",
+        "areas": [
+          "新宿",
+          "浅草",
+          "上野"
+        ],
+        "dates": {
+          "start": "2025-08-28",
+          "end": "2025-08-29"
+        },
+        "transport": "public",
+        "budget": 50000,
+        "preferences": "",
+        "duration": 2
+      }
+    },
+    {
+      "ts": "2025-08-18T12:51:51.979Z",
+      "agent": "activity",
+      "model": "gpt-4o-mini",
+      "system_prompt": "あなたは観光アクティビティの専門家です。提示された旅行条件に基づき、おすすめのアクティビティを3つ提案してください。**各アクティビティについて、具体的な「入場料や参加費（price）」と「公式サイトや参考URL（url）」を必ず含めてください。**出力は必ず以下のJSON形式にしてください: {\"activities\": [{\"name\": \"アクティビティ名\", \"type\": \"種別\", \"price\": \"無料\", \"url\": \"https://example.com\"}]}",
+      "user_prompt": "提供された情報: {\"origin\":\"大阪\",\"destination\":\"東京\",\"areas\":[\"新宿\",\"浅草\",\"上野\"],\"dates\":{\"start\":\"2025-08-28\",\"end\":\"2025-08-29\"},\"transport\":\"public\",\"budget\":50000,\"preferences\":\"\",\"currentArea\":\"浅草・上野\"}",
+      "variables_json": {
+        "origin": "大阪",
+        "destination": "東京",
+        "areas": [
+          "新宿",
+          "浅草",
+          "上野"
+        ],
+        "dates": {
+          "start": "2025-08-28",
+          "end": "2025-08-29"
+        },
+        "transport": "public",
+        "budget": 50000,
+        "preferences": "",
+        "currentArea": "浅草・上野"
+      }
+    },
+    {
+      "ts": "2025-08-18T12:51:56.582Z",
+      "agent": "day-planner",
+      "model": "gpt-4o-mini",
+      "system_prompt": "\n# 命令\nあなたは旅程作成のプロです。提供された「特定の日」の情報に基づき、具体的なタイムスケジュールをJSON形式で出力してください。\n# 入力情報\n- day, date, area, theme: その日の基本情報\n- planConditions: 旅行全体の条件\n- availableResources: そのエリアで利用可能な「食事」「宿泊」「アクティビティ」の選択肢\n# あなたのタスク\n1.  **選択と配置**: availableResourcesの中から、その日のテーマと予算に最もふさわしいものを複数選び、タイムスケジュールに賢く配置する。\n2.  **現実的な時間配分**: 移動時間や滞在時間を考慮し、無理のないスケジュールを組む。\n3.  **費用計算**: スケジュール内の各項目の概算料金を合計し、「total_cost」として円単位の数値で出力する。\n4.  **人間味あふれる説明**: AI的ではなく、友人に語りかけるように、なぜそこがおすすめなのかを魅力的に記述する。\n# 制約条件\n- **絶対に指定されたJSON形式で出力してください。**\n- **「total_cost」キーを必ず含めてください。**\n# 出力形式\n{ \"day\": 1, \"date\": \"2025-08-20\", \"area\": \"大阪駅・梅田周辺\", \"theme\": \"近代的な都市景観とショッピング\", \"schedule\": [ { \"time\": \"14:00\", \"activity_name\": \"梅田スカイビル 空中庭園展望台\", \"description\": \"...\", \"price\": \"1500円\", \"url\": \"...\" } ], \"total_cost\": 4500 }\n",
+      "user_prompt": "提供された情報: {\"day\":2,\"date\":\"2025-08-29\",\"area\":\"浅草・上野\",\"theme\":\"歴史と文化の探訪\",\"planConditions\":{\"origin\":\"大阪\",\"destination\":\"東京\",\"areas\":[\"新宿\",\"浅草\",\"上野\"],\"dates\":{\"start\":\"2025-08-28\",\"end\":\"2025-08-29\"},\"transport\":\"public\",\"budget\":50000,\"preferences\":\"\"},\"availableResources\":{\"restaurants\":[{\"name\":\"浅草今半\",\"type\":\"和食・しゃぶしゃぶ\",\"price\":\"3,000円〜6,000円\",\"url\":\"https://www.asakusa-imah an.co.jp\"},{\"name\":\"新宿つな八\",\"type\":\"天ぷら\",\"price\":\"2,000円〜4,000円\",\"url\":\"https://www.tsunahachi.com\"},{\"name\":\"上野恩賜公園内 レストラン藤\",\"type\":\"洋食\",\"price\":\"1,500円〜3,500円\",\"url\":\"https://www.fujirestaurant.com\"}],\"hotels\":[{\"name\":\"ホテルグレイスリー新宿\",\"type\":\"ホテル\",\"price\":\"18,000円〜\",\"url\":\"https://www.gracery.com/shinjuku/\"},{\"name\":\"浅草ビューホテル\",\"type\":\"ホテル\",\"price\":\"15,000円〜\",\"url\":\"https://www.viewhotel.co.jp/asakusa/\"}],\"activities\":[{\"name\":\"東京スカイツリー展望デッキ\",\"type\":\"展望台\",\"price\":\"2,100円\",\"url\":\"https://www.tokyo-skytree.jp/\"},{\"name\":\"浅草寺参拝\",\"type\":\"宗教・文化\",\"price\":\"無料\",\"url\":\"https://www.senso-ji.jp/\"},{\"name\":\"上野恩賜公園散策\",\"type\":\"自然・公園\",\"price\":\"無料\",\"url\":\"https://www.tokyo-park.or.jp/park/format/index042.html\"}]}}",
+      "variables_json": {
+        "day": 2,
+        "date": "2025-08-29",
+        "area": "浅草・上野",
+        "theme": "歴史と文化の探訪",
+        "planConditions": {
+          "origin": "大阪",
+          "destination": "東京",
+          "areas": [
+            "新宿",
+            "浅草",
+            "上野"
+          ],
+          "dates": {
+            "start": "2025-08-28",
+            "end": "2025-08-29"
+          },
+          "transport": "public",
+          "budget": 50000,
+          "preferences": ""
+        },
+        "availableResources": {
+          "restaurants": [
+            {
+              "name": "浅草今半",
+              "type": "和食・しゃぶしゃぶ",
+              "price": "3,000円〜6,000円",
+              "url": "https://www.asakusa-imah an.co.jp"
+            },
+            {
+              "name": "新宿つな八",
+              "type": "天ぷら",
+              "price": "2,000円〜4,000円",
+              "url": "https://www.tsunahachi.com"
+            },
+            {
+              "name": "上野恩賜公園内 レストラン藤",
+              "type": "洋食",
+              "price": "1,500円〜3,500円",
+              "url": "https://www.fujirestaurant.com"
+            }
+          ],
+          "hotels": [
+            {
+              "name": "ホテルグレイスリー新宿",
+              "type": "ホテル",
+              "price": "18,000円〜",
+              "url": "https://www.gracery.com/shinjuku/"
+            },
+            {
+              "name": "浅草ビューホテル",
+              "type": "ホテル",
+              "price": "15,000円〜",
+              "url": "https://www.viewhotel.co.jp/asakusa/"
+            }
+          ],
+          "activities": [
+            {
+              "name": "東京スカイツリー展望デッキ",
+              "type": "展望台",
+              "price": "2,100円",
+              "url": "https://www.tokyo-skytree.jp/"
+            },
+            {
+              "name": "浅草寺参拝",
+              "type": "宗教・文化",
+              "price": "無料",
+              "url": "https://www.senso-ji.jp/"
+            },
+            {
+              "name": "上野恩賜公園散策",
+              "type": "自然・公園",
+              "price": "無料",
+              "url": "https://www.tokyo-park.or.jp/park/format/index042.html"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "llm_output": [
+    {
+      "ts": "2025-08-18T12:51:51.961Z",
+      "agent": "master",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"master_plan\": [\n    {\n      \"day\": 1,\n      \"area\": \"新宿\",\n      \"theme\": \"都市の活気とナイトライフ\"\n    },\n    {\n      \"day\": 2,\n      \"area\": \"浅草・上野\",\n      \"theme\": \"歴史と文化の探訪\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "master_plan": [
+          {
+            "day": 1,
+            "area": "新宿",
+            "theme": "都市の活気とナイトライフ"
+          },
+          {
+            "day": 2,
+            "area": "浅草・上野",
+            "theme": "歴史と文化の探訪"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 330,
+        "completion_tokens": 79,
+        "total_tokens": 409,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-08-18T12:51:53.686Z",
+      "agent": "hotel",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\"hotels\":[{\"name\":\"ホテルグレイスリー新宿\",\"type\":\"ホテル\",\"price\":\"18,000円〜\",\"url\":\"https://www.gracery.com/shinjuku/\"},{\"name\":\"浅草ビューホテル\",\"type\":\"ホテル\",\"price\":\"15,000円〜\",\"url\":\"https://www.viewhotel.co.jp/asakusa/\"}]}",
+      "parsed_json": {
+        "hotels": [
+          {
+            "name": "ホテルグレイスリー新宿",
+            "type": "ホテル",
+            "price": "18,000円〜",
+            "url": "https://www.gracery.com/shinjuku/"
+          },
+          {
+            "name": "浅草ビューホテル",
+            "type": "ホテル",
+            "price": "15,000円〜",
+            "url": "https://www.viewhotel.co.jp/asakusa/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 200,
+        "completion_tokens": 78,
+        "total_tokens": 278,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-08-18T12:51:54.351Z",
+      "agent": "dining",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\"restaurants\":[{\"name\":\"新宿つな八\",\"type\":\"天ぷら\",\"price\":\"1,500円〜3,000円\",\"url\":\"https://www.tsunahachi.com/\"},{\"name\":\"浅草今半\",\"type\":\"すき焼き\",\"price\":\"3,000円〜10,000円\",\"url\":\"https://www.asakusa-imahankai.com/\"},{\"name\":\"上野の森 あんこう鍋専門店 あんこう屋\",\"type\":\"魚料理\",\"price\":\"2,000円〜5,000円\",\"url\":\"https://ankouya.com/\"}]}",
+      "parsed_json": {
+        "restaurants": [
+          {
+            "name": "新宿つな八",
+            "type": "天ぷら",
+            "price": "1,500円〜3,000円",
+            "url": "https://www.tsunahachi.com/"
+          },
+          {
+            "name": "浅草今半",
+            "type": "すき焼き",
+            "price": "3,000円〜10,000円",
+            "url": "https://www.asakusa-imahankai.com/"
+          },
+          {
+            "name": "上野の森 あんこう鍋専門店 あんこう屋",
+            "type": "魚料理",
+            "price": "2,000円〜5,000円",
+            "url": "https://ankouya.com/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 193,
+        "completion_tokens": 129,
+        "total_tokens": 322,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-08-18T12:51:55.160Z",
+      "agent": "hotel",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"hotels\": [\n    {\n      \"name\": \"新宿グランベルホテル\",\n      \"type\": \"ビジネスホテル\",\n      \"price\": \"15,000円〜\",\n      \"url\": \"https://www.grandbellhotel.com/\"\n    },\n    {\n      \"name\": \"浅草ビューホテル\",\n      \"type\": \"シティホテル\",\n      \"price\": \"18,000円〜\",\n      \"url\": \"https://www.asakusa-viewhotel.com/\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "hotels": [
+          {
+            "name": "新宿グランベルホテル",
+            "type": "ビジネスホテル",
+            "price": "15,000円〜",
+            "url": "https://www.grandbellhotel.com/"
+          },
+          {
+            "name": "浅草ビューホテル",
+            "type": "シティホテル",
+            "price": "18,000円〜",
+            "url": "https://www.asakusa-viewhotel.com/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 197,
+        "completion_tokens": 114,
+        "total_tokens": 311,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-08-18T12:51:55.348Z",
+      "agent": "dining",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"restaurants\": [\n    {\n      \"name\": \"浅草今半\",\n      \"type\": \"和食・しゃぶしゃぶ\",\n      \"price\": \"3,000円〜6,000円\",\n      \"url\": \"https://www.asakusa-imah an.co.jp\"\n    },\n    {\n      \"name\": \"新宿つな八\",\n      \"type\": \"天ぷら\",\n      \"price\": \"2,000円〜4,000円\",\n      \"url\": \"https://www.tsunahachi.com\"\n    },\n    {\n      \"name\": \"上野恩賜公園内 レストラン藤\",\n      \"type\": \"洋食\",\n      \"price\": \"1,500円〜3,500円\",\n      \"url\": \"https://www.fujirestaurant.com\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "restaurants": [
+          {
+            "name": "浅草今半",
+            "type": "和食・しゃぶしゃぶ",
+            "price": "3,000円〜6,000円",
+            "url": "https://www.asakusa-imah an.co.jp"
+          },
+          {
+            "name": "新宿つな八",
+            "type": "天ぷら",
+            "price": "2,000円〜4,000円",
+            "url": "https://www.tsunahachi.com"
+          },
+          {
+            "name": "上野恩賜公園内 レストラン藤",
+            "type": "洋食",
+            "price": "1,500円〜3,500円",
+            "url": "https://www.fujirestaurant.com"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 196,
+        "completion_tokens": 181,
+        "total_tokens": 377,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-08-18T12:51:56.076Z",
+      "agent": "activity",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"activities\": [\n    {\n      \"name\": \"新宿御苑散策\",\n      \"type\": \"公園・庭園\",\n      \"price\": \"500円\",\n      \"url\": \"http://shinjukugyoen.go.jp/\"\n    },\n    {\n      \"name\": \"浅草寺見学\",\n      \"type\": \"宗教施設\",\n      \"price\": \"無料\",\n      \"url\": \"https://www.senso-ji.jp/\"\n    },\n    {\n      \"name\": \"上野恩賜公園の動物園\",\n      \"type\": \"動物園\",\n      \"price\": \"600円\",\n      \"url\": \"http://www.ueno-zoo.jp/\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "activities": [
+          {
+            "name": "新宿御苑散策",
+            "type": "公園・庭園",
+            "price": "500円",
+            "url": "http://shinjukugyoen.go.jp/"
+          },
+          {
+            "name": "浅草寺見学",
+            "type": "宗教施設",
+            "price": "無料",
+            "url": "https://www.senso-ji.jp/"
+          },
+          {
+            "name": "上野恩賜公園の動物園",
+            "type": "動物園",
+            "price": "600円",
+            "url": "http://www.ueno-zoo.jp/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 201,
+        "completion_tokens": 157,
+        "total_tokens": 358,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-08-18T12:51:56.572Z",
+      "agent": "activity",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"activities\": [\n    {\n      \"name\": \"東京スカイツリー展望デッキ\",\n      \"type\": \"展望台\",\n      \"price\": \"2,100円\",\n      \"url\": \"https://www.tokyo-skytree.jp/\"\n    },\n    {\n      \"name\": \"浅草寺参拝\",\n      \"type\": \"宗教・文化\",\n      \"price\": \"無料\",\n      \"url\": \"https://www.senso-ji.jp/\"\n    },\n    {\n      \"name\": \"上野恩賜公園散策\",\n      \"type\": \"自然・公園\",\n      \"price\": \"無料\",\n      \"url\": \"https://www.tokyo-park.or.jp/park/format/index042.html\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "activities": [
+          {
+            "name": "東京スカイツリー展望デッキ",
+            "type": "展望台",
+            "price": "2,100円",
+            "url": "https://www.tokyo-skytree.jp/"
+          },
+          {
+            "name": "浅草寺参拝",
+            "type": "宗教・文化",
+            "price": "無料",
+            "url": "https://www.senso-ji.jp/"
+          },
+          {
+            "name": "上野恩賜公園散策",
+            "type": "自然・公園",
+            "price": "無料",
+            "url": "https://www.tokyo-park.or.jp/park/format/index042.html"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 204,
+        "completion_tokens": 171,
+        "total_tokens": 375,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-08-18T12:52:03.842Z",
+      "agent": "day-planner",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"day\": 1,\n  \"date\": \"2025-08-28\",\n  \"area\": \"新宿\",\n  \"theme\": \"都市の活気とナイトライフ\",\n  \"schedule\": [\n    {\n      \"time\": \"15:00\",\n      \"activity_name\": \"新宿御苑散策\",\n      \"description\": \"新宿のオアシスとも言われる新宿御苑でリラックスしながら、四季折々の景色を楽しみましょう。ここでの散策は、都会の中で静けさを感じる絶好の時間です。\",\n      \"price\": \"500円\",\n      \"url\": \"http://shinjukugyoen.go.jp/\"\n    },\n    {\n      \"time\": \"17:00\",\n      \"activity_name\": \"新宿つな八で天ぷら\",\n      \"description\": \"新宿つな八で絶品天ぷらを味わいましょう！サクサクの衣と新鮮な素材の組み合わせは、まさに日本の食文化を堪能できます。おすすめは、季節の天ぷら盛り合わせです。\",\n      \"price\": \"3000円\",\n      \"url\": \"https://www.tsunahachi.com/\"\n    },\n    {\n      \"time\": \"19:00\",\n      \"activity_name\": \"東京の夜景を楽しむ\",\n      \"description\": \"新宿のスカイラインをバックに、都会の輝きを満喫するため、周辺のバーや展望台で素晴らしい夜景を楽しむのも忘れずに！これは新宿のナイトライフの醍醐味です。\",\n      \"price\": \"飲み物代を含めて約3000円\",\n      \"url\": \"\"\n    },\n    {\n      \"time\": \"21:00\",\n      \"activity_name\": \"新宿グランベルホテル チェックイン\",\n      \"description\": \"活気ある新宿での一日を締めくくるために、新宿グランベルホテルでリラックスしましょう。モダンなデザインと快適な設備が整っていて、都会の喧騒を忘れさせてくれます。\",\n      \"price\": \"15000円\",\n      \"url\": \"https://www.grandbellhotel.com/\"\n    }\n  ],\n  \"total_cost\": 21500\n}",
+      "parsed_json": {
+        "day": 1,
+        "date": "2025-08-28",
+        "area": "新宿",
+        "theme": "都市の活気とナイトライフ",
+        "schedule": [
+          {
+            "time": "15:00",
+            "activity_name": "新宿御苑散策",
+            "description": "新宿のオアシスとも言われる新宿御苑でリラックスしながら、四季折々の景色を楽しみましょう。ここでの散策は、都会の中で静けさを感じる絶好の時間です。",
+            "price": "500円",
+            "url": "http://shinjukugyoen.go.jp/"
+          },
+          {
+            "time": "17:00",
+            "activity_name": "新宿つな八で天ぷら",
+            "description": "新宿つな八で絶品天ぷらを味わいましょう！サクサクの衣と新鮮な素材の組み合わせは、まさに日本の食文化を堪能できます。おすすめは、季節の天ぷら盛り合わせです。",
+            "price": "3000円",
+            "url": "https://www.tsunahachi.com/"
+          },
+          {
+            "time": "19:00",
+            "activity_name": "東京の夜景を楽しむ",
+            "description": "新宿のスカイラインをバックに、都会の輝きを満喫するため、周辺のバーや展望台で素晴らしい夜景を楽しむのも忘れずに！これは新宿のナイトライフの醍醐味です。",
+            "price": "飲み物代を含めて約3000円",
+            "url": ""
+          },
+          {
+            "time": "21:00",
+            "activity_name": "新宿グランベルホテル チェックイン",
+            "description": "活気ある新宿での一日を締めくくるために、新宿グランベルホテルでリラックスしましょう。モダンなデザインと快適な設備が整っていて、都会の喧騒を忘れさせてくれます。",
+            "price": "15000円",
+            "url": "https://www.grandbellhotel.com/"
+          }
+        ],
+        "total_cost": 21500
+      },
+      "usage": {
+        "prompt_tokens": 859,
+        "completion_tokens": 532,
+        "total_tokens": 1391,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-08-18T12:52:04.668Z",
+      "agent": "day-planner",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"day\": 2,\n  \"date\": \"2025-08-29\",\n  \"area\": \"浅草・上野\",\n  \"theme\": \"歴史と文化の探訪\",\n  \"schedule\": [\n    {\n      \"time\": \"10:00\",\n      \"activity_name\": \"浅草寺参拝\",\n      \"description\": \"東京の下町、浅草のシンボルである浅草寺を訪れ、歴史的な雰囲気を感じましょう。参拝した後は境内の雰囲気を楽しみながら、運が良ければおみくじも引けます。\",\n      \"price\": \"無料\",\n      \"url\": \"https://www.senso-ji.jp/\"\n    },\n    {\n      \"time\": \"11:30\",\n      \"activity_name\": \"上野恩賜公園散策\",\n      \"description\": \"日々の喧騒から離れて、自然に囲まれた上野恩賜公園を散策します。博物館や動物園もあるので、文化を楽しむのにもピッタリ。\",\n      \"price\": \"無料\",\n      \"url\": \"https://www.tokyo-park.or.jp/park/format/index042.html\"\n    },\n    {\n      \"time\": \"13:00\",\n      \"activity_name\": \"上野恩賜公園内 レストラン藤でランチ\",\n      \"description\": \"上野公園内のレストランで、特製の洋食ランチをリーズナブルに楽しみましょう。美しい自然を眺めながらの食事は格別です。\",\n      \"price\": \"2500円\",\n      \"url\": \"https://www.fujirestaurant.com\"\n    },\n    {\n      \"time\": \"15:00\",\n      \"activity_name\": \"東京スカイツリー展望デッキ\",\n      \"description\": \"東京のシンボル、スカイツリーの展望デッキから360度のパノラマビューを楽しむことができます。晴れた日には富士山まで見えるかも。\",\n      \"price\": \"2100円\",\n      \"url\": \"https://www.tokyo-skytree.jp/\"\n    },\n    {\n      \"time\": \"17:30\",\n      \"activity_name\": \"ホテルチェックイン（浅草ビューホテル）\",\n      \"description\": \"今日の宿泊先、浅草ビューホテルでリラックス。便利な立地で、観光地へのアクセスも抜群です。\",\n      \"price\": \"15000円\",\n      \"url\": \"https://www.viewhotel.co.jp/asakusa/\"\n    }\n  ],\n  \"total_cost\": 20400\n}",
+      "parsed_json": {
+        "day": 2,
+        "date": "2025-08-29",
+        "area": "浅草・上野",
+        "theme": "歴史と文化の探訪",
+        "schedule": [
+          {
+            "time": "10:00",
+            "activity_name": "浅草寺参拝",
+            "description": "東京の下町、浅草のシンボルである浅草寺を訪れ、歴史的な雰囲気を感じましょう。参拝した後は境内の雰囲気を楽しみながら、運が良ければおみくじも引けます。",
+            "price": "無料",
+            "url": "https://www.senso-ji.jp/"
+          },
+          {
+            "time": "11:30",
+            "activity_name": "上野恩賜公園散策",
+            "description": "日々の喧騒から離れて、自然に囲まれた上野恩賜公園を散策します。博物館や動物園もあるので、文化を楽しむのにもピッタリ。",
+            "price": "無料",
+            "url": "https://www.tokyo-park.or.jp/park/format/index042.html"
+          },
+          {
+            "time": "13:00",
+            "activity_name": "上野恩賜公園内 レストラン藤でランチ",
+            "description": "上野公園内のレストランで、特製の洋食ランチをリーズナブルに楽しみましょう。美しい自然を眺めながらの食事は格別です。",
+            "price": "2500円",
+            "url": "https://www.fujirestaurant.com"
+          },
+          {
+            "time": "15:00",
+            "activity_name": "東京スカイツリー展望デッキ",
+            "description": "東京のシンボル、スカイツリーの展望デッキから360度のパノラマビューを楽しむことができます。晴れた日には富士山まで見えるかも。",
+            "price": "2100円",
+            "url": "https://www.tokyo-skytree.jp/"
+          },
+          {
+            "time": "17:30",
+            "activity_name": "ホテルチェックイン（浅草ビューホテル）",
+            "description": "今日の宿泊先、浅草ビューホテルでリラックス。便利な立地で、観光地へのアクセスも抜群です。",
+            "price": "15000円",
+            "url": "https://www.viewhotel.co.jp/asakusa/"
+          }
+        ],
+        "total_cost": 20400
+      },
+      "usage": {
+        "prompt_tokens": 871,
+        "completion_tokens": 609,
+        "total_tokens": 1480,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-08-18T12:52:18.218Z",
+      "query": "新宿御苑散策 新宿 東京 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-18T12:52:18.221Z",
+      "query": "新宿つな八で天ぷら 新宿 東京 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-18T12:52:18.223Z",
+      "query": "東京の夜景を楽しむ 新宿 東京 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-18T12:52:18.225Z",
+      "query": "新宿グランベルホテル チェックイン 新宿 東京 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-18T12:52:18.228Z",
+      "query": "浅草寺参拝 浅草・上野 東京 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-18T12:52:18.230Z",
+      "query": "上野恩賜公園散策 浅草・上野 東京 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-18T12:52:18.232Z",
+      "query": "上野恩賜公園内 レストラン藤でランチ 浅草・上野 東京 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-18T12:52:18.235Z",
+      "query": "東京スカイツリー展望デッキ 浅草・上野 東京 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-18T12:52:18.237Z",
+      "query": "ホテルチェックイン（浅草ビューホテル） 浅草・上野 東京 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    }
+  ]
+}

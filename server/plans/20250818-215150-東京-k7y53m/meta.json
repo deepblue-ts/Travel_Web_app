@@ -1,0 +1,14 @@
+{
+  "planId": "20250818-215150-東京-k7y53m",
+  "createdAt": "2025-08-18T12:51:50.553Z",
+  "status": "Done",
+  "origin": "大阪",
+  "destination": "東京",
+  "dates": {
+    "start": "2025-08-28",
+    "end": "2025-08-29"
+  },
+  "duration": 2,
+  "budgetPerDay": 50000,
+  "transport": "public"
+}
