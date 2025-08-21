@@ -14,7 +14,7 @@ import { ExcelLogger } from './server/excelLogger.js';
 // ─────────────────────────────────────────────
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const PORT = 3001;
+const PORT = process.env.PORT ? Number(process.env.PORT) : 3001;
 
 const AREA_CACHE_FILE = path.join(__dirname, 'cache', 'area-cache.json');
 const GEOCODE_CACHE_FILE = path.join(__dirname, 'cache', 'geocode-cache.json');
@@ -24,7 +24,20 @@ const GEOCODE_CACHE_FILE = path.join(__dirname, 'cache', 'geocode-cache.json');
 // ─────────────────────────────────────────────
 const app = express();
 app.use(express.json({ limit: '10mb' }));
-app.use(cors({ origin: ['http://localhost:5173', 'http://127.0.0.1:5173'] }));
+
+// CORS: dev/Pages/追加オリジン（環境変数 ALLOWED_ORIGINS で上書き可）
+const defaultOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'https://deepblue-ts.github.io', // GitHub Pages（org用）
+];
+const allowList = (process.env.ALLOWED_ORIGINS || '')
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean);
+const origins = [...new Set([...defaultOrigins, ...allowList])];
+
+app.use(cors({ origin: origins }));
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
@@ -136,7 +149,7 @@ async function geocodeBatchInternal(destination, items, planId) {
     } else {
       results.push({ query, lat: null, lon: null, error: 'not_found' });
     }
-    await sleep(1100); // Nominatim のレート制限配慮
+    await sleep(1100); // Nominatim レート制限配慮
   }
 
   // Excelログ（任意）
@@ -187,7 +200,7 @@ const accommodationSystemPrompt = `あなたは宿泊施設の専門家です。
 
 const activitySystemPrompt = `あなたは観光アクティビティの専門家です。提示された旅行条件に基づき、おすすめのアクティビティを3つ提案してください。**各アクティビティについて、具体的な「入場料や参加費（price）」と「公式サイトや参考URL（url）」を必ず含めてください。**出力は必ず以下のJSON形式にしてください: {"activities": [{"name": "アクティビティ名", "type": "種別", "price": "無料", "url": "https://example.com"}]}`;
 
-// 4o用：骨格（Day→Area）を決める
+// 4o用：骨格（Day→Area）
 const createMasterPlanSystemPrompt = `
 あなたは旅行の戦略家です。提示された条件に基づき、旅行全体の骨格となる
 「エリア分割計画（day→area, theme）」をJSON形式で出力してください。
@@ -213,7 +226,7 @@ const createMasterPlanSystemPrompt = `
 { "master_plan": [ { "day": 1, "area": "新宿", "theme": "近代建築と夜景" } ] }
 `;
 
-// 4o用：1日の並びを作る
+// 4o用：1日の並び
 const createDayPlanSystemPrompt = `
 あなたは旅程作成のプロです。確定済みの day/date/area/theme と候補リストから、
 現実的な1日スケジュールをJSONで構築します。
@@ -253,18 +266,15 @@ const createDayPlanSystemPrompt = `
 // 4) LLM呼び出しヘルパ
 // ─────────────────────────────────────────────
 async function callLLMJson({ systemPrompt, userBody, model = 'gpt-4o-mini', planId, agent }) {
-  // planId は LLM へ渡さない
   const filtered = { ...(userBody || {}) };
   delete filtered.planId;
 
-  // 送信メッセージ（ユーザー側は human-readable に）
   const userPrompt = `提供された情報: ${JSON.stringify(filtered)}`;
   const messages = [
     { role: 'system', content: systemPrompt },
     { role: 'user', content: userPrompt },
   ];
 
-  // 入力ログ
   if (planId) {
     const logger = new ExcelLogger(planId);
     await logger.log('llm_input', {
@@ -276,14 +286,12 @@ async function callLLMJson({ systemPrompt, userBody, model = 'gpt-4o-mini', plan
     });
   }
 
-  // 実呼び出し
   const chat = await openai.chat.completions.create({
     messages,
     model,
     response_format: { type: 'json_object' },
   });
 
-  // 応答解析
   const raw = chat?.choices?.[0]?.message?.content ?? '';
   let json;
   try {
@@ -294,7 +302,6 @@ async function callLLMJson({ systemPrompt, userBody, model = 'gpt-4o-mini', plan
     json = JSON.parse(extracted);
   }
 
-  // 出力ログ
   if (planId) {
     const logger = new ExcelLogger(planId);
     await logger.log('llm_output', {
@@ -385,7 +392,6 @@ app.post('/api/get-areas', async (req, res) => {
 });
 
 // 5-2) LLM系（ログ自動）
-// 低コストの収集系は 4o-mini
 app.post('/api/find-dining',        createApiHandlerWithModel(diningSystemPrompt,        'dining',  'gpt-4o-mini'));
 app.post('/api/find-accommodation', createApiHandlerWithModel(accommodationSystemPrompt, 'hotel',   'gpt-4o-mini'));
 app.post('/api/find-activities',    createApiHandlerWithModel(activitySystemPrompt,      'activity','gpt-4o-mini'));
@@ -412,7 +418,7 @@ app.post('/api/create-day-plans', async (req, res) => {
     const json = await callLLMJson({
       systemPrompt: createDayPlanSystemPrompt,
       userBody: body,
-      model: 'gpt-4o',          // ★ 合成は 4o
+      model: 'gpt-4o',
       planId,
       agent: 'day-planner',
     });
@@ -428,12 +434,12 @@ app.post('/api/create-day-plans', async (req, res) => {
         : { ok: false, day: days[i]?.day, error: r.reason?.message }
     );
 
-    // 2) 成功分で暫定 itinerary を構築
+    // 2) 暫定 itinerary
     const itinerary = results
       .filter(r => r.ok && r.plan && Array.isArray(r.plan.schedule))
       .map(r => r.plan);
 
-    // 3) geocode して lat/lon を付与
+    // 3) geocode
     const items = [];
     for (const d of itinerary) {
       for (const s of (d.schedule || [])) {
@@ -466,7 +472,7 @@ app.post('/api/create-day-plans', async (req, res) => {
   }
 });
 
-// 5-5) ジオコーディング（キャッシュ + Nominatim）: 内部ヘルパー共通化
+// 5-4) ジオコーディング（キャッシュ + Nominatim）
 app.post('/api/geocode-batch', async (req, res) => {
   try {
     const { destination, items, planId } = req.body || {};
@@ -489,7 +495,6 @@ app.post('/api/plan/start', async (req, res) => {
     const meta = req.body || {};
     const { planId, planPath } = await ExcelLogger.start(meta);
 
-    // start直後に初期条件をUserInputへ自動記録
     const logger = new ExcelLogger(planId);
     const kvs = [
       ['origin', meta.origin],
@@ -526,7 +531,6 @@ app.post('/api/plan/log-user', async (req, res) => {
   }
 });
 
-// 任意：クライアント側から明示的に LLM ログを送りたい場合に使用
 app.post('/api/plan/log-llm', async (req, res) => {
   try {
     const { planId, agent, kind, summary, payload } = req.body || {};
@@ -582,10 +586,7 @@ app.get('/api/plans/download', async (req, res) => {
     const abs = logger.planXlsx;
     await fs.access(abs);
     res.setHeader('Content-Disposition', `attachment; filename="${path.basename(abs)}"`);
-    res.setHeader(
-      'Content-Type',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    );
+    res.setHeader('Content-Type','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.sendFile(abs);
   } catch (e) {
     res.status(404).json({ error: 'file not found' });
@@ -610,6 +611,7 @@ app
   .listen(PORT, () => {
     console.log('\x1b[32m%s\x1b[0m', `Backend server listening at http://localhost:${PORT}`);
     console.log('OPENAI key exists?', !!process.env.OPENAI_API_KEY);
+    console.log('CORS origins:', origins.join(', '));
   })
   .on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
