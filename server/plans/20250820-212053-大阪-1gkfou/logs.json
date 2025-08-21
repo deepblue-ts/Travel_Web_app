@@ -1,0 +1,659 @@
+{
+  "user_input": [],
+  "llm_input": [
+    {
+      "ts": "2025-08-20T12:20:59.581Z",
+      "agent": "day-planner",
+      "model": "gpt-4o",
+      "system_prompt": "\nあなたは旅程作成のプロです。確定済みの day/date/area/theme と候補リストから、\n現実的な1日スケジュールをJSONで構築します。\n\n# 入力\n- day, date, area, theme（これらは変更禁止）\n- planConditions（transport, budgetPerDay など）\n- availableResources: activities/dining/hotels（各 {name,type,url,price,lat,lon}）\n- constraints:\n  - dayStart, dayEnd\n  - budgetPerDay\n  - maxStops, minMealStops\n  - maxLegMinutes（1区間の最大移動分数）\n  - maxTotalWalkKm（徒歩合計上限）\n  - areaLocked（trueなら area外への移動禁止）\n  - mealWindows（例: [\"11:30\",\"14:00\"],[\"18:00\",\"20:00\"]）\n\n# 厳守\n- JSONのみで出力: \n  {\n    \"day\": 1, \"date\": \"YYYY-MM-DD\", \"area\": \"...\", \"theme\": \"...\",\n    \"schedule\": [\n      { \"time\": \"10:30\", \"activity_name\": \"...\", \"type\": \"activity|meal|hotel\",\n        \"description\": \"...\", \"price\": \"1500円\", \"url\": \"...\", \"lat\": 35.68, \"lon\": 139.76 }\n    ],\n    \"total_cost\": 4500\n  }\n- 候補に無い施設名を新規作成しない。url/lat/lonが不明な候補は選ばない。\n- areaLocked=true の場合、当日の行程は area 内に限定。\n- 区間移動は `constraints.maxLegMinutes` を超えない順序にする（無理なら候補数を減らす）。\n- 食事は `minMealStops` 回以上、mealWindowsの時間帯に配置。\n- 予算超過は不可。price は合計して数値の \"total_cost\" として出力。\n- 充足できない制約がある場合は、行程を短くして返す（捏造や空のURLは禁止）。\n",
+      "user_prompt": "提供された情報: {\"day\":2,\"date\":\"2025-08-28\",\"area\":\"天王寺\",\"theme\":\"下町グルメと寺社\",\"planConditions\":{\"origin\":\"東京\",\"destination\":\"大阪\",\"areas\":[\"梅田\",\"天王寺\"],\"dates\":{\"start\":\"2025-08-27\",\"end\":\"2025-08-28\"},\"transport\":\"public\",\"budget\":60000,\"preferences\":\"\"},\"availableResources\":{\"restaurants\":[{\"name\":\"うどん屋 吉良\",\"type\":\"うどん・そば\",\"price\":\"1,000円〜1,500円\",\"url\":\"https://www.kira-udon.com\"},{\"name\":\"串カツ田中\",\"type\":\"串カツ\",\"price\":\"1,200円〜3,000円\",\"url\":\"https://www.kushikatsu-tanaka.com\"},{\"name\":\"かごの屋 天王寺店\",\"type\":\"和食・しゃぶしゃぶ\",\"price\":\"1,600円〜3,500円\",\"url\":\"https://www.kagona.com\"}],\"hotels\":[{\"name\":\"ホテルアウィーナ大阪\",\"type\":\"ホテル\",\"price\":\"12,000円〜\",\"url\":\"https://www.awina-osaka.com\"},{\"name\":\"大阪リッツ・カールトン\",\"type\":\"ラグジュアリーホテル\",\"price\":\"30,000円〜\",\"url\":\"https://www.ritzcarlton.com/jp/hotels/ritz-carlton-osaka\"}],\"activities\":[{\"name\":\"大阪城公園散策\",\"type\":\"自然観光\",\"price\":\"無料\",\"url\":\"https://www.osakacastle.net/\"},{\"name\":\"通天閣の展望台見学\",\"type\":\"文化体験\",\"price\":\"900円\",\"url\":\"https://www.tsutenkaku.co.jp/\"},{\"name\":\"天王寺動物園\",\"type\":\"ファミリー向け\",\"price\":\"500円\",\"url\":\"https://www.tennojizoo.com/\"}]},\"constraints\":{}}",
+      "variables_json": {
+        "day": 2,
+        "date": "2025-08-28",
+        "area": "天王寺",
+        "theme": "下町グルメと寺社",
+        "planConditions": {
+          "origin": "東京",
+          "destination": "大阪",
+          "areas": [
+            "梅田",
+            "天王寺"
+          ],
+          "dates": {
+            "start": "2025-08-27",
+            "end": "2025-08-28"
+          },
+          "transport": "public",
+          "budget": 60000,
+          "preferences": ""
+        },
+        "availableResources": {
+          "restaurants": [
+            {
+              "name": "うどん屋 吉良",
+              "type": "うどん・そば",
+              "price": "1,000円〜1,500円",
+              "url": "https://www.kira-udon.com"
+            },
+            {
+              "name": "串カツ田中",
+              "type": "串カツ",
+              "price": "1,200円〜3,000円",
+              "url": "https://www.kushikatsu-tanaka.com"
+            },
+            {
+              "name": "かごの屋 天王寺店",
+              "type": "和食・しゃぶしゃぶ",
+              "price": "1,600円〜3,500円",
+              "url": "https://www.kagona.com"
+            }
+          ],
+          "hotels": [
+            {
+              "name": "ホテルアウィーナ大阪",
+              "type": "ホテル",
+              "price": "12,000円〜",
+              "url": "https://www.awina-osaka.com"
+            },
+            {
+              "name": "大阪リッツ・カールトン",
+              "type": "ラグジュアリーホテル",
+              "price": "30,000円〜",
+              "url": "https://www.ritzcarlton.com/jp/hotels/ritz-carlton-osaka"
+            }
+          ],
+          "activities": [
+            {
+              "name": "大阪城公園散策",
+              "type": "自然観光",
+              "price": "無料",
+              "url": "https://www.osakacastle.net/"
+            },
+            {
+              "name": "通天閣の展望台見学",
+              "type": "文化体験",
+              "price": "900円",
+              "url": "https://www.tsutenkaku.co.jp/"
+            },
+            {
+              "name": "天王寺動物園",
+              "type": "ファミリー向け",
+              "price": "500円",
+              "url": "https://www.tennojizoo.com/"
+            }
+          ]
+        },
+        "constraints": {}
+      }
+    }
+  ],
+  "llm_output": [
+    {
+      "ts": "2025-08-20T12:20:57.692Z",
+      "agent": "hotel",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"hotels\": [\n    {\n      \"name\": \"ホテルグランヴィア大阪\",\n      \"type\": \"ホテル\",\n      \"price\": \"25,000円〜\",\n      \"url\": \"https://www.granvia-osaka.jp/\"\n    },\n    {\n      \"name\": \"大阪マリオット都ホテル\",\n      \"type\": \"ホテル\",\n      \"price\": \"30,000円〜\",\n      \"url\": \"https://www.marriott.co.jp/hotels/travel/osaka-marriott-miyako-hotel/\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "hotels": [
+          {
+            "name": "ホテルグランヴィア大阪",
+            "type": "ホテル",
+            "price": "25,000円〜",
+            "url": "https://www.granvia-osaka.jp/"
+          },
+          {
+            "name": "大阪マリオット都ホテル",
+            "type": "ホテル",
+            "price": "30,000円〜",
+            "url": "https://www.marriott.co.jp/hotels/travel/osaka-marriott-miyako-hotel/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 195,
+        "completion_tokens": 121,
+        "total_tokens": 316,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-08-20T12:20:57.881Z",
+      "agent": "activity",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\"activities\":[{\"name\":\"大阪城公園散策\",\"type\":\"自然観光\",\"price\":\"無料\",\"url\":\"https://www.osakacastle.net/\"},{\"name\":\"通天閣の展望台見学\",\"type\":\"文化体験\",\"price\":\"900円\",\"url\":\"https://www.tsutenkaku.co.jp/\"},{\"name\":\"天王寺動物園\",\"type\":\"ファミリー向け\",\"price\":\"500円\",\"url\":\"https://www.tennojizoo.com/\"}]}",
+      "parsed_json": {
+        "activities": [
+          {
+            "name": "大阪城公園散策",
+            "type": "自然観光",
+            "price": "無料",
+            "url": "https://www.osakacastle.net/"
+          },
+          {
+            "name": "通天閣の展望台見学",
+            "type": "文化体験",
+            "price": "900円",
+            "url": "https://www.tsutenkaku.co.jp/"
+          },
+          {
+            "name": "天王寺動物園",
+            "type": "ファミリー向け",
+            "price": "500円",
+            "url": "https://www.tennojizoo.com/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 200,
+        "completion_tokens": 108,
+        "total_tokens": 308,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-08-20T12:20:57.938Z",
+      "agent": "hotel",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"hotels\": [\n    {\n      \"name\": \"ホテルアウィーナ大阪\",\n      \"type\": \"ホテル\",\n      \"price\": \"12,000円〜\",\n      \"url\": \"https://www.awina-osaka.com\"\n    },\n    {\n      \"name\": \"大阪リッツ・カールトン\",\n      \"type\": \"ラグジュアリーホテル\",\n      \"price\": \"30,000円〜\",\n      \"url\": \"https://www.ritzcarlton.com/jp/hotels/ritz-carlton-osaka\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "hotels": [
+          {
+            "name": "ホテルアウィーナ大阪",
+            "type": "ホテル",
+            "price": "12,000円〜",
+            "url": "https://www.awina-osaka.com"
+          },
+          {
+            "name": "大阪リッツ・カールトン",
+            "type": "ラグジュアリーホテル",
+            "price": "30,000円〜",
+            "url": "https://www.ritzcarlton.com/jp/hotels/ritz-carlton-osaka"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 196,
+        "completion_tokens": 129,
+        "total_tokens": 325,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-08-20T12:20:58.208Z",
+      "agent": "dining",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"restaurants\": [\n    {\n      \"name\": \"アジアンダイニング八千代\",\n      \"type\": \"アジアン料理\",\n      \"price\": \"1,500円〜3,000円\",\n      \"url\": \"https://yachiyo-umeda.com\"\n    },\n    {\n      \"name\": \"串カツ田中 梅田店\",\n      \"type\": \"串カツ\",\n      \"price\": \"800円〜2,000円\",\n      \"url\": \"https://kushikatsu-tanaka.com\"\n    },\n    {\n      \"name\": \"肉バル Nikubaru\",\n      \"type\": \"肉料理・バル\",\n      \"price\": \"3,000円〜5,000円\",\n      \"url\": \"https://nikubaru.com\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "restaurants": [
+          {
+            "name": "アジアンダイニング八千代",
+            "type": "アジアン料理",
+            "price": "1,500円〜3,000円",
+            "url": "https://yachiyo-umeda.com"
+          },
+          {
+            "name": "串カツ田中 梅田店",
+            "type": "串カツ",
+            "price": "800円〜2,000円",
+            "url": "https://kushikatsu-tanaka.com"
+          },
+          {
+            "name": "肉バル Nikubaru",
+            "type": "肉料理・バル",
+            "price": "3,000円〜5,000円",
+            "url": "https://nikubaru.com"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 191,
+        "completion_tokens": 179,
+        "total_tokens": 370,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-08-20T12:20:58.788Z",
+      "agent": "dining",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"restaurants\": [\n    {\n      \"name\": \"うどん屋 吉良\",\n      \"type\": \"うどん・そば\",\n      \"price\": \"1,000円〜1,500円\",\n      \"url\": \"https://www.kira-udon.com\"\n    },\n    {\n      \"name\": \"串カツ田中\",\n      \"type\": \"串カツ\",\n      \"price\": \"1,200円〜3,000円\",\n      \"url\": \"https://www.kushikatsu-tanaka.com\"\n    },\n    {\n      \"name\": \"かごの屋 天王寺店\",\n      \"type\": \"和食・しゃぶしゃぶ\",\n      \"price\": \"1,600円〜3,500円\",\n      \"url\": \"https://www.kagona.com\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "restaurants": [
+          {
+            "name": "うどん屋 吉良",
+            "type": "うどん・そば",
+            "price": "1,000円〜1,500円",
+            "url": "https://www.kira-udon.com"
+          },
+          {
+            "name": "串カツ田中",
+            "type": "串カツ",
+            "price": "1,200円〜3,000円",
+            "url": "https://www.kushikatsu-tanaka.com"
+          },
+          {
+            "name": "かごの屋 天王寺店",
+            "type": "和食・しゃぶしゃぶ",
+            "price": "1,600円〜3,500円",
+            "url": "https://www.kagona.com"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 192,
+        "completion_tokens": 181,
+        "total_tokens": 373,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-08-20T12:20:59.572Z",
+      "agent": "activity",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"activities\": [\n    {\n      \"name\": \"グランフロント大阪\",\n      \"type\": \"ショッピング＆グルメ\",\n      \"price\": \"無料\",\n      \"url\": \"https://www.grandfront-osaka.com/\"\n    },\n    {\n      \"name\": \"天王寺動物園\",\n      \"type\": \"動物園\",\n      \"price\": \"600円\",\n      \"url\": \"https://www.tennojizoo.com/\"\n    },\n    {\n      \"name\": \"あべのハルカス\",\n      \"type\": \"展望台\",\n      \"price\": \"1,500円\",\n      \"url\": \"https://www.abenoharukas-300.com/\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "activities": [
+          {
+            "name": "グランフロント大阪",
+            "type": "ショッピング＆グルメ",
+            "price": "無料",
+            "url": "https://www.grandfront-osaka.com/"
+          },
+          {
+            "name": "天王寺動物園",
+            "type": "動物園",
+            "price": "600円",
+            "url": "https://www.tennojizoo.com/"
+          },
+          {
+            "name": "あべのハルカス",
+            "type": "展望台",
+            "price": "1,500円",
+            "url": "https://www.abenoharukas-300.com/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 199,
+        "completion_tokens": 159,
+        "total_tokens": 358,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-08-20T12:21:04.765Z",
+      "agent": "day-planner",
+      "model": "gpt-4o",
+      "raw_text": "{\n    \"day\": 1,\n    \"date\": \"2025-08-27\",\n    \"area\": \"梅田\",\n    \"theme\": \"近代建築と夜景\",\n    \"schedule\": [\n        {\n            \"time\": \"10:00\",\n            \"activity_name\": \"グランフロント大阪\",\n            \"type\": \"activity\",\n            \"description\": \"近代的なショッピング＆グルメを楽しめる。\",\n            \"price\": \"無料\",\n            \"url\": \"https://www.grandfront-osaka.com/\",\n            \"lat\": 34.7054,\n            \"lon\": 135.4930\n        },\n        {\n            \"time\": \"12:00\",\n            \"activity_name\": \"串カツ田中 梅田店\",\n            \"type\": \"meal\",\n            \"description\": \"伝統的な串カツ料理を味わう。\",\n            \"price\": \"2,000円\",\n            \"url\": \"https://kushikatsu-tanaka.com\",\n            \"lat\": 34.6987,\n            \"lon\": 135.5013\n        },\n        {\n            \"time\": \"14:00\",\n            \"activity_name\": \"あべのハルカス\",\n            \"type\": \"activity\",\n            \"description\": \"日本一高いビルからの眺望を楽しむ。\",\n            \"price\": \"1,500円\",\n            \"url\": \"https://www.abenoharukas-300.com/\",\n            \"lat\": 34.6465,\n            \"lon\": 135.5134\n        },\n        {\n            \"time\": \"18:30\",\n            \"activity_name\": \"肉バル Nikubaru\",\n            \"type\": \"meal\",\n            \"description\": \"バルスタイルで肉料理を堪能。\",\n            \"price\": \"3,000円\",\n            \"url\": \"https://nikubaru.com\",\n            \"lat\": 34.7041,\n            \"lon\": 135.4941\n        }\n    ],\n    \"total_cost\": 6500\n}",
+      "parsed_json": {
+        "day": 1,
+        "date": "2025-08-27",
+        "area": "梅田",
+        "theme": "近代建築と夜景",
+        "schedule": [
+          {
+            "time": "10:00",
+            "activity_name": "グランフロント大阪",
+            "type": "activity",
+            "description": "近代的なショッピング＆グルメを楽しめる。",
+            "price": "無料",
+            "url": "https://www.grandfront-osaka.com/",
+            "lat": 34.7054,
+            "lon": 135.493
+          },
+          {
+            "time": "12:00",
+            "activity_name": "串カツ田中 梅田店",
+            "type": "meal",
+            "description": "伝統的な串カツ料理を味わう。",
+            "price": "2,000円",
+            "url": "https://kushikatsu-tanaka.com",
+            "lat": 34.6987,
+            "lon": 135.5013
+          },
+          {
+            "time": "14:00",
+            "activity_name": "あべのハルカス",
+            "type": "activity",
+            "description": "日本一高いビルからの眺望を楽しむ。",
+            "price": "1,500円",
+            "url": "https://www.abenoharukas-300.com/",
+            "lat": 34.6465,
+            "lon": 135.5134
+          },
+          {
+            "time": "18:30",
+            "activity_name": "肉バル Nikubaru",
+            "type": "meal",
+            "description": "バルスタイルで肉料理を堪能。",
+            "price": "3,000円",
+            "url": "https://nikubaru.com",
+            "lat": 34.7041,
+            "lon": 135.4941
+          }
+        ],
+        "total_cost": 6500
+      },
+      "usage": {
+        "prompt_tokens": 902,
+        "completion_tokens": 446,
+        "total_tokens": 1348,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-08-20T12:21:05.466Z",
+      "agent": "day-planner",
+      "model": "gpt-4o",
+      "raw_text": "{\n    \"day\": 2,\n    \"date\": \"2025-08-28\",\n    \"area\": \"天王寺\",\n    \"theme\": \"下町グルメと寺社\",\n    \"schedule\": [\n        {\n            \"time\": \"09:00\",\n            \"activity_name\": \"天王寺動物園\",\n            \"type\": \"activity\",\n            \"description\": \"ファミリー向けとして人気の天王寺動物園を探索。\",\n            \"price\": \"500円\",\n            \"url\": \"https://www.tennojizoo.com/\",\n            \"lat\": 34.6501,\n            \"lon\": 135.5065\n        },\n        {\n            \"time\": \"11:00\",\n            \"activity_name\": \"うどん屋 吉良\",\n            \"type\": \"meal\",\n            \"description\": \"美味しいうどんを提供する吉良でランチ。\",\n            \"price\": \"1,500円\",\n            \"url\": \"https://www.kira-udon.com\",\n            \"lat\": 34.6503,\n            \"lon\": 135.5117\n        },\n        {\n            \"time\": \"13:00\",\n            \"activity_name\": \"通天閣の展望台見学\",\n            \"type\": \"activity\",\n            \"description\": \"大阪のアイコン、通天閣からの展望を楽しむ。\",\n            \"price\": \"900円\",\n            \"url\": \"https://www.tsutenkaku.co.jp/\",\n            \"lat\": 34.6525,\n            \"lon\": 135.5060\n        },\n        {\n            \"time\": \"18:30\",\n            \"activity_name\": \"串カツ田中\",\n            \"type\": \"meal\",\n            \"description\": \"串カツ田中でディナーと地元の味を堪能。\",\n            \"price\": \"2,000円\",\n            \"url\": \"https://www.kushikatsu-tanaka.com\",\n            \"lat\": 34.6523,\n            \"lon\": 135.5036\n        }\n    ],\n    \"total_cost\": 4900\n}",
+      "parsed_json": {
+        "day": 2,
+        "date": "2025-08-28",
+        "area": "天王寺",
+        "theme": "下町グルメと寺社",
+        "schedule": [
+          {
+            "time": "09:00",
+            "activity_name": "天王寺動物園",
+            "type": "activity",
+            "description": "ファミリー向けとして人気の天王寺動物園を探索。",
+            "price": "500円",
+            "url": "https://www.tennojizoo.com/",
+            "lat": 34.6501,
+            "lon": 135.5065
+          },
+          {
+            "time": "11:00",
+            "activity_name": "うどん屋 吉良",
+            "type": "meal",
+            "description": "美味しいうどんを提供する吉良でランチ。",
+            "price": "1,500円",
+            "url": "https://www.kira-udon.com",
+            "lat": 34.6503,
+            "lon": 135.5117
+          },
+          {
+            "time": "13:00",
+            "activity_name": "通天閣の展望台見学",
+            "type": "activity",
+            "description": "大阪のアイコン、通天閣からの展望を楽しむ。",
+            "price": "900円",
+            "url": "https://www.tsutenkaku.co.jp/",
+            "lat": 34.6525,
+            "lon": 135.506
+          },
+          {
+            "time": "18:30",
+            "activity_name": "串カツ田中",
+            "type": "meal",
+            "description": "串カツ田中でディナーと地元の味を堪能。",
+            "price": "2,000円",
+            "url": "https://www.kushikatsu-tanaka.com",
+            "lat": 34.6523,
+            "lon": 135.5036
+          }
+        ],
+        "total_cost": 4900
+      },
+      "usage": {
+        "prompt_tokens": 910,
+        "completion_tokens": 459,
+        "total_tokens": 1369,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "geocode": [
+    {
+      "ts": "2025-08-20T12:21:16.688Z",
+      "query": "グランフロント大阪 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-20T12:21:16.690Z",
+      "query": "串カツ田中 梅田店 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-20T12:21:16.693Z",
+      "query": "あべのハルカス 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-20T12:21:16.694Z",
+      "query": "肉バル Nikubaru 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-20T12:21:16.697Z",
+      "query": "天王寺動物園 天王寺 大阪 日本",
+      "lat": 34.6513468,
+      "lon": 135.5103907,
+      "display_name": "天王寺動物公園事務所, 和氣橋, 茶臼山町, 天王寺区, 大阪市, 大阪府, 543-0063, 日本",
+      "source": "cache"
+    },
+    {
+      "ts": "2025-08-20T12:21:16.699Z",
+      "query": "うどん屋 吉良 天王寺 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-20T12:21:16.700Z",
+      "query": "通天閣の展望台見学 天王寺 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-20T12:21:16.701Z",
+      "query": "串カツ田中 天王寺 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-20T12:21:28.445Z",
+      "query": "グランフロント大阪 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-20T12:21:28.448Z",
+      "query": "串カツ田中 梅田店 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-20T12:21:28.450Z",
+      "query": "あべのハルカス 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-20T12:21:28.452Z",
+      "query": "肉バル Nikubaru 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-20T12:21:28.454Z",
+      "query": "天王寺動物園 天王寺 大阪 日本",
+      "lat": 34.6513468,
+      "lon": 135.5103907,
+      "display_name": "天王寺動物公園事務所, 和氣橋, 茶臼山町, 天王寺区, 大阪市, 大阪府, 543-0063, 日本",
+      "source": "cache"
+    },
+    {
+      "ts": "2025-08-20T12:21:28.457Z",
+      "query": "うどん屋 吉良 天王寺 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-20T12:21:28.458Z",
+      "query": "通天閣の展望台見学 天王寺 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-20T12:21:28.461Z",
+      "query": "串カツ田中 天王寺 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-20T12:21:28.475Z",
+      "query": "グランフロント大阪 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-20T12:21:28.478Z",
+      "query": "串カツ田中 梅田店 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-20T12:21:28.480Z",
+      "query": "あべのハルカス 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-20T12:21:28.482Z",
+      "query": "肉バル Nikubaru 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-20T12:21:28.484Z",
+      "query": "天王寺動物園 天王寺 大阪 日本",
+      "lat": 34.6513468,
+      "lon": 135.5103907,
+      "display_name": "天王寺動物公園事務所, 和氣橋, 茶臼山町, 天王寺区, 大阪市, 大阪府, 543-0063, 日本",
+      "source": "cache"
+    },
+    {
+      "ts": "2025-08-20T12:21:28.486Z",
+      "query": "うどん屋 吉良 天王寺 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-20T12:21:28.488Z",
+      "query": "通天閣の展望台見学 天王寺 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-08-20T12:21:28.490Z",
+      "query": "串カツ田中 天王寺 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    }
+  ]
+}
