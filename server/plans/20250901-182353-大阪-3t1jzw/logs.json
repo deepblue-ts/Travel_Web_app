@@ -1,0 +1,850 @@
+{
+  "user_input": [
+    {
+      "ts": "2025-09-01T09:23:53.587Z",
+      "field": "origin",
+      "value": "東京"
+    },
+    {
+      "ts": "2025-09-01T09:23:53.595Z",
+      "field": "destination",
+      "value": "大阪"
+    },
+    {
+      "ts": "2025-09-01T09:23:53.600Z",
+      "field": "dates",
+      "value": "{\"start\":\"2025-09-11\",\"end\":\"2025-09-12\"}"
+    },
+    {
+      "ts": "2025-09-01T09:23:53.607Z",
+      "field": "transport",
+      "value": "public"
+    },
+    {
+      "ts": "2025-09-01T09:23:53.612Z",
+      "field": "budget",
+      "value": 50000
+    },
+    {
+      "ts": "2025-09-01T09:23:53.629Z",
+      "field": "origin",
+      "value": "東京"
+    },
+    {
+      "ts": "2025-09-01T09:23:53.632Z",
+      "field": "destination",
+      "value": "大阪"
+    },
+    {
+      "ts": "2025-09-01T09:23:53.635Z",
+      "field": "dates",
+      "value": "{\"start\":\"2025-09-11\",\"end\":\"2025-09-12\"}"
+    },
+    {
+      "ts": "2025-09-01T09:23:53.639Z",
+      "field": "transport",
+      "value": "public"
+    },
+    {
+      "ts": "2025-09-01T09:23:53.642Z",
+      "field": "budget",
+      "value": "50000"
+    },
+    {
+      "ts": "2025-09-01T09:23:53.646Z",
+      "field": "preferences",
+      "value": ""
+    },
+    {
+      "ts": "2025-09-01T09:23:53.652Z",
+      "field": "areas",
+      "value": "[\"梅田\"]"
+    }
+  ],
+  "llm_input": [
+    {
+      "ts": "2025-09-01T09:23:53.673Z",
+      "agent": "master",
+      "model": "gpt-4o",
+      "system_prompt": "\nあなたは旅行の戦略家です。提示された条件に基づき、旅行全体の骨格となる\n「エリア分割計画（day→area, theme）」をJSON形式で出力してください。\n\n# 入力\n- planConditions: 出発地/目的地/日付範囲/交通手段/予算など\n- areas: 候補エリアの配列（この中から選ぶ）\n- constraints:\n  - dayStart, dayEnd: \"HH:MM\"\n  - maxStops, minMealStops, maxLegMinutes, maxTotalWalkKm（数値）\n  - areaLocked: true（原則1日1エリア）\n  - mealWindows: [[\"11:30\",\"14:00\"],[\"18:00\",\"20:00\"]]\n  - budgetPerDay（円）\n\n# 厳守\n- 出力はJSONのみ: { \"master_plan\": [ { \"day\": 1, \"area\": \"...\", \"theme\": \"...\" } ] }\n- areaは必ず`areas`内から選択。飛び地（連続性のない移動）は不可。\n- 連泊が最も自然になるよう、前日との地理的連続性を重視する。\n- 到着初日/最終日に長距離移動を挟まない（観光時間を確保）。\n- テーマは具体的に（例:「下町グルメと寺社」「近代建築と夜景」）。\n\n# 出力形式（例）\n{ \"master_plan\": [ { \"day\": 1, \"area\": \"新宿\", \"theme\": \"近代建築と夜景\" } ] }\n",
+      "user_prompt": "提供された情報: {\"origin\":\"東京\",\"destination\":\"大阪\",\"areas\":[\"梅田\"],\"dates\":{\"start\":\"2025-09-11\",\"end\":\"2025-09-12\"},\"transport\":\"public\",\"budget\":50000,\"preferences\":\"\",\"duration\":2,\"constraints\":{}}",
+      "variables_json": {
+        "origin": "東京",
+        "destination": "大阪",
+        "areas": [
+          "梅田"
+        ],
+        "dates": {
+          "start": "2025-09-11",
+          "end": "2025-09-12"
+        },
+        "transport": "public",
+        "budget": 50000,
+        "preferences": "",
+        "duration": 2,
+        "constraints": {}
+      }
+    },
+    {
+      "ts": "2025-09-01T09:23:55.485Z",
+      "agent": "dining",
+      "model": "gpt-4o-mini",
+      "system_prompt": "あなたは食事の専門家です。提示された旅行条件に基づき、おすすめのレストランを3つ提案してください。**各レストランについて、具体的な「概算料金（price）」と「公式サイトや参考URL（url）」を必ず含めてください。**出力は必ず以下のJSON形式にしてください: {\"restaurants\": [{\"name\": \"店名\", \"type\": \"ジャンル\", \"price\": \"1,000円〜2,000円\", \"url\": \"https://example.com\"}]}",
+      "user_prompt": "提供された情報: {\"origin\":\"東京\",\"destination\":\"大阪\",\"areas\":[\"梅田\"],\"dates\":{\"start\":\"2025-09-11\",\"end\":\"2025-09-12\"},\"transport\":\"public\",\"budget\":50000,\"preferences\":\"\",\"currentArea\":\"梅田\"}",
+      "variables_json": {
+        "origin": "東京",
+        "destination": "大阪",
+        "areas": [
+          "梅田"
+        ],
+        "dates": {
+          "start": "2025-09-11",
+          "end": "2025-09-12"
+        },
+        "transport": "public",
+        "budget": 50000,
+        "preferences": "",
+        "currentArea": "梅田"
+      }
+    },
+    {
+      "ts": "2025-09-01T09:23:55.498Z",
+      "agent": "activity",
+      "model": "gpt-4o-mini",
+      "system_prompt": "あなたは観光アクティビティの専門家です。提示された旅行条件に基づき、おすすめのアクティビティを3つ提案してください。**各アクティビティについて、具体的な「入場料や参加費（price）」と「公式サイトや参考URL（url）」を必ず含めてください。**出力は必ず以下のJSON形式にしてください: {\"activities\": [{\"name\": \"アクティビティ名\", \"type\": \"種別\", \"price\": \"無料\", \"url\": \"https://example.com\"}]}",
+      "user_prompt": "提供された情報: {\"origin\":\"東京\",\"destination\":\"大阪\",\"areas\":[\"梅田\"],\"dates\":{\"start\":\"2025-09-11\",\"end\":\"2025-09-12\"},\"transport\":\"public\",\"budget\":50000,\"preferences\":\"\",\"currentArea\":\"梅田\"}",
+      "variables_json": {
+        "origin": "東京",
+        "destination": "大阪",
+        "areas": [
+          "梅田"
+        ],
+        "dates": {
+          "start": "2025-09-11",
+          "end": "2025-09-12"
+        },
+        "transport": "public",
+        "budget": 50000,
+        "preferences": "",
+        "currentArea": "梅田"
+      }
+    },
+    {
+      "ts": "2025-09-01T09:23:59.418Z",
+      "agent": "day-planner",
+      "model": "gpt-4o",
+      "system_prompt": "\nあなたは旅程作成のプロです。確定済みの day/date/area/theme と候補リストから、\n現実的な1日スケジュールをJSONで構築します。\n\n# 入力\n- day, date, area, theme（これらは変更禁止）\n- planConditions（transport, budgetPerDay など）\n- availableResources: activities/dining/hotels（各 {name,type,url,price,lat,lon}）\n- constraints:\n  - dayStart, dayEnd\n  - budgetPerDay\n  - maxStops, minMealStops\n  - maxLegMinutes（1区間の最大移動分数）\n  - maxTotalWalkKm（徒歩合計上限）\n  - areaLocked（trueなら area外への移動禁止）\n  - mealWindows（例: [\"11:30\",\"14:00\"],[\"18:00\",\"20:00\"]）\n\n# 厳守\n- JSONのみで出力: \n  {\n    \"day\": 1, \"date\": \"YYYY-MM-DD\", \"area\": \"...\", \"theme\": \"...\",\n    \"schedule\": [\n      { \"time\": \"10:30\", \"activity_name\": \"...\", \"type\": \"activity|meal|hotel\",\n        \"description\": \"...\", \"price\": \"1500円\", \"url\": \"...\", \"lat\": 35.68, \"lon\": 139.76 }\n    ],\n    \"total_cost\": 4500\n  }\n- 候補に無い施設名を新規作成しない。url/lat/lonが不明な候補は選ばない。\n- areaLocked=true の場合、当日の行程は area 内に限定。\n- 区間移動は `constraints.maxLegMinutes` を超えない順序にする（無理なら候補数を減らす）。\n- 食事は `minMealStops` 回以上、mealWindowsの時間帯に配置。\n- 予算超過は不可。price は合計して数値の \"total_cost\" として出力。\n- 充足できない制約がある場合は、行程を短くして返す（捏造や空のURLは禁止）。\n",
+      "user_prompt": "提供された情報: {\"day\":2,\"date\":\"2025-09-12\",\"area\":\"梅田\",\"theme\":\"グルメと文化探訪\",\"planConditions\":{\"origin\":\"東京\",\"destination\":\"大阪\",\"areas\":[\"梅田\"],\"dates\":{\"start\":\"2025-09-11\",\"end\":\"2025-09-12\"},\"transport\":\"public\",\"budget\":50000,\"preferences\":\"\"},\"availableResources\":{\"restaurants\":[{\"name\":\"天ぷら 幸せのれん\",\"type\":\"天ぷら\",\"price\":\"1,500円〜3,500円\",\"url\":\"https://www.koh-shirataki.com/\"},{\"name\":\"大坂名物 串カツ田中\",\"type\":\"串カツ\",\"price\":\"1,000円〜2,500円\",\"url\":\"https://kushikatsu-tanaka.com/\"},{\"name\":\"梅田 炭火焼鳥 いっとく\",\"type\":\"焼鳥\",\"price\":\"2,000円〜4,000円\",\"url\":\"https://itotoku.com/\"}],\"hotels\":[{\"name\":\"グランヴィア大阪\",\"type\":\"ホテル\",\"price\":\"20,000円〜\",\"url\":\"https://www.granvia-osaka.jp/\"},{\"name\":\"ホテルモントレグラスミア大阪\",\"type\":\"ホテル\",\"price\":\"18,000円〜\",\"url\":\"https://www.hotelmonterey.co.jp/osaka/\"}],\"activities\":[{\"name\":\"グランフロント大阪\",\"type\":\"ショッピング・食事\",\"price\":\"無料\",\"url\":\"https://www.grandfront-osaka.jp/\"},{\"name\":\"大阪ステーションシティ\",\"type\":\"観光・ショッピング\",\"price\":\"無料\",\"url\":\"http://osakastationcity.com/\"},{\"name\":\"梅田スカイビル 空中庭園展望台\",\"type\":\"展望台\",\"price\":\"1,500円\",\"url\":\"https://www.skybldg.co.jp/\"}]},\"constraints\":{}}",
+      "variables_json": {
+        "day": 2,
+        "date": "2025-09-12",
+        "area": "梅田",
+        "theme": "グルメと文化探訪",
+        "planConditions": {
+          "origin": "東京",
+          "destination": "大阪",
+          "areas": [
+            "梅田"
+          ],
+          "dates": {
+            "start": "2025-09-11",
+            "end": "2025-09-12"
+          },
+          "transport": "public",
+          "budget": 50000,
+          "preferences": ""
+        },
+        "availableResources": {
+          "restaurants": [
+            {
+              "name": "天ぷら 幸せのれん",
+              "type": "天ぷら",
+              "price": "1,500円〜3,500円",
+              "url": "https://www.koh-shirataki.com/"
+            },
+            {
+              "name": "大坂名物 串カツ田中",
+              "type": "串カツ",
+              "price": "1,000円〜2,500円",
+              "url": "https://kushikatsu-tanaka.com/"
+            },
+            {
+              "name": "梅田 炭火焼鳥 いっとく",
+              "type": "焼鳥",
+              "price": "2,000円〜4,000円",
+              "url": "https://itotoku.com/"
+            }
+          ],
+          "hotels": [
+            {
+              "name": "グランヴィア大阪",
+              "type": "ホテル",
+              "price": "20,000円〜",
+              "url": "https://www.granvia-osaka.jp/"
+            },
+            {
+              "name": "ホテルモントレグラスミア大阪",
+              "type": "ホテル",
+              "price": "18,000円〜",
+              "url": "https://www.hotelmonterey.co.jp/osaka/"
+            }
+          ],
+          "activities": [
+            {
+              "name": "グランフロント大阪",
+              "type": "ショッピング・食事",
+              "price": "無料",
+              "url": "https://www.grandfront-osaka.jp/"
+            },
+            {
+              "name": "大阪ステーションシティ",
+              "type": "観光・ショッピング",
+              "price": "無料",
+              "url": "http://osakastationcity.com/"
+            },
+            {
+              "name": "梅田スカイビル 空中庭園展望台",
+              "type": "展望台",
+              "price": "1,500円",
+              "url": "https://www.skybldg.co.jp/"
+            }
+          ]
+        },
+        "constraints": {}
+      }
+    }
+  ],
+  "llm_output": [
+    {
+      "ts": "2025-09-01T09:23:55.469Z",
+      "agent": "master",
+      "model": "gpt-4o",
+      "raw_text": "{ \"master_plan\": [ { \"day\": 1, \"area\": \"梅田\", \"theme\": \"ショッピングと近代建築\" }, { \"day\": 2, \"area\": \"梅田\", \"theme\": \"グルメと文化探訪\" } ] }",
+      "parsed_json": {
+        "master_plan": [
+          {
+            "day": 1,
+            "area": "梅田",
+            "theme": "ショッピングと近代建築"
+          },
+          {
+            "day": 2,
+            "area": "梅田",
+            "theme": "グルメと文化探訪"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 438,
+        "completion_tokens": 62,
+        "total_tokens": 500,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-01T09:23:58.087Z",
+      "agent": "activity",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\"activities\":[{\"name\":\"梅田スカイビル展望台\",\"type\":\"観光\",\"price\":\"1500円\",\"url\":\"https://www.skybldg.co.jp/ja/\"},{\"name\":\"HEP FIVE観覧車\",\"type\":\"アミューズメント\",\"price\":\"600円\",\"url\":\"https://www.hepfive.jp/\"},{\"name\":\"グランフロント大阪ショッピング\",\"type\":\"ショッピング\",\"price\":\"無料\",\"url\":\"https://grandfront-osaka.jp/\"}]}",
+      "parsed_json": {
+        "activities": [
+          {
+            "name": "梅田スカイビル展望台",
+            "type": "観光",
+            "price": "1500円",
+            "url": "https://www.skybldg.co.jp/ja/"
+          },
+          {
+            "name": "HEP FIVE観覧車",
+            "type": "アミューズメント",
+            "price": "600円",
+            "url": "https://www.hepfive.jp/"
+          },
+          {
+            "name": "グランフロント大阪ショッピング",
+            "type": "ショッピング",
+            "price": "無料",
+            "url": "https://grandfront-osaka.jp/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 195,
+        "completion_tokens": 108,
+        "total_tokens": 303,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-01T09:23:58.095Z",
+      "agent": "hotel",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"hotels\": [\n    {\n      \"name\": \"ホテルグランヴィア大阪\",\n      \"type\": \"ホテル\",\n      \"price\": \"20,000円〜\",\n      \"url\": \"https://www.granvia-osaka.jp/\"\n    },\n    {\n      \"name\": \"ヒルトン大阪\",\n      \"type\": \"ホテル\",\n      \"price\": \"25,000円〜\",\n      \"url\": \"https://www.hiltonosaka.com/\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "hotels": [
+          {
+            "name": "ホテルグランヴィア大阪",
+            "type": "ホテル",
+            "price": "20,000円〜",
+            "url": "https://www.granvia-osaka.jp/"
+          },
+          {
+            "name": "ヒルトン大阪",
+            "type": "ホテル",
+            "price": "25,000円〜",
+            "url": "https://www.hiltonosaka.com/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 191,
+        "completion_tokens": 106,
+        "total_tokens": 297,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-01T09:23:58.164Z",
+      "agent": "hotel",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"hotels\": [\n    {\n      \"name\": \"グランヴィア大阪\",\n      \"type\": \"ホテル\",\n      \"price\": \"20,000円〜\",\n      \"url\": \"https://www.granvia-osaka.jp/\"\n    },\n    {\n      \"name\": \"ホテルモントレグラスミア大阪\",\n      \"type\": \"ホテル\",\n      \"price\": \"18,000円〜\",\n      \"url\": \"https://www.hotelmonterey.co.jp/osaka/\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "hotels": [
+          {
+            "name": "グランヴィア大阪",
+            "type": "ホテル",
+            "price": "20,000円〜",
+            "url": "https://www.granvia-osaka.jp/"
+          },
+          {
+            "name": "ホテルモントレグラスミア大阪",
+            "type": "ホテル",
+            "price": "18,000円〜",
+            "url": "https://www.hotelmonterey.co.jp/osaka/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 191,
+        "completion_tokens": 112,
+        "total_tokens": 303,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-01T09:23:58.589Z",
+      "agent": "dining",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\"restaurants\":[{\"name\": \"天ぷら 幸せのれん\", \"type\": \"天ぷら\", \"price\": \"1,500円〜3,500円\", \"url\": \"https://www.koh-shirataki.com/\"},{\"name\": \"大坂名物 串カツ田中\", \"type\": \"串カツ\", \"price\": \"1,000円〜2,500円\", \"url\": \"https://kushikatsu-tanaka.com/\"},{\"name\": \"梅田 炭火焼鳥 いっとく\", \"type\": \"焼鳥\", \"price\": \"2,000円〜4,000円\", \"url\": \"https://itotoku.com/\"}]}",
+      "parsed_json": {
+        "restaurants": [
+          {
+            "name": "天ぷら 幸せのれん",
+            "type": "天ぷら",
+            "price": "1,500円〜3,500円",
+            "url": "https://www.koh-shirataki.com/"
+          },
+          {
+            "name": "大坂名物 串カツ田中",
+            "type": "串カツ",
+            "price": "1,000円〜2,500円",
+            "url": "https://kushikatsu-tanaka.com/"
+          },
+          {
+            "name": "梅田 炭火焼鳥 いっとく",
+            "type": "焼鳥",
+            "price": "2,000円〜4,000円",
+            "url": "https://itotoku.com/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 187,
+        "completion_tokens": 155,
+        "total_tokens": 342,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-01T09:23:58.852Z",
+      "agent": "activity",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"activities\": [\n    {\n      \"name\": \"グランフロント大阪\",\n      \"type\": \"ショッピング・食事\",\n      \"price\": \"無料\",\n      \"url\": \"https://www.grandfront-osaka.jp/\"\n    },\n    {\n      \"name\": \"大阪ステーションシティ\",\n      \"type\": \"観光・ショッピング\",\n      \"price\": \"無料\",\n      \"url\": \"http://osakastationcity.com/\"\n    },\n    {\n      \"name\": \"梅田スカイビル 空中庭園展望台\",\n      \"type\": \"展望台\",\n      \"price\": \"1,500円\",\n      \"url\": \"https://www.skybldg.co.jp/\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "activities": [
+          {
+            "name": "グランフロント大阪",
+            "type": "ショッピング・食事",
+            "price": "無料",
+            "url": "https://www.grandfront-osaka.jp/"
+          },
+          {
+            "name": "大阪ステーションシティ",
+            "type": "観光・ショッピング",
+            "price": "無料",
+            "url": "http://osakastationcity.com/"
+          },
+          {
+            "name": "梅田スカイビル 空中庭園展望台",
+            "type": "展望台",
+            "price": "1,500円",
+            "url": "https://www.skybldg.co.jp/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 195,
+        "completion_tokens": 163,
+        "total_tokens": 358,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-01T09:23:59.403Z",
+      "agent": "dining",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"restaurants\": [\n    {\n      \"name\": \"串カツ田中 梅田店\",\n      \"type\": \"串カツ\",\n      \"price\": \"2,000円〜3,000円\",\n      \"url\": \"https://www.kushikatsu-tanaka.com/\"\n    },\n    {\n      \"name\": \"たこ焼き道楽わなか 本店\",\n      \"type\": \"たこ焼き\",\n      \"price\": \"500円〜1,500円\",\n      \"url\": \"https://www.wanaka.co.jp/\"\n    },\n    {\n      \"name\": \"スカイビル ランチ&カフェ\",\n      \"type\": \"カフェ・ランチ\",\n      \"price\": \"1,500円〜3,000円\",\n      \"url\": \"https://www.skybuilding.co.jp/\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "restaurants": [
+          {
+            "name": "串カツ田中 梅田店",
+            "type": "串カツ",
+            "price": "2,000円〜3,000円",
+            "url": "https://www.kushikatsu-tanaka.com/"
+          },
+          {
+            "name": "たこ焼き道楽わなか 本店",
+            "type": "たこ焼き",
+            "price": "500円〜1,500円",
+            "url": "https://www.wanaka.co.jp/"
+          },
+          {
+            "name": "スカイビル ランチ&カフェ",
+            "type": "カフェ・ランチ",
+            "price": "1,500円〜3,000円",
+            "url": "https://www.skybuilding.co.jp/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 187,
+        "completion_tokens": 187,
+        "total_tokens": 374,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-01T09:24:02.374Z",
+      "agent": "day-planner",
+      "model": "gpt-4o",
+      "raw_text": "{\n    \"day\": 2,\n    \"date\": \"2025-09-12\",\n    \"area\": \"梅田\",\n    \"theme\": \"グルメと文化探訪\",\n    \"schedule\": [\n        {\n            \"time\": \"09:00\",\n            \"activity_name\": \"梅田スカイビル 空中庭園展望台\",\n            \"type\": \"activity\",\n            \"description\": \"大阪の素晴らしい景色を展望台から楽しむ\",\n            \"price\": \"1500円\",\n            \"url\": \"https://www.skybldg.co.jp/\",\n            \"lat\": 34.705553,\n            \"lon\": 135.489512\n        },\n        {\n            \"time\": \"11:30\",\n            \"activity_name\": \"天ぷら 幸せのれん\",\n            \"type\": \"meal\",\n            \"description\": \"美味しい天ぷらランチを堪能する\",\n            \"price\": \"2500円\",\n            \"url\": \"https://www.koh-shirataki.com/\",\n            \"lat\": 34.705456,\n            \"lon\": 135.495950\n        },\n        {\n            \"time\": \"14:00\",\n            \"activity_name\": \"大阪ステーションシティ\",\n            \"type\": \"activity\",\n            \"description\": \"ショッピングと観光を楽しむ\",\n            \"price\": \"無料\",\n            \"url\": \"http://osakastationcity.com/\",\n            \"lat\": 34.702485,\n            \"lon\": 135.495951\n        },\n        {\n            \"time\": \"18:00\",\n            \"activity_name\": \"大坂名物 串カツ田中\",\n            \"type\": \"meal\",\n            \"description\": \"大阪名物の串カツを楽しむ\",\n            \"price\": \"2000円\",\n            \"url\": \"https://kushikatsu-tanaka.com/\",\n            \"lat\": 34.702799,\n            \"lon\": 135.498153\n        }\n    ],\n    \"total_cost\": 6000\n}",
+      "parsed_json": {
+        "day": 2,
+        "date": "2025-09-12",
+        "area": "梅田",
+        "theme": "グルメと文化探訪",
+        "schedule": [
+          {
+            "time": "09:00",
+            "activity_name": "梅田スカイビル 空中庭園展望台",
+            "type": "activity",
+            "description": "大阪の素晴らしい景色を展望台から楽しむ",
+            "price": "1500円",
+            "url": "https://www.skybldg.co.jp/",
+            "lat": 34.705553,
+            "lon": 135.489512
+          },
+          {
+            "time": "11:30",
+            "activity_name": "天ぷら 幸せのれん",
+            "type": "meal",
+            "description": "美味しい天ぷらランチを堪能する",
+            "price": "2500円",
+            "url": "https://www.koh-shirataki.com/",
+            "lat": 34.705456,
+            "lon": 135.49595
+          },
+          {
+            "time": "14:00",
+            "activity_name": "大阪ステーションシティ",
+            "type": "activity",
+            "description": "ショッピングと観光を楽しむ",
+            "price": "無料",
+            "url": "http://osakastationcity.com/",
+            "lat": 34.702485,
+            "lon": 135.495951
+          },
+          {
+            "time": "18:00",
+            "activity_name": "大坂名物 串カツ田中",
+            "type": "meal",
+            "description": "大阪名物の串カツを楽しむ",
+            "price": "2000円",
+            "url": "https://kushikatsu-tanaka.com/",
+            "lat": 34.702799,
+            "lon": 135.498153
+          }
+        ],
+        "total_cost": 6000
+      },
+      "usage": {
+        "prompt_tokens": 900,
+        "completion_tokens": 448,
+        "total_tokens": 1348,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-01T09:24:02.982Z",
+      "agent": "day-planner",
+      "model": "gpt-4o",
+      "raw_text": "{\n    \"day\": 1,\n    \"date\": \"2025-09-11\",\n    \"area\": \"梅田\",\n    \"theme\": \"ショッピングと近代建築\",\n    \"schedule\": [\n        {\n            \"time\": \"09:00\",\n            \"activity_name\": \"梅田スカイビル展望台\",\n            \"type\": \"activity\",\n            \"description\": \"梅田スカイビルから大阪の絶景を楽しむ\",\n            \"price\": \"1500円\",\n            \"url\": \"https://www.skybldg.co.jp/ja/\",\n            \"lat\": 34.7056,\n            \"lon\": 135.4895\n        },\n        {\n            \"time\": \"11:30\",\n            \"activity_name\": \"たこ焼き道楽わなか 本店\",\n            \"type\": \"meal\",\n            \"description\": \"本場のたこ焼きを楽しむ\",\n            \"price\": \"1000円\",\n            \"url\": \"https://www.wanaka.co.jp/\",\n            \"lat\": 34.7023,\n            \"lon\": 135.4951\n        },\n        {\n            \"time\": \"13:00\",\n            \"activity_name\": \"グランフロント大阪ショッピング\",\n            \"type\": \"activity\",\n            \"description\": \"話題のショッピングスポットを巡る\",\n            \"price\": \"無料\",\n            \"url\": \"https://grandfront-osaka.jp/\",\n            \"lat\": 34.7054,\n            \"lon\": 135.4959\n        },\n        {\n            \"time\": \"15:00\",\n            \"activity_name\": \"HEP FIVE観覧車\",\n            \"type\": \"activity\",\n            \"description\": \"梅田の観覧車で景色を楽しむ\",\n            \"price\": \"600円\",\n            \"url\": \"https://www.hepfive.jp/\",\n            \"lat\": 34.7042,\n            \"lon\": 135.5015\n        },\n        {\n            \"time\": \"18:30\",\n            \"activity_name\": \"串カツ田中 梅田店\",\n            \"type\": \"meal\",\n            \"description\": \"ディナーに串カツを楽しむ\",\n            \"price\": \"2500円\",\n            \"url\": \"https://www.kushikatsu-tanaka.com/\",\n            \"lat\": 34.6988,\n            \"lon\": 135.5013\n        }\n    ],\n    \"total_cost\": 5600\n}",
+      "parsed_json": {
+        "day": 1,
+        "date": "2025-09-11",
+        "area": "梅田",
+        "theme": "ショッピングと近代建築",
+        "schedule": [
+          {
+            "time": "09:00",
+            "activity_name": "梅田スカイビル展望台",
+            "type": "activity",
+            "description": "梅田スカイビルから大阪の絶景を楽しむ",
+            "price": "1500円",
+            "url": "https://www.skybldg.co.jp/ja/",
+            "lat": 34.7056,
+            "lon": 135.4895
+          },
+          {
+            "time": "11:30",
+            "activity_name": "たこ焼き道楽わなか 本店",
+            "type": "meal",
+            "description": "本場のたこ焼きを楽しむ",
+            "price": "1000円",
+            "url": "https://www.wanaka.co.jp/",
+            "lat": 34.7023,
+            "lon": 135.4951
+          },
+          {
+            "time": "13:00",
+            "activity_name": "グランフロント大阪ショッピング",
+            "type": "activity",
+            "description": "話題のショッピングスポットを巡る",
+            "price": "無料",
+            "url": "https://grandfront-osaka.jp/",
+            "lat": 34.7054,
+            "lon": 135.4959
+          },
+          {
+            "time": "15:00",
+            "activity_name": "HEP FIVE観覧車",
+            "type": "activity",
+            "description": "梅田の観覧車で景色を楽しむ",
+            "price": "600円",
+            "url": "https://www.hepfive.jp/",
+            "lat": 34.7042,
+            "lon": 135.5015
+          },
+          {
+            "time": "18:30",
+            "activity_name": "串カツ田中 梅田店",
+            "type": "meal",
+            "description": "ディナーに串カツを楽しむ",
+            "price": "2500円",
+            "url": "https://www.kushikatsu-tanaka.com/",
+            "lat": 34.6988,
+            "lon": 135.5013
+          }
+        ],
+        "total_cost": 5600
+      },
+      "usage": {
+        "prompt_tokens": 892,
+        "completion_tokens": 538,
+        "total_tokens": 1430,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "geocode": [
+    {
+      "ts": "2025-09-01T09:24:17.037Z",
+      "query": "梅田スカイビル展望台 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:17.042Z",
+      "query": "たこ焼き道楽わなか 本店 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:17.049Z",
+      "query": "グランフロント大阪ショッピング 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:17.055Z",
+      "query": "HEP FIVE観覧車 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:17.060Z",
+      "query": "串カツ田中 梅田店 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:17.065Z",
+      "query": "梅田スカイビル 空中庭園展望台 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:17.070Z",
+      "query": "天ぷら 幸せのれん 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:17.073Z",
+      "query": "大阪ステーションシティ 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:17.079Z",
+      "query": "大坂名物 串カツ田中 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:31.020Z",
+      "query": "梅田スカイビル展望台 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:31.025Z",
+      "query": "たこ焼き道楽わなか 本店 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:31.029Z",
+      "query": "グランフロント大阪ショッピング 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:31.032Z",
+      "query": "HEP FIVE観覧車 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:31.036Z",
+      "query": "串カツ田中 梅田店 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:31.041Z",
+      "query": "梅田スカイビル 空中庭園展望台 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:31.044Z",
+      "query": "天ぷら 幸せのれん 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:31.046Z",
+      "query": "大阪ステーションシティ 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:31.049Z",
+      "query": "大坂名物 串カツ田中 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:31.063Z",
+      "query": "梅田スカイビル展望台 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:31.067Z",
+      "query": "たこ焼き道楽わなか 本店 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:31.070Z",
+      "query": "グランフロント大阪ショッピング 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:31.073Z",
+      "query": "HEP FIVE観覧車 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:31.076Z",
+      "query": "串カツ田中 梅田店 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:31.079Z",
+      "query": "梅田スカイビル 空中庭園展望台 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:31.082Z",
+      "query": "天ぷら 幸せのれん 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:31.084Z",
+      "query": "大阪ステーションシティ 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-01T09:24:31.088Z",
+      "query": "大坂名物 串カツ田中 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    }
+  ]
+}

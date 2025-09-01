@@ -1,9 +1,10 @@
+# .github\workflows\deploy-pages.yml
 name: Deploy to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -25,19 +26,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # VITE_API_BASE は Secrets に登録しておく
       - name: Create production env file
         env:
           VITE_API_BASE: ${{ secrets.VITE_API_BASE }}
         run: |
           echo "VITE_API_BASE=${VITE_API_BASE}" > .env.production
-          # 他の env があればここに追加
           cat .env.production
 
       - name: Build
         run: npm run build
 
+      # SPA 直リンク対策
+      - name: Create 404.html for SPA
+        run: cp dist/index.html dist/404.html
+
       - name: Upload artifact for GitHub Pages
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
 
@@ -46,4 +51,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v4
