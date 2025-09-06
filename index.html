@@ -1,8 +1,10 @@
+<!-- index.html -->
+
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- Vite 置換用の BASE_URL を使用（本番: /Travel_Web_app/） -->
+    <!-- favicon は公開パス参照なので BASE_URL を使う -->
     <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI Travel Planner</title>
@@ -28,7 +30,8 @@
   </head>
   <body>
     <div id="root"></div>
-    <!-- 開発/本番どちらでも動くように BASE_URL を使用 -->
-    <script type="module" src="%BASE_URL%src/main.jsx"></script>
+    <!-- ▼ モジュールは base を使わず、ルート基準で指定する -->
+    <script type="module" src="/src/main.jsx"></script>
+    <!-- ▲ ここがビルド失敗の原因でした -->
   </body>
 </html>

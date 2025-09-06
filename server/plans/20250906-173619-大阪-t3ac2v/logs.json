@@ -1,0 +1,770 @@
+{
+  "user_input": [
+    {
+      "ts": "2025-09-06T08:36:19.773Z",
+      "field": "origin",
+      "value": "東京"
+    },
+    {
+      "ts": "2025-09-06T08:36:19.791Z",
+      "field": "destination",
+      "value": "大阪"
+    },
+    {
+      "ts": "2025-09-06T08:36:19.804Z",
+      "field": "dates",
+      "value": "{\"start\":\"2025-09-17\",\"end\":\"2025-09-18\"}"
+    },
+    {
+      "ts": "2025-09-06T08:36:19.811Z",
+      "field": "transport",
+      "value": "public"
+    },
+    {
+      "ts": "2025-09-06T08:36:19.817Z",
+      "field": "budget",
+      "value": 50000
+    },
+    {
+      "ts": "2025-09-06T08:36:19.836Z",
+      "field": "origin",
+      "value": "東京"
+    },
+    {
+      "ts": "2025-09-06T08:36:19.838Z",
+      "field": "destination",
+      "value": "大阪"
+    },
+    {
+      "ts": "2025-09-06T08:36:19.847Z",
+      "field": "dates",
+      "value": "{\"start\":\"2025-09-17\",\"end\":\"2025-09-18\"}"
+    },
+    {
+      "ts": "2025-09-06T08:36:19.851Z",
+      "field": "transport",
+      "value": "public"
+    },
+    {
+      "ts": "2025-09-06T08:36:19.857Z",
+      "field": "budget",
+      "value": "50000"
+    },
+    {
+      "ts": "2025-09-06T08:36:19.865Z",
+      "field": "preferences",
+      "value": ""
+    },
+    {
+      "ts": "2025-09-06T08:36:19.869Z",
+      "field": "areas",
+      "value": "[\"梅田\",\"難波\"]"
+    }
+  ],
+  "llm_input": [
+    {
+      "ts": "2025-09-06T08:36:19.892Z",
+      "agent": "master",
+      "model": "gpt-4o",
+      "system_prompt": "\nあなたは旅行の戦略家です。提示された条件に基づき、旅行全体の骨格となる\n「エリア分割計画（day→area, theme）」をJSON形式で出力してください。\n\n# 入力\n- planConditions: 出発地/目的地/日付範囲/交通手段/予算など\n- areas: 候補エリアの配列（この中から選ぶ）\n- constraints:\n  - dayStart, dayEnd: \"HH:MM\"\n  - maxStops, minMealStops, maxLegMinutes, maxTotalWalkKm（数値）\n  - areaLocked: true（原則1日1エリア）\n  - mealWindows: [[\"11:30\",\"14:00\"],[\"18:00\",\"20:00\"]]\n  - budgetPerDay（円）\n\n# 厳守\n- 出力はJSONのみ: { \"master_plan\": [ { \"day\": 1, \"area\": \"...\", \"theme\": \"...\" } ] }\n- areaは必ず`areas`内から選択。飛び地（連続性のない移動）は不可。\n- 連泊が最も自然になるよう、前日との地理的連続性を重視する。\n- 到着初日/最終日に長距離移動を挟まない（観光時間を確保）。\n- テーマは具体的に（例:「下町グルメと寺社」「近代建築と夜景」）。\n\n# 出力形式（例）\n{ \"master_plan\": [ { \"day\": 1, \"area\": \"新宿\", \"theme\": \"近代建築と夜景\" } ] }\n",
+      "user_prompt": "提供された情報: {\"origin\":\"東京\",\"destination\":\"大阪\",\"areas\":[\"梅田\",\"難波\"],\"dates\":{\"start\":\"2025-09-17\",\"end\":\"2025-09-18\"},\"transport\":\"public\",\"budget\":50000,\"preferences\":\"\",\"duration\":2,\"constraints\":{}}",
+      "variables_json": {
+        "origin": "東京",
+        "destination": "大阪",
+        "areas": [
+          "梅田",
+          "難波"
+        ],
+        "dates": {
+          "start": "2025-09-17",
+          "end": "2025-09-18"
+        },
+        "transport": "public",
+        "budget": 50000,
+        "preferences": "",
+        "duration": 2,
+        "constraints": {}
+      }
+    },
+    {
+      "ts": "2025-09-06T08:36:21.341Z",
+      "agent": "hotel",
+      "model": "gpt-4o-mini",
+      "system_prompt": "あなたは宿泊施設の専門家です。提示された旅行条件に基づき、おすすめのホテルや旅館を2つ提案してください。**各施設について、具体的な「一泊あたりの概算料金（price）」と「公式サイトや予約サイトのURL（url）」を必ず含めてください。**出力は必ず以下のJSON形式にしてください: {\"hotels\": [{\"name\": \"施設名\", \"type\": \"種別\", \"price\": \"15,000円〜\", \"url\": \"https://example.com\"}]}",
+      "user_prompt": "提供された情報: {\"origin\":\"東京\",\"destination\":\"大阪\",\"areas\":[\"梅田\",\"難波\"],\"dates\":{\"start\":\"2025-09-17\",\"end\":\"2025-09-18\"},\"transport\":\"public\",\"budget\":50000,\"preferences\":\"\",\"currentArea\":\"梅田\"}",
+      "variables_json": {
+        "origin": "東京",
+        "destination": "大阪",
+        "areas": [
+          "梅田",
+          "難波"
+        ],
+        "dates": {
+          "start": "2025-09-17",
+          "end": "2025-09-18"
+        },
+        "transport": "public",
+        "budget": 50000,
+        "preferences": "",
+        "currentArea": "梅田"
+      }
+    },
+    {
+      "ts": "2025-09-06T08:36:21.354Z",
+      "agent": "activity",
+      "model": "gpt-4o-mini",
+      "system_prompt": "あなたは観光アクティビティの専門家です。提示された旅行条件に基づき、おすすめのアクティビティを3つ提案してください。**各アクティビティについて、具体的な「入場料や参加費（price）」と「公式サイトや参考URL（url）」を必ず含めてください。**出力は必ず以下のJSON形式にしてください: {\"activities\": [{\"name\": \"アクティビティ名\", \"type\": \"種別\", \"price\": \"無料\", \"url\": \"https://example.com\"}]}",
+      "user_prompt": "提供された情報: {\"origin\":\"東京\",\"destination\":\"大阪\",\"areas\":[\"梅田\",\"難波\"],\"dates\":{\"start\":\"2025-09-17\",\"end\":\"2025-09-18\"},\"transport\":\"public\",\"budget\":50000,\"preferences\":\"\",\"currentArea\":\"梅田\"}",
+      "variables_json": {
+        "origin": "東京",
+        "destination": "大阪",
+        "areas": [
+          "梅田",
+          "難波"
+        ],
+        "dates": {
+          "start": "2025-09-17",
+          "end": "2025-09-18"
+        },
+        "transport": "public",
+        "budget": 50000,
+        "preferences": "",
+        "currentArea": "梅田"
+      }
+    },
+    {
+      "ts": "2025-09-06T08:36:21.372Z",
+      "agent": "activity",
+      "model": "gpt-4o-mini",
+      "system_prompt": "あなたは観光アクティビティの専門家です。提示された旅行条件に基づき、おすすめのアクティビティを3つ提案してください。**各アクティビティについて、具体的な「入場料や参加費（price）」と「公式サイトや参考URL（url）」を必ず含めてください。**出力は必ず以下のJSON形式にしてください: {\"activities\": [{\"name\": \"アクティビティ名\", \"type\": \"種別\", \"price\": \"無料\", \"url\": \"https://example.com\"}]}",
+      "user_prompt": "提供された情報: {\"origin\":\"東京\",\"destination\":\"大阪\",\"areas\":[\"梅田\",\"難波\"],\"dates\":{\"start\":\"2025-09-17\",\"end\":\"2025-09-18\"},\"transport\":\"public\",\"budget\":50000,\"preferences\":\"\",\"currentArea\":\"難波\"}",
+      "variables_json": {
+        "origin": "東京",
+        "destination": "大阪",
+        "areas": [
+          "梅田",
+          "難波"
+        ],
+        "dates": {
+          "start": "2025-09-17",
+          "end": "2025-09-18"
+        },
+        "transport": "public",
+        "budget": 50000,
+        "preferences": "",
+        "currentArea": "難波"
+      }
+    },
+    {
+      "ts": "2025-09-06T08:36:24.525Z",
+      "agent": "day-planner",
+      "model": "gpt-4o",
+      "system_prompt": "\nあなたは旅程作成のプロです。確定済みの day/date/area/theme と候補リストから、\n現実的な1日スケジュールをJSONで構築します。\n\n# 入力\n- day, date, area, theme（これらは変更禁止）\n- planConditions（transport, budgetPerDay など）\n- availableResources: activities/dining/hotels（各 {name,type,url,price,lat,lon}）\n- constraints:\n  - dayStart, dayEnd\n  - budgetPerDay\n  - maxStops, minMealStops\n  - maxLegMinutes（1区間の最大移動分数）\n  - maxTotalWalkKm（徒歩合計上限）\n  - areaLocked（trueなら area外への移動禁止）\n  - mealWindows（例: [\"11:30\",\"14:00\"],[\"18:00\",\"20:00\"]）\n\n# 厳守\n- JSONのみで出力: \n  {\n    \"day\": 1, \"date\": \"YYYY-MM-DD\", \"area\": \"...\", \"theme\": \"...\",\n    \"schedule\": [\n      { \"time\": \"10:30\", \"activity_name\": \"...\", \"type\": \"activity|meal|hotel\",\n        \"description\": \"...\", \"price\": \"1500円\", \"url\": \"...\", \"lat\": 35.68, \"lon\": 139.76 }\n    ],\n    \"total_cost\": 4500\n  }\n- 候補に無い施設名を新規作成しない。url/lat/lonが不明な候補は選ばない。\n- areaLocked=true の場合、当日の行程は area 内に限定。\n- 区間移動は `constraints.maxLegMinutes` を超えない順序にする（無理なら候補数を減らす）。\n- 食事は `minMealStops` 回以上、mealWindowsの時間帯に配置。\n- 予算超過は不可。price は合計して数値の \"total_cost\" として出力。\n- 充足できない制約がある場合は、行程を短くして返す（捏造や空のURLは禁止）。\n",
+      "user_prompt": "提供された情報: {\"day\":2,\"date\":\"2025-09-18\",\"area\":\"難波\",\"theme\":\"下町グルメとエンターテインメント\",\"planConditions\":{\"origin\":\"東京\",\"destination\":\"大阪\",\"areas\":[\"梅田\",\"難波\"],\"dates\":{\"start\":\"2025-09-17\",\"end\":\"2025-09-18\"},\"transport\":\"public\",\"budget\":50000,\"preferences\":\"\"},\"availableResources\":{\"restaurants\":[{\"name\":\"梅田ダイニング 海鮮酒場\",\"type\":\"海鮮料理\",\"price\":\"3,000円〜5,000円\",\"url\":\"https://umesaka-bay.com/\"},{\"name\":\"難波炭火焼肉 小鉄\",\"type\":\"焼肉\",\"price\":\"2,000円〜4,000円\",\"url\":\"https://namba-kotetsu.com/\"},{\"name\":\"梅田 Bistro 風\",\"type\":\"フレンチ\",\"price\":\"4,000円〜8,000円\",\"url\":\"https://bistro-kaze.com/\"}],\"hotels\":[{\"name\":\"ホテルグランヴィア大阪\",\"type\":\"ホテル\",\"price\":\"20,000円〜\",\"url\":\"https://www.granvia-osaka.jp/\"},{\"name\":\"なんばスイスホテル\",\"type\":\"ホテル\",\"price\":\"25,000円〜\",\"url\":\"https://www.swissotel.com/hotels/namba-osaka/\"}],\"activities\":[{\"name\":\"梅田スカイビル 空中庭園展望台\",\"type\":\"展望台\",\"price\":\"1500円\",\"url\":\"https://www.skybldg.co.jp/sky/\"},{\"name\":\"難波パークス\",\"type\":\"ショッピングモール\",\"price\":\"無料\",\"url\":\"https://www.nambaparks.com/\"},{\"name\":\"道頓堀クルーズ\",\"type\":\"ボートツアー\",\"price\":\"1500円\",\"url\":\"https://www.dotonbori-cruise.com/\"}]},\"constraints\":{}}",
+      "variables_json": {
+        "day": 2,
+        "date": "2025-09-18",
+        "area": "難波",
+        "theme": "下町グルメとエンターテインメント",
+        "planConditions": {
+          "origin": "東京",
+          "destination": "大阪",
+          "areas": [
+            "梅田",
+            "難波"
+          ],
+          "dates": {
+            "start": "2025-09-17",
+            "end": "2025-09-18"
+          },
+          "transport": "public",
+          "budget": 50000,
+          "preferences": ""
+        },
+        "availableResources": {
+          "restaurants": [
+            {
+              "name": "梅田ダイニング 海鮮酒場",
+              "type": "海鮮料理",
+              "price": "3,000円〜5,000円",
+              "url": "https://umesaka-bay.com/"
+            },
+            {
+              "name": "難波炭火焼肉 小鉄",
+              "type": "焼肉",
+              "price": "2,000円〜4,000円",
+              "url": "https://namba-kotetsu.com/"
+            },
+            {
+              "name": "梅田 Bistro 風",
+              "type": "フレンチ",
+              "price": "4,000円〜8,000円",
+              "url": "https://bistro-kaze.com/"
+            }
+          ],
+          "hotels": [
+            {
+              "name": "ホテルグランヴィア大阪",
+              "type": "ホテル",
+              "price": "20,000円〜",
+              "url": "https://www.granvia-osaka.jp/"
+            },
+            {
+              "name": "なんばスイスホテル",
+              "type": "ホテル",
+              "price": "25,000円〜",
+              "url": "https://www.swissotel.com/hotels/namba-osaka/"
+            }
+          ],
+          "activities": [
+            {
+              "name": "梅田スカイビル 空中庭園展望台",
+              "type": "展望台",
+              "price": "1500円",
+              "url": "https://www.skybldg.co.jp/sky/"
+            },
+            {
+              "name": "難波パークス",
+              "type": "ショッピングモール",
+              "price": "無料",
+              "url": "https://www.nambaparks.com/"
+            },
+            {
+              "name": "道頓堀クルーズ",
+              "type": "ボートツアー",
+              "price": "1500円",
+              "url": "https://www.dotonbori-cruise.com/"
+            }
+          ]
+        },
+        "constraints": {}
+      }
+    }
+  ],
+  "llm_output": [
+    {
+      "ts": "2025-09-06T08:36:21.317Z",
+      "agent": "master",
+      "model": "gpt-4o",
+      "raw_text": "{\n    \"master_plan\": [\n        {\n            \"day\": 1,\n            \"area\": \"梅田\",\n            \"theme\": \"ショッピングと都市文化\"\n        },\n        {\n            \"day\": 2,\n            \"area\": \"難波\",\n            \"theme\": \"下町グルメとエンターテインメント\"\n        }\n    ]\n}",
+      "parsed_json": {
+        "master_plan": [
+          {
+            "day": 1,
+            "area": "梅田",
+            "theme": "ショッピングと都市文化"
+          },
+          {
+            "day": 2,
+            "area": "難波",
+            "theme": "下町グルメとエンターテインメント"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 441,
+        "completion_tokens": 76,
+        "total_tokens": 517,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-06T08:36:23.242Z",
+      "agent": "hotel",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\"hotels\":[{\"name\":\"ホテルグランヴィア大阪\",\"type\":\"ホテル\",\"price\":\"20,000円〜\",\"url\":\"https://www.granvia-osaka.jp/\"},{\"name\":\"スイスホテル南海大阪\",\"type\":\"ホテル\",\"price\":\"25,000円〜\",\"url\":\"https://www.swissotel.com/ja/hotels/osaka/\"}]}",
+      "parsed_json": {
+        "hotels": [
+          {
+            "name": "ホテルグランヴィア大阪",
+            "type": "ホテル",
+            "price": "20,000円〜",
+            "url": "https://www.granvia-osaka.jp/"
+          },
+          {
+            "name": "スイスホテル南海大阪",
+            "type": "ホテル",
+            "price": "25,000円〜",
+            "url": "https://www.swissotel.com/ja/hotels/osaka/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 194,
+        "completion_tokens": 79,
+        "total_tokens": 273,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-06T08:36:23.889Z",
+      "agent": "dining",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\"restaurants\":[{\"name\":\"梅田ダイニング 海鮮酒場\",\"type\":\"海鮮料理\",\"price\":\"3,000円〜5,000円\",\"url\":\"https://umesaka-bay.com/\"},{\"name\":\"難波炭火焼肉 小鉄\",\"type\":\"焼肉\",\"price\":\"2,000円〜4,000円\",\"url\":\"https://namba-kotetsu.com/\"},{\"name\":\"梅田 Bistro 風\",\"type\":\"フレンチ\",\"price\":\"4,000円〜8,000円\",\"url\":\"https://bistro-kaze.com/\"}]}",
+      "parsed_json": {
+        "restaurants": [
+          {
+            "name": "梅田ダイニング 海鮮酒場",
+            "type": "海鮮料理",
+            "price": "3,000円〜5,000円",
+            "url": "https://umesaka-bay.com/"
+          },
+          {
+            "name": "難波炭火焼肉 小鉄",
+            "type": "焼肉",
+            "price": "2,000円〜4,000円",
+            "url": "https://namba-kotetsu.com/"
+          },
+          {
+            "name": "梅田 Bistro 風",
+            "type": "フレンチ",
+            "price": "4,000円〜8,000円",
+            "url": "https://bistro-kaze.com/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 190,
+        "completion_tokens": 127,
+        "total_tokens": 317,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-06T08:36:24.464Z",
+      "agent": "activity",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"activities\": [\n    {\n      \"name\": \"梅田スカイビル 空中庭園展望台\",\n      \"type\": \"展望台\",\n      \"price\": \"1500円\",\n      \"url\": \"https://www.skybldg.co.jp/sky/\"\n    },\n    {\n      \"name\": \"難波パークス\",\n      \"type\": \"ショッピングモール\",\n      \"price\": \"無料\",\n      \"url\": \"https://www.nambaparks.com/\"\n    },\n    {\n      \"name\": \"道頓堀クルーズ\",\n      \"type\": \"ボートツアー\",\n      \"price\": \"1500円\",\n      \"url\": \"https://www.dotonbori-cruise.com/\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "activities": [
+          {
+            "name": "梅田スカイビル 空中庭園展望台",
+            "type": "展望台",
+            "price": "1500円",
+            "url": "https://www.skybldg.co.jp/sky/"
+          },
+          {
+            "name": "難波パークス",
+            "type": "ショッピングモール",
+            "price": "無料",
+            "url": "https://www.nambaparks.com/"
+          },
+          {
+            "name": "道頓堀クルーズ",
+            "type": "ボートツアー",
+            "price": "1500円",
+            "url": "https://www.dotonbori-cruise.com/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 198,
+        "completion_tokens": 169,
+        "total_tokens": 367,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-06T08:36:24.496Z",
+      "agent": "activity",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"activities\": [\n    {\n      \"name\": \"大阪城天守閣\",\n      \"type\": \"歴史・観光\",\n      \"price\": \"600円\",\n      \"url\": \"https://www.osakacastle.net/\"\n    },\n    {\n      \"name\": \"梅田スカイビル 空中庭園\",\n      \"type\": \"観光・展望\",\n      \"price\": \"1,500円\",\n      \"url\": \"https://www.skybldg.co.jp/\"\n    },\n    {\n      \"name\": \"道頓堀クルーズ\",\n      \"type\": \"遊覧・クルーズ\",\n      \"price\": \"1,800円\",\n      \"url\": \"https://www.dotonbori-cruise.com/\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "activities": [
+          {
+            "name": "大阪城天守閣",
+            "type": "歴史・観光",
+            "price": "600円",
+            "url": "https://www.osakacastle.net/"
+          },
+          {
+            "name": "梅田スカイビル 空中庭園",
+            "type": "観光・展望",
+            "price": "1,500円",
+            "url": "https://www.skybldg.co.jp/"
+          },
+          {
+            "name": "道頓堀クルーズ",
+            "type": "遊覧・クルーズ",
+            "price": "1,800円",
+            "url": "https://www.dotonbori-cruise.com/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 198,
+        "completion_tokens": 173,
+        "total_tokens": 371,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-06T08:36:29.350Z",
+      "agent": "day-planner",
+      "model": "gpt-4o",
+      "raw_text": "{\n    \"day\": 2,\n    \"date\": \"2025-09-18\",\n    \"area\": \"難波\",\n    \"theme\": \"下町グルメとエンターテインメント\",\n    \"schedule\": [\n        {\n            \"time\": \"09:00\",\n            \"activity_name\": \"梅田スカイビル 空中庭園展望台\",\n            \"type\": \"activity\",\n            \"description\": \"大阪市の街並みを一望できる展望台を訪れる。\",\n            \"price\": \"1500円\",\n            \"url\": \"https://www.skybldg.co.jp/sky/\",\n            \"lat\": 34.7056,\n            \"lon\": 135.4892\n        },\n        {\n            \"time\": \"12:00\",\n            \"activity_name\": \"難波パークス\",\n            \"type\": \"activity\",\n            \"description\": \"難波で人気のショッピングモールを探索。\",\n            \"price\": \"無料\",\n            \"url\": \"https://www.nambaparks.com/\",\n            \"lat\": 34.6643,\n            \"lon\": 135.5018\n        },\n        {\n            \"time\": \"13:30\",\n            \"activity_name\": \"難波炭火焼肉 小鉄\",\n            \"type\": \"meal\",\n            \"description\": \"人気の焼肉料理を堪能。\",\n            \"price\": \"3000円\",\n            \"url\": \"https://namba-kotetsu.com/\",\n            \"lat\": 34.6628,\n            \"lon\": 135.5032\n        },\n        {\n            \"time\": \"15:30\",\n            \"activity_name\": \"道頓堀クルーズ\",\n            \"type\": \"activity\",\n            \"description\": \"道頓堀を巡るボートツアー。\",\n            \"price\": \"1500円\",\n            \"url\": \"https://www.dotonbori-cruise.com/\",\n            \"lat\": 34.6687,\n            \"lon\": 135.5014\n        }\n    ],\n    \"total_cost\": 6000\n}",
+      "parsed_json": {
+        "day": 2,
+        "date": "2025-09-18",
+        "area": "難波",
+        "theme": "下町グルメとエンターテインメント",
+        "schedule": [
+          {
+            "time": "09:00",
+            "activity_name": "梅田スカイビル 空中庭園展望台",
+            "type": "activity",
+            "description": "大阪市の街並みを一望できる展望台を訪れる。",
+            "price": "1500円",
+            "url": "https://www.skybldg.co.jp/sky/",
+            "lat": 34.7056,
+            "lon": 135.4892
+          },
+          {
+            "time": "12:00",
+            "activity_name": "難波パークス",
+            "type": "activity",
+            "description": "難波で人気のショッピングモールを探索。",
+            "price": "無料",
+            "url": "https://www.nambaparks.com/",
+            "lat": 34.6643,
+            "lon": 135.5018
+          },
+          {
+            "time": "13:30",
+            "activity_name": "難波炭火焼肉 小鉄",
+            "type": "meal",
+            "description": "人気の焼肉料理を堪能。",
+            "price": "3000円",
+            "url": "https://namba-kotetsu.com/",
+            "lat": 34.6628,
+            "lon": 135.5032
+          },
+          {
+            "time": "15:30",
+            "activity_name": "道頓堀クルーズ",
+            "type": "activity",
+            "description": "道頓堀を巡るボートツアー。",
+            "price": "1500円",
+            "url": "https://www.dotonbori-cruise.com/",
+            "lat": 34.6687,
+            "lon": 135.5014
+          }
+        ],
+        "total_cost": 6000
+      },
+      "usage": {
+        "prompt_tokens": 906,
+        "completion_tokens": 457,
+        "total_tokens": 1363,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-06T08:36:30.033Z",
+      "agent": "day-planner",
+      "model": "gpt-4o",
+      "raw_text": "{\n    \"day\": 1,\n    \"date\": \"2025-09-17\",\n    \"area\": \"梅田\",\n    \"theme\": \"ショッピングと都市文化\",\n    \"schedule\": [\n        {\n            \"time\": \"10:00\",\n            \"activity_name\": \"梅田スカイビル 空中庭園\",\n            \"type\": \"activity\",\n            \"description\": \"梅田のランドマーク、空中庭園からの展望を楽しみます。\",\n            \"price\": \"1500円\",\n            \"url\": \"https://www.skybldg.co.jp/\",\n            \"lat\": 34.705531,\n            \"lon\": 135.489434\n        },\n        {\n            \"time\": \"12:30\",\n            \"activity_name\": \"梅田 鮨だるま\",\n            \"type\": \"meal\",\n            \"description\": \"新鮮な寿司を楽しめる梅田の人気店でランチ。\",\n            \"price\": \"4000円\",\n            \"url\": \"https://sushidaruma.com/umeda\",\n            \"lat\": 34.705601,\n            \"lon\": 135.495979\n        },\n        {\n            \"time\": \"15:00\",\n            \"activity_name\": \"大阪城天守閣\",\n            \"type\": \"activity\",\n            \"description\": \"歴史的な大阪城を見学し、都市文化を感じる。\",\n            \"price\": \"600円\",\n            \"url\": \"https://www.osakacastle.net/\",\n            \"lat\": 34.687317,\n            \"lon\": 135.526201\n        },\n        {\n            \"time\": \"18:00\",\n            \"activity_name\": \"梅田 カフェ アントワネット\",\n            \"type\": \"meal\",\n            \"description\": \"アンティークな雰囲気のカフェでティータイムを。\",\n            \"price\": \"2000円\",\n            \"url\": \"https://antoinette.com\",\n            \"lat\": 34.707957,\n            \"lon\": 135.498119\n        }\n    ],\n    \"total_cost\": 8100\n}",
+      "parsed_json": {
+        "day": 1,
+        "date": "2025-09-17",
+        "area": "梅田",
+        "theme": "ショッピングと都市文化",
+        "schedule": [
+          {
+            "time": "10:00",
+            "activity_name": "梅田スカイビル 空中庭園",
+            "type": "activity",
+            "description": "梅田のランドマーク、空中庭園からの展望を楽しみます。",
+            "price": "1500円",
+            "url": "https://www.skybldg.co.jp/",
+            "lat": 34.705531,
+            "lon": 135.489434
+          },
+          {
+            "time": "12:30",
+            "activity_name": "梅田 鮨だるま",
+            "type": "meal",
+            "description": "新鮮な寿司を楽しめる梅田の人気店でランチ。",
+            "price": "4000円",
+            "url": "https://sushidaruma.com/umeda",
+            "lat": 34.705601,
+            "lon": 135.495979
+          },
+          {
+            "time": "15:00",
+            "activity_name": "大阪城天守閣",
+            "type": "activity",
+            "description": "歴史的な大阪城を見学し、都市文化を感じる。",
+            "price": "600円",
+            "url": "https://www.osakacastle.net/",
+            "lat": 34.687317,
+            "lon": 135.526201
+          },
+          {
+            "time": "18:00",
+            "activity_name": "梅田 カフェ アントワネット",
+            "type": "meal",
+            "description": "アンティークな雰囲気のカフェでティータイムを。",
+            "price": "2000円",
+            "url": "https://antoinette.com",
+            "lat": 34.707957,
+            "lon": 135.498119
+          }
+        ],
+        "total_cost": 8100
+      },
+      "usage": {
+        "prompt_tokens": 902,
+        "completion_tokens": 464,
+        "total_tokens": 1366,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "geocode": [
+    {
+      "ts": "2025-09-06T08:36:46.037Z",
+      "query": "梅田スカイビル 空中庭園 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-06T08:36:46.050Z",
+      "query": "梅田 鮨だるま 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-06T08:36:46.060Z",
+      "query": "大阪城天守閣 梅田 大阪 日本",
+      "lat": 35.0235553,
+      "lon": 135.7414358,
+      "display_name": "千本日活, 上長者町通, 武衛陣町, 高台院町, 上京区, 京都市, 京都府, 602-8288, 日本",
+      "source": "nominatim"
+    },
+    {
+      "ts": "2025-09-06T08:36:46.070Z",
+      "query": "梅田 カフェ アントワネット 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-06T08:36:46.079Z",
+      "query": "梅田スカイビル 空中庭園展望台 難波 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-06T08:36:46.085Z",
+      "query": "難波パークス 難波 大阪 日本",
+      "lat": 34.6622806,
+      "lon": 135.5009819,
+      "display_name": "難波パークス通り, 阪神高速1号環状線, 難波中二丁目, 浪速区, 大阪市, 大阪府, 556-8799, 日本",
+      "source": "nominatim"
+    },
+    {
+      "ts": "2025-09-06T08:36:46.095Z",
+      "query": "難波炭火焼肉 小鉄 難波 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-06T08:36:46.102Z",
+      "query": "道頓堀クルーズ 難波 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-06T08:36:57.486Z",
+      "query": "梅田スカイビル 空中庭園 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-06T08:36:57.494Z",
+      "query": "梅田 鮨だるま 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-06T08:36:57.503Z",
+      "query": "大阪城天守閣 梅田 大阪 日本",
+      "lat": 35.0235553,
+      "lon": 135.7414358,
+      "display_name": "千本日活, 上長者町通, 武衛陣町, 高台院町, 上京区, 京都市, 京都府, 602-8288, 日本",
+      "source": "cache"
+    },
+    {
+      "ts": "2025-09-06T08:36:57.508Z",
+      "query": "梅田 カフェ アントワネット 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-06T08:36:57.511Z",
+      "query": "梅田スカイビル 空中庭園展望台 難波 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-06T08:36:57.515Z",
+      "query": "難波パークス 難波 大阪 日本",
+      "lat": 34.6622806,
+      "lon": 135.5009819,
+      "display_name": "難波パークス通り, 阪神高速1号環状線, 難波中二丁目, 浪速区, 大阪市, 大阪府, 556-8799, 日本",
+      "source": "cache"
+    },
+    {
+      "ts": "2025-09-06T08:36:57.519Z",
+      "query": "難波炭火焼肉 小鉄 難波 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-06T08:36:57.524Z",
+      "query": "道頓堀クルーズ 難波 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-06T08:36:57.545Z",
+      "query": "梅田スカイビル 空中庭園 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-06T08:36:57.562Z",
+      "query": "梅田 鮨だるま 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-06T08:36:57.573Z",
+      "query": "大阪城天守閣 梅田 大阪 日本",
+      "lat": 35.0235553,
+      "lon": 135.7414358,
+      "display_name": "千本日活, 上長者町通, 武衛陣町, 高台院町, 上京区, 京都市, 京都府, 602-8288, 日本",
+      "source": "cache"
+    },
+    {
+      "ts": "2025-09-06T08:36:57.582Z",
+      "query": "梅田 カフェ アントワネット 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-06T08:36:57.589Z",
+      "query": "梅田スカイビル 空中庭園展望台 難波 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-06T08:36:57.597Z",
+      "query": "難波パークス 難波 大阪 日本",
+      "lat": 34.6622806,
+      "lon": 135.5009819,
+      "display_name": "難波パークス通り, 阪神高速1号環状線, 難波中二丁目, 浪速区, 大阪市, 大阪府, 556-8799, 日本",
+      "source": "cache"
+    },
+    {
+      "ts": "2025-09-06T08:36:57.604Z",
+      "query": "難波炭火焼肉 小鉄 難波 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-06T08:36:57.608Z",
+      "query": "道頓堀クルーズ 難波 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    }
+  ]
+}

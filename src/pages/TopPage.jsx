@@ -1,24 +1,158 @@
-// src\pages\TopPage.jsx
+// src/pages/TopPage.jsx
+import React, { useEffect, useState } from "react";
+import { trackEvent } from "../utils/analytics";
 
 export default function TopPage({ onStart }) {
+  const [consented, setConsented] = useState(false);
+
+  // 初回表示トラッキング＋過去の同意状態を復元
+  useEffect(() => {
+    trackEvent("consent_view");
+    try {
+      const v = localStorage.getItem("atp_consent_v1");
+      if (v === "true") setConsented(true);
+    } catch (_) {}
+  }, []);
+
+  const handleToggle = (e) => {
+    const checked = e.target.checked;
+    setConsented(checked);
+    trackEvent(checked ? "consent_checked" : "consent_unchecked");
+  };
+
+  const handleStart = () => {
+    if (!consented) return;
+    try {
+      localStorage.setItem("atp_consent_v1", "true");
+    } catch (_) {}
+    trackEvent("consent_accept");
+    onStart?.();
+  };
+
   return (
-    <div style={{
-      display: "flex", flexDirection: "column", alignItems: "center",
-      justifyContent: "center", height: "100vh", background: "#fff"
-    }}>
-      <h1 style={{ color: "#00C0B8", fontSize: 48, marginBottom: 24 }}>
-        AI Travel Planner
-      </h1>
-      <button
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "grid",
+        placeItems: "center",
+        background: "#fff",
+        padding: 24,
+      }}
+    >
+      <div
         style={{
-          background: "#00C0B8", color: "#fff", border: "none",
-          borderRadius: 8, fontSize: 22, padding: "16px 56px", fontWeight: 700,
-          cursor: "pointer"
+          width: "min(780px, 92vw)",
+          border: "1px solid #e6eaef",
+          borderRadius: 16,
+          padding: "36px 28px",
+          boxShadow: "0 6px 24px rgba(0,0,0,0.06)",
         }}
-        onClick={onStart}
       >
-        Start
-      </button>
+        <h1
+          style={{
+            color: "#00C0B8",
+            fontSize: 44,
+            lineHeight: 1.1,
+            margin: 0,
+            marginBottom: 8,
+            textAlign: "center",
+            fontWeight: 800,
+          }}
+        >
+          AI Travel Planner
+        </h1>
+
+        <p
+          style={{
+            textAlign: "center",
+            color: "#667085",
+            marginTop: 0,
+            marginBottom: 28,
+            fontSize: 16,
+          }}
+        >
+          より良い体験のために、利用状況（ページ閲覧・クリック等）を分析目的で収集します。
+        </p>
+
+        <div
+          style={{
+            background: "#f8fafc",
+            border: "1px solid #eef2f7",
+            borderRadius: 12,
+            padding: 20,
+            marginBottom: 20,
+          }}
+        >
+          <label
+            htmlFor="consent"
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+              gap: 12,
+              cursor: "pointer",
+            }}
+          >
+            <input
+              id="consent"
+              type="checkbox"
+              checked={consented}
+              onChange={handleToggle}
+              style={{ marginTop: 2, width: 18, height: 18, cursor: "pointer" }}
+            />
+            <span style={{ color: "#334155", fontSize: 15, lineHeight: 1.6 }}>
+              上記のデータ収集に同意し、
+              <a
+                href="#/terms"
+                style={{ color: "#00A59E", textDecoration: "underline" }}
+              >
+                利用規約
+              </a>
+              と
+              <a
+                href="#/privacy"
+                style={{ color: "#00A59E", textDecoration: "underline" }}
+              >
+                プライバシーポリシー
+              </a>
+              を確認しました。
+              <br />
+              ※ 計測には Google Analytics 4 を使用します。詳細はポリシーをご参照ください。
+            </span>
+          </label>
+        </div>
+
+        <div style={{ textAlign: "center" }}>
+          <button
+            onClick={handleStart}
+            disabled={!consented}
+            style={{
+              background: consented ? "#00C0B8" : "#9bdedb",
+              color: "#fff",
+              border: "none",
+              borderRadius: 10,
+              fontSize: 20,
+              padding: "14px 48px",
+              fontWeight: 800,
+              cursor: consented ? "pointer" : "not-allowed",
+              transition: "transform 0.05s ease",
+            }}
+            onMouseDown={(e) => {
+              if (consented) e.currentTarget.style.transform = "translateY(1px)";
+            }}
+            onMouseUp={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+            }}
+            aria-disabled={!consented}
+            aria-label="同意して開始"
+          >
+            Start
+          </button>
+
+          <div style={{ marginTop: 16, color: "#94a3b8", fontSize: 13 }}>
+            ※ 同意はこのブラウザに保存されます（いつでも解除可）。
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
