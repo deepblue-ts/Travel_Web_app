@@ -1,15 +1,14 @@
 <!-- index.html -->
-
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- favicon は公開パス参照なので BASE_URL を使う -->
-    <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
+    <!-- SVG favicon: BASE_URL + キャッシュバスター + sizes="any" を付与 -->
+    <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg?v=2" sizes="any" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI Travel Planner</title>
 
-    <!-- GA4: 本番ビルド時だけ読み込む（Viteの環境変数を利用） -->
+    <!-- GA4: 本番のみ読み込み -->
     <script type="module">
       const GA_ID = import.meta.env.VITE_GA_ID;
       if (import.meta.env.PROD && GA_ID) {
@@ -17,21 +16,17 @@
         s.async = true;
         s.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
         document.head.appendChild(s);
-
         window.dataLayer = window.dataLayer || [];
         function gtag(){ dataLayer.push(arguments); }
         window.gtag = gtag;
-
         gtag('js', new Date());
-        // SPAなので自動 page_view はオフ。遷移時に自分で送る
         gtag('config', GA_ID, { send_page_view: false });
       }
     </script>
   </head>
   <body>
     <div id="root"></div>
-    <!-- ▼ モジュールは base を使わず、ルート基準で指定する -->
+    <!-- モジュールはルート基準でOK（BASE_URLは付けない） -->
     <script type="module" src="/src/main.jsx"></script>
-    <!-- ▲ ここがビルド失敗の原因でした -->
   </body>
 </html>
