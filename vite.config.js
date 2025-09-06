@@ -2,13 +2,12 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// GitHub Pages のベースパス（リポ名）
-const repoBase = '/Travel_Web_app/'
+// GitHub Pages 配信時のみサブパスにする
+const isProd = process.env.GITHUB_ACTIONS || process.env.NODE_ENV === 'production'
 
 export default defineConfig({
   plugins: [react()],
-  // build 時にだけ効くので、常に設定してOK
-  base: repoBase,
+  base: isProd ? '/Travel_Web_app/' : '/',
   server: {
     proxy: {
       '/api': {

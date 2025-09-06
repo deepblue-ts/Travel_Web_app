@@ -5,7 +5,7 @@ import PlanWizard from "./pages/PlanWizard";
 import GeneratingPlanPage from "./pages/GeneratingPlanPage";
 import PlanResult from "./pages/PlanResult";
 import { usePlan } from "./contexts/PlanContext";
-import { trackPageView, trackEvent } from "./lib/analytics";
+import { trackPageView, trackEvent } from "./utils/analytics";
 
 // ステップごとの仮想パス＆タイトル（HashRouterでもGAには # を含めないパスを送る）
 const PAGE_INFO = {
@@ -29,20 +29,22 @@ export default function App() {
     else setStep(0);
   }, []);
 
-  // 生成フローの画面遷移
+  // 生成フローの画面遷移（★修正ポイント）
   useEffect(() => {
-    if (planJsonResult) {
+    // 結果が出たら、「生成中(step===2)」からだけ結果ページへ遷移
+    if (planJsonResult && step === 2) {
       setStep(3);
       return;
     }
-    if (!loadingStatus.active && step === 2) {
+    // 生成中から中断/失敗したらウィザードへ戻す
+    if (!loadingStatus?.active && step === 2) {
       if (error) {
         // 必要ならUI側で通知
         // alert(error);
       }
-      setStep(1); // Wizardに戻す
+      setStep(1);
     }
-  }, [planJsonResult, loadingStatus.active, error, step]);
+  }, [planJsonResult, loadingStatus, error, step]);
 
   // ステップ変化時：Hashを更新し、GAにpage_view送信＆タイトル設定
   useEffect(() => {
@@ -63,18 +65,18 @@ export default function App() {
 
   const handleStart = () => {
     trackEvent("click_start");
-    setStep(1);
+    setStep(1); // Top -> Wizard
   };
 
   const handleBackToTop = () => {
     trackEvent("back_to_top");
-    setStep(0);
+    setStep(0); // どこからでも Top へ
   };
 
   // 「作成開始」を押した瞬間にローディング画面へ
   const handlePlanGenerationStart = () => {
     trackEvent("generate_plan_start");
-    setStep(2);
+    setStep(2); // Wizard -> Generating
   };
 
   const renderStep = () => {
