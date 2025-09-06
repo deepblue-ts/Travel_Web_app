@@ -1,0 +1,21 @@
+<!-- /public/favicon.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="AI Travel Planner">
+  <!-- BG circle -->
+  <circle cx="256" cy="256" r="248" fill="#0EA5E9"></circle>
+  <!-- Dotted route -->
+  <g fill="#E0F2FE">
+    <circle cx="160" cy="332" r="8"></circle>
+    <circle cx="192" cy="308" r="8"></circle>
+    <circle cx="224" cy="284" r="8"></circle>
+    <circle cx="256" cy="260" r="8"></circle>
+    <circle cx="288" cy="236" r="8"></circle>
+  </g>
+  <!-- Paper plane -->
+  <path d="M112 256l288-120-96 240-56-72-72-56 240-112-224 136z" fill="#FFFFFF"></path>
+  <!-- Spark (AI感のアクセント) -->
+  <g fill="#FDE68A">
+    <circle cx="338" cy="174" r="10"></circle>
+    <circle cx="360" cy="162" r="5"></circle>
+    <circle cx="322" cy="162" r="5"></circle>
+  </g>
+</svg>
