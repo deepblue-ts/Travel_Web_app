@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!doctype html>
 <html lang="en">
   <head>
@@ -5,6 +6,24 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI Travel Planner</title>
+
+    <!-- GA4: 本番かつ GA_ID があるときだけ読み込み＆初期化 -->
+    <script type="module">
+      const GA_ID = import.meta.env.VITE_GA_ID;
+      if (import.meta.env.PROD && GA_ID) {
+        const s = document.createElement('script');
+        s.async = true;
+        s.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
+        document.head.appendChild(s);
+
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function(){ window.dataLayer.push(arguments); };
+
+        gtag('js', new Date());
+        // SPAなので自動 page_view は無効にして、アプリ側で送る
+        gtag('config', GA_ID, { send_page_view: false });
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
