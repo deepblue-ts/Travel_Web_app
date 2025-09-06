@@ -3,11 +3,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI Travel Planner</title>
 
-    <!-- GA4: 本番かつ GA_ID があるときだけ読み込み＆初期化 -->
+    <!-- GA4: 本番ビルド時だけ読み込む（Viteの環境変数を利用） -->
     <script type="module">
       const GA_ID = import.meta.env.VITE_GA_ID;
       if (import.meta.env.PROD && GA_ID) {
@@ -17,10 +17,11 @@
         document.head.appendChild(s);
 
         window.dataLayer = window.dataLayer || [];
-        window.gtag = function(){ window.dataLayer.push(arguments); };
+        function gtag(){ dataLayer.push(arguments); }
+        window.gtag = gtag;
 
         gtag('js', new Date());
-        // SPAなので自動 page_view は無効にして、アプリ側で送る
+        // SPAなので自動 page_view はオフ。遷移時に自分で送る
         gtag('config', GA_ID, { send_page_view: false });
       }
     </script>

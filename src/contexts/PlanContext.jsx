@@ -196,7 +196,7 @@ export function PlanProvider({ children }) {
       );
 
       // ⑤ 各日の詳細プラン
-      step("各日の詳細プランを同時生成中...", 60);
+      step("各日の詳細プランを生成中...", 60);
       const batchInput = perDayResources.map((r) => ({
         day: r.day,
         date: r.date,
