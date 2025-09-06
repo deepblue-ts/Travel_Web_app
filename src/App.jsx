@@ -4,43 +4,51 @@ import TopPage from "./pages/TopPage";
 import PlanWizard from "./pages/PlanWizard";
 import GeneratingPlanPage from "./pages/GeneratingPlanPage";
 import PlanResult from "./pages/PlanResult";
+import TermsPage from "./pages/TermsPage";
+import PrivacyPage from "./pages/PrivacyPage";
 import { usePlan } from "./contexts/PlanContext";
 import { trackPageView, trackEvent } from "./utils/analytics";
 
 // ステップごとの仮想パス＆タイトル（HashRouterでもGAには # を含めないパスを送る）
 const PAGE_INFO = {
-  0: { path: "/",           title: "Top — AI Travel Planner" },
-  1: { path: "/wizard",     title: "Wizard — AI Travel Planner" },
-  2: { path: "/generating", title: "Generating — AI Travel Planner" },
-  3: { path: "/result",     title: "Result — AI Travel Planner" },
+  0:  { path: "/",           title: "Top — AI Travel Planner" },
+  1:  { path: "/wizard",     title: "Wizard — AI Travel Planner" },
+  2:  { path: "/generating", title: "Generating — AI Travel Planner" },
+  3:  { path: "/result",     title: "Result — AI Travel Planner" },
+  10: { path: "/terms",      title: "利用規約 — AI Travel Planner" },
+  11: { path: "/privacy",    title: "プライバシーポリシー — AI Travel Planner" },
 };
 
 export default function App() {
-  // 0: Top, 1: Wizard, 2: Generating, 3: Result
+  // 0: Top, 1: Wizard, 2: Generating, 3: Result, 10: Terms, 11: Privacy
   const [step, setStep] = useState(0);
   const { loadingStatus, error, planJsonResult } = usePlan();
 
-  // Hashから初期ステップを推定（直リンク対策）
+  // Hash → step へ反映（初期化＋ハッシュ遷移対応）
   useEffect(() => {
-    const h = (window.location.hash || "").replace(/^#/, "");
-    if (h.startsWith("/wizard")) setStep(1);
-    else if (h.startsWith("/generating")) setStep(2);
-    else if (h.startsWith("/result")) setStep(3);
-    else setStep(0);
+    const applyFromHash = () => {
+      const h = (window.location.hash || "").replace(/^#/, "");
+      if (h.startsWith("/wizard")) setStep(1);
+      else if (h.startsWith("/generating")) setStep(2);
+      else if (h.startsWith("/result")) setStep(3);
+      else if (h.startsWith("/terms")) setStep(10);
+      else if (h.startsWith("/privacy")) setStep(11);
+      else setStep(0);
+    };
+    applyFromHash();
+    window.addEventListener("hashchange", applyFromHash);
+    return () => window.removeEventListener("hashchange", applyFromHash);
   }, []);
 
-  // 生成フローの画面遷移（★修正ポイント）
+  // 生成フローの画面遷移（結果は「生成中(step===2)」からだけ遷移）
   useEffect(() => {
-    // 結果が出たら、「生成中(step===2)」からだけ結果ページへ遷移
     if (planJsonResult && step === 2) {
       setStep(3);
       return;
     }
-    // 生成中から中断/失敗したらウィザードへ戻す
     if (!loadingStatus?.active && step === 2) {
       if (error) {
-        // 必要ならUI側で通知
-        // alert(error);
+        // 必要なら通知など
       }
       setStep(1);
     }
@@ -53,7 +61,7 @@ export default function App() {
     // タイトル
     if (title) document.title = title;
 
-    // URLのHash（ユーザーの直リンク共有にも便利）
+    // URLのHash（共有・直リンクにも対応）
     const desiredHash = `#${path}`.replace("#//", "#/");
     if (window.location.hash !== desiredHash) {
       window.location.hash = desiredHash;
@@ -92,6 +100,10 @@ export default function App() {
         return <GeneratingPlanPage />;
       case 3:
         return <PlanResult onBackToTop={handleBackToTop} />;
+      case 10:
+        return <TermsPage />;
+      case 11:
+        return <PrivacyPage />;
       default:
         return <TopPage onStart={handleStart} />;
     }

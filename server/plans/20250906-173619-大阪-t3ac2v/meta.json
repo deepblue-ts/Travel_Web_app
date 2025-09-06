@@ -1,0 +1,14 @@
+{
+  "planId": "20250906-173619-大阪-t3ac2v",
+  "createdAt": "2025-09-06T08:36:19.656Z",
+  "status": "Done",
+  "origin": "東京",
+  "destination": "大阪",
+  "dates": {
+    "start": "2025-09-17",
+    "end": "2025-09-18"
+  },
+  "duration": 2,
+  "budgetPerDay": 50000,
+  "transport": "public"
+}

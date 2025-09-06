@@ -1,0 +1,150 @@
+{
+  "places": [
+    {
+      "id": "p1",
+      "name": "梅田スカイビル 空中庭園",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 1500,
+      "url": "https://www.skybldg.co.jp/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p2",
+      "name": "梅田 鮨だるま",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 4000,
+      "url": "https://sushidaruma.com/umeda",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p3",
+      "name": "大阪城天守閣",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 600,
+      "url": "https://www.osakacastle.net/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p4",
+      "name": "梅田 カフェ アントワネット",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 2000,
+      "url": "https://antoinette.com",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p5",
+      "name": "梅田スカイビル 空中庭園展望台",
+      "type": "poi",
+      "area": "難波",
+      "priceYen": 1500,
+      "url": "https://www.skybldg.co.jp/sky/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p6",
+      "name": "難波パークス",
+      "type": "poi",
+      "area": "難波",
+      "priceYen": 0,
+      "url": "https://www.nambaparks.com/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p7",
+      "name": "難波炭火焼肉 小鉄",
+      "type": "poi",
+      "area": "難波",
+      "priceYen": 3000,
+      "url": "https://namba-kotetsu.com/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p8",
+      "name": "道頓堀クルーズ",
+      "type": "poi",
+      "area": "難波",
+      "priceYen": 1500,
+      "url": "https://www.dotonbori-cruise.com/",
+      "lat": "",
+      "lon": ""
+    }
+  ],
+  "days": [
+    {
+      "day": 1,
+      "date": "2025-09-17",
+      "stops": [
+        {
+          "time": "10:00",
+          "placeId": "p1",
+          "note": "梅田のランドマーク、空中庭園からの展望を楽しみます。",
+          "costYen": 1500
+        },
+        {
+          "time": "12:30",
+          "placeId": "p2",
+          "note": "新鮮な寿司を楽しめる梅田の人気店でランチ。",
+          "costYen": 4000
+        },
+        {
+          "time": "15:00",
+          "placeId": "p3",
+          "note": "歴史的な大阪城を見学し、都市文化を感じる。",
+          "costYen": 600
+        },
+        {
+          "time": "18:00",
+          "placeId": "p4",
+          "note": "アンティークな雰囲気のカフェでティータイムを。",
+          "costYen": 2000
+        }
+      ]
+    },
+    {
+      "day": 2,
+      "date": "2025-09-18",
+      "stops": [
+        {
+          "time": "09:00",
+          "placeId": "p5",
+          "note": "大阪市の街並みを一望できる展望台を訪れる。",
+          "costYen": 1500
+        },
+        {
+          "time": "12:00",
+          "placeId": "p6",
+          "note": "難波で人気のショッピングモールを探索。",
+          "costYen": 0
+        },
+        {
+          "time": "13:30",
+          "placeId": "p7",
+          "note": "人気の焼肉料理を堪能。",
+          "costYen": 3000
+        },
+        {
+          "time": "15:30",
+          "placeId": "p8",
+          "note": "道頓堀を巡るボートツアー。",
+          "costYen": 1500
+        }
+      ]
+    }
+  ],
+  "estimates": {
+    "totalCostYen": 14100
+  },
+  "title": "大阪への2日間の旅"
+}
