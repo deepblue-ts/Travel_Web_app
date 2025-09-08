@@ -179,7 +179,7 @@ function mergeGeocodesIntoItinerary(destination, itinerary, geocodeResults) {
 }
 
 // ─────────────────────────────────────────────
-// 3) LLM 共通プロンプト
+/** 3) LLM プロンプト */
 // ─────────────────────────────────────────────
 const areaSystemPrompt = `
 あなたは日本の地理と観光に非常に精通した、正確性を最重視する地理情報のエキスパートです。
@@ -352,42 +352,111 @@ const createApiHandlerWithModel = (systemPrompt, agent, model) => async (req, re
 // 5) ルーティング
 // ─────────────────────────────────────────────
 
-// 5-1) エリア（キャッシュ対応）
+// ==== 置き換え: /api/get-areas（POST互換） + GET新設 ====
+
+// L1メモリキャッシュ（プロセス内）
+const L1_AREAS = new Map(); // key => { areas, updatedAt, cache_key, expiresAt }
+const AREA_TTL_MS = 1000 * 60 * 60 * 24 * 30; // 30日
+
+// 正規化（表記ゆれ対策）
+function canonicalizeDestination(input) {
+  if (!input) return '';
+  let s = String(input).normalize('NFKC').trim().toLowerCase();
+  s = s.replace(/\s+/g, '');
+  s = s.replace(/[都道府県市区町村郡]$/u, '');
+  const romaji2ja = {
+    tokyo: '東京', kyoto: '京都', osaka: '大阪',
+    hokkaido: '北海道', okinawa: '沖縄', fukuoka: '福岡',
+    nagoya: '名古屋', sapporo: '札幌', nara: '奈良',
+    kobe: '神戸', yokohama: '横浜', chiba: '千葉',
+    saitama: '埼玉', hiroshima: '広島', sendai: '仙台',
+  };
+  if (romaji2ja[s]) s = romaji2ja[s];
+  return s;
+}
+
+async function handleGetAreas(destination, res) {
+  if (!destination || typeof destination !== 'string') {
+    res.status(400).json({ error: 'destination は必須です（string）' });
+    return;
+  }
+
+  const ckey = canonicalizeDestination(destination);
+  const now = Date.now();
+
+  // 1) L1メモリ
+  const l1 = L1_AREAS.get(ckey);
+  if (l1 && l1.expiresAt > now) {
+    res.set('X-Cache', 'HIT-L1');
+    res.set('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+    res.json({ areas: l1.areas, source: 'cache', cache_key: l1.cache_key, updatedAt: l1.updatedAt || null });
+    return;
+  }
+
+  // 2) ディスク
+  const cacheObj = await readJsonFile(AREA_CACHE_FILE);
+  const hitKeyByFn = findCacheKey(cacheObj, destination);
+  const hitKeyByCanon = Object.keys(cacheObj).find(k => canonicalizeDestination(k) === ckey);
+  const hitKey = hitKeyByFn || hitKeyByCanon;
+
+  if (hitKey && cacheObj[hitKey]?.areas) {
+    const payload = cacheObj[hitKey];
+    L1_AREAS.set(ckey, {
+      areas: payload.areas,
+      updatedAt: payload.updatedAt || null,
+      cache_key: hitKey,
+      expiresAt: now + AREA_TTL_MS,
+    });
+    res.set('X-Cache', 'HIT-DISK');
+    res.set('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+    res.json({ areas: payload.areas, source: 'cache', cache_key: hitKey, updatedAt: payload.updatedAt || null });
+    return;
+  }
+
+  // 3) MISS → LLM
+  const areas = await callLLMForAreas({ destination });
+
+  // 4) 保存（原文キー＋正規化キー）
+  const saveKeyOriginal = String(destination).trim();
+  const saveKeyCanonical = ckey;
+  const entry = { areas, updatedAt: new Date().toISOString() };
+  const updated = {
+    ...(cacheObj || {}),
+    [saveKeyOriginal]: entry,
+    [saveKeyCanonical]: entry,
+  };
+  await writeJsonFile(AREA_CACHE_FILE, updated);
+
+  // L1にも保存
+  L1_AREAS.set(ckey, {
+    areas,
+    updatedAt: entry.updatedAt,
+    cache_key: saveKeyOriginal,
+    expiresAt: now + AREA_TTL_MS,
+  });
+
+  res.set('X-Cache', 'MISS');
+  res.set('Cache-Control', 'public, max-age=60');
+  res.json({ areas, source: 'ai', cache_key: saveKeyOriginal, updatedAt: entry.updatedAt });
+}
+
+// POST版（既存互換）
 app.post('/api/get-areas', async (req, res) => {
   try {
-    const { destination } = req.body || {};
-    if (!destination || typeof destination !== 'string') {
-      return res.status(400).json({ error: 'destination は必須です（string）' });
-    }
+    await handleGetAreas(req.body?.destination, res);
+  } catch (e) {
+    const status = e?.status || e?.response?.status || 500;
+    res.status(status).json({ error: e?.message || 'Unknown server error' });
+  }
+});
 
-    const cacheObj = await readJsonFile(AREA_CACHE_FILE);
-    const hitKey = findCacheKey(cacheObj, destination);
-
-    if (hitKey && cacheObj[hitKey]?.areas) {
-      return res.json({
-        areas: cacheObj[hitKey].areas,
-        source: 'cache',
-        cache_key: hitKey,
-        updatedAt: cacheObj[hitKey].updatedAt || null,
-      });
-    }
-
-    const areas = await callLLMForAreas(req.body);
-    const saveKey = String(destination).trim();
-    const updated = { ...(cacheObj || {}), [saveKey]: { areas, updatedAt: new Date().toISOString() } };
-    await writeJsonFile(AREA_CACHE_FILE, updated);
-
-    res.json({
-      areas,
-      source: 'ai',
-      cache_key: saveKey,
-      updatedAt: updated[saveKey].updatedAt,
-    });
-  } catch (error) {
-    const status = error?.status || error?.response?.status || 500;
-    const detail = error?.response?.data || null;
-    console.error('get-areas Error:', error?.message, detail);
-    res.status(status).json({ error: error?.message || 'Unknown server error', detail });
+// GET版（プリフライト回避 & ブラウザキャッシュ活用）
+app.get('/api/get-areas', async (req, res) => {
+  try {
+    await handleGetAreas(req.query?.destination, res);
+  } catch (e) {
+    const status = e?.status || e?.response?.status || 500;
+    res.status(status).json({ error: e?.message || 'Unknown server error' });
   }
 });
 
