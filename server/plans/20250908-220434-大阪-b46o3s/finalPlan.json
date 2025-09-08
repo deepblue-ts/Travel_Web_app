@@ -1,0 +1,150 @@
+{
+  "places": [
+    {
+      "id": "p1",
+      "name": "梅田スカイビル空中庭園展望台",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 1500,
+      "url": "https://www.skybldg.co.jp/observatory/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p2",
+      "name": "大阪焼肉 鶴橋 風月 梅田店",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 4000,
+      "url": "https://www.fuugetsu.com/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p3",
+      "name": "大阪城見学",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 600,
+      "url": "https://www.osakacastle.net/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p4",
+      "name": "ラーメンはやし",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 1000,
+      "url": "https://ramenhayashi.com/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p5",
+      "name": "梅田スカイビル展望台",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 1500,
+      "url": "https://www.skybldg.co.jp/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p6",
+      "name": "茶房 梅田",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 1500,
+      "url": "https://example.com/sabo-umeda",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p7",
+      "name": "阪急うめだ本店",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 0,
+      "url": "https://www.hankyu-dept.co.jp/honten/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p8",
+      "name": "イタリアンダイニング Ciao",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 2000,
+      "url": "https://example.com/italian-ciao",
+      "lat": "",
+      "lon": ""
+    }
+  ],
+  "days": [
+    {
+      "day": 1,
+      "date": "2025-09-23",
+      "stops": [
+        {
+          "time": "10:30",
+          "placeId": "p1",
+          "note": "梅田スカイビルで大阪の景色を楽しむ",
+          "costYen": 1500
+        },
+        {
+          "time": "13:00",
+          "placeId": "p2",
+          "note": "大阪名物焼肉ランチを楽しむ",
+          "costYen": 4000
+        },
+        {
+          "time": "15:30",
+          "placeId": "p3",
+          "note": "日本の歴史を感じる大阪城を訪れる",
+          "costYen": 600
+        },
+        {
+          "time": "18:00",
+          "placeId": "p4",
+          "note": "ディナーでラーメンを味わう",
+          "costYen": 1000
+        }
+      ]
+    },
+    {
+      "day": 2,
+      "date": "2025-09-24",
+      "stops": [
+        {
+          "time": "10:00",
+          "placeId": "p5",
+          "note": "近代建築の象徴である梅田スカイビルの展望台から美しい景色を見渡します。",
+          "costYen": 1500
+        },
+        {
+          "time": "12:30",
+          "placeId": "p6",
+          "note": "和の雰囲気漂う茶房でランチを楽しみます。",
+          "costYen": 1500
+        },
+        {
+          "time": "14:30",
+          "placeId": "p7",
+          "note": "ショッピングを楽しむなら阪急うめだ本店へ。様々なブランドが揃っています。",
+          "costYen": 0
+        },
+        {
+          "time": "18:30",
+          "placeId": "p8",
+          "note": "ディナーはイタリアンダイニングでゆったりと。",
+          "costYen": 2000
+        }
+      ]
+    }
+  ],
+  "estimates": {
+    "totalCostYen": 12100
+  },
+  "title": "大阪への2日間の旅"
+}
