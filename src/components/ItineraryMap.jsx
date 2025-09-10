@@ -1,17 +1,19 @@
 // src/components/ItineraryMap.jsx
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import {
+  GoogleMap,
+  Marker,
+  Polyline,
+  InfoWindow,
+  Circle,
+  useJsApiLoader,
+} from '@react-google-maps/api';
 import { geocodeItinerary, geocodePlace } from '../api/llmService';
 
-// Leaflet のデフォルトアイコン（Viteのアセット解決対策）
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-L.Icon.Default.mergeOptions({ iconRetinaUrl: markerIcon2x, iconUrl: markerIcon, shadowUrl: markerShadow });
-
+// ---- 設定 ----
 const DAY_COLORS = ['#1976d2', '#2e7d32', '#ef6c00', '#6a1b9a', '#ad1457', '#00838f'];
+const MAP_CONTAINER_STYLE = { height: 640, width: '100%' };
+const DEFAULT_CENTER = { lat: 35.681236, lng: 139.767125 }; // 東京駅
 
 const norm = (s) => String(s || '').replace(/\s+/g, '').toLowerCase();
 const makeKey = (day, name) => `${day}||${norm(name)}`;
@@ -19,29 +21,34 @@ const makeQuery = (name, area, dest) =>
   [name, area, dest, '日本'].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
 
 export default function ItineraryMap({ destination, itinerary, selected, onSelect }) {
-  const [map, setMap] = useState(null);                 // Leaflet Map インスタンス
-  const [geo, setGeo] = useState(null);                 // スケジュール座標
-  const [destCenter, setDestCenter] = useState(null);   // 目的地中心座標
-  const markerRefs = useRef({});                        // key -> Marker インスタンス
+  const [destCenter, setDestCenter] = useState(null);   // 目的地中心
+  const [geo, setGeo] = useState(null);                 // バッチジオコード結果
   const [error, setError] = useState(null);
+  const [activeKey, setActiveKey] = useState(null);     // InfoWindow用
 
-  // 1) 目的地をジオコーディング → 初期はここにフォーカス
+  const mapRef = useRef(null);
+  const markersRef = useRef({}); // key -> {lat,lng,meta}
+
+  // Google Maps JS API の読み込み
+  const { isLoaded, loadError } = useJsApiLoader({
+    googleMapsApiKey: import.meta.env.VITE_GMAPS_BROWSER_KEY,
+    id: 'gmap-script',
+  });
+
+  // 1) 目的地センター
   useEffect(() => {
     if (!destination) return;
     (async () => {
       try {
         const r = await geocodePlace(destination);
         if (r?.lat && r?.lon) {
-          setDestCenter({ lat: Number(r.lat), lon: Number(r.lon) });
-          if (map) map.setView([Number(r.lat), Number(r.lon)], 12, { animate: false });
+          setDestCenter({ lat: Number(r.lat), lng: Number(r.lon) });
         }
-      } catch {
-        // 失敗時はデフォルト中心のまま
-      }
+      } catch {}
     })();
-  }, [destination, map]);
+  }, [destination]);
 
-  // 2) 行程を一括ジオコーディング（キャッシュ利用）
+  // 2) 行程の一括ジオコーディング
   useEffect(() => {
     if (!destination || !itinerary?.length) return;
     (async () => {
@@ -54,93 +61,144 @@ export default function ItineraryMap({ destination, itinerary, selected, onSelec
     })();
   }, [destination, itinerary]);
 
-  // 3) dayごとのライン・マーカー・選択ポイント
-  const { dayLines, selectedPoint } = useMemo(() => {
-    if (!geo?.results) return { dayLines: [], selectedPoint: null };
-
+  // 3) dayごとの線・点・選択ポイント
+  const { dayLines, selectedPoint, allPoints } = useMemo(() => {
+    if (!geo?.results) return { dayLines: [], selectedPoint: null, allPoints: [] };
     const byQuery = new Map(geo.results.map((r) => [r.query, r]));
+
     const lines = [];
+    const all = [];
     let sel = null;
 
-    for (const day of itinerary) {
+    for (const day of itinerary || []) {
       const pts = [];
       for (const s of day.schedule || []) {
         const q = makeQuery(s.activity_name, day.area, destination);
         const hit = byQuery.get(q);
         if (hit && Number.isFinite(+hit.lat) && Number.isFinite(+hit.lon)) {
           const key = makeKey(day.day, s.activity_name);
-          const meta = { day: day.day, area: day.area, name: s.activity_name, time: s.time, desc: s.description, url: s.url, key };
-          const p = { lat: Number(hit.lat), lon: Number(hit.lon), meta };
+          const meta = {
+            day: day.day, area: day.area, name: s.activity_name,
+            time: s.time, desc: s.description, url: s.url, key
+          };
+          const p = { lat: Number(hit.lat), lng: Number(hit.lon), meta };
           pts.push(p);
+          all.push(p);
           if (selected && key === makeKey(selected.day, selected.name)) sel = p;
         }
       }
-      if (pts.length) lines.push({ day: day.day, color: DAY_COLORS[(day.day - 1) % DAY_COLORS.length], points: pts });
+      if (pts.length) {
+        lines.push({
+          day: day.day,
+          color: DAY_COLORS[(day.day - 1) % DAY_COLORS.length],
+          points: pts,
+        });
+      }
     }
-
-    return { dayLines: lines, selectedPoint: sel };
+    return { dayLines: lines, selectedPoint: sel, allPoints: all };
   }, [geo, itinerary, destination, selected]);
 
-  // 4) 左のクリックで地図を動かす（flyTo & 該当マーカーのPopupを開く）
+  // 4) マップ初期表示：目的地 or 全ポイントにフィット
+  const onMapLoad = (map) => {
+    mapRef.current = map;
+    if (allPoints.length > 0 && window.google) {
+      const b = new window.google.maps.LatLngBounds();
+      allPoints.forEach((p) => b.extend(p));
+      map.fitBounds(b, 60);
+    } else if (destCenter) {
+      map.setCenter(destCenter);
+      map.setZoom(12);
+    } else {
+      map.setCenter(DEFAULT_CENTER);
+      map.setZoom(6);
+    }
+  };
+
+  // 5) 左カラムからの選択に追従
   useEffect(() => {
-    if (!map || !selectedPoint) return;
-    map.flyTo([selectedPoint.lat, selectedPoint.lon], Math.max(14, map.getZoom()), { duration: 0.6 });
-    const m = markerRefs.current[selectedPoint.meta.key];
-    if (m) m.openPopup();
-  }, [selectedPoint, map]);
+    if (!mapRef.current || !selectedPoint) return;
+    mapRef.current.panTo(selectedPoint);
+    mapRef.current.setZoom(Math.max(14, mapRef.current.getZoom()));
+    setActiveKey(selectedPoint.meta.key);
+  }, [selectedPoint]);
+
+  if (loadError) {
+    return <div style={{ padding: 8, color: '#c62828' }}>Google Mapsの読み込みに失敗しました。</div>;
+  }
+  if (!isLoaded) return <div style={{ height: 640 }} />;
 
   return (
     <div style={{ height: 640, borderRadius: 16, overflow: 'hidden', boxShadow: '0 10px 24px rgba(0,0,0,.06)' }}>
-      <MapContainer
-        whenCreated={setMap}
-        center={destCenter ? [destCenter.lat, destCenter.lon] : [35.681236, 139.767125]}
+      <GoogleMap
+        onLoad={onMapLoad}
+        mapContainerStyle={MAP_CONTAINER_STYLE}
+        center={destCenter || DEFAULT_CENTER}
         zoom={destCenter ? 12 : 6}
-        style={{ height: '100%', width: '100%' }}
+        options={{
+          mapId: import.meta.env.VITE_GMAPS_MAP_ID || undefined, // 任意
+          clickableIcons: false,
+          gestureHandling: 'greedy',
+        }}
       >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution="&copy; OpenStreetMap contributors"
-        />
-
+        {/* ルート線とマーカー */}
         {dayLines.map((day) => (
           <React.Fragment key={day.day}>
             <Polyline
-              positions={day.points.map((p) => [p.lat, p.lon])}
-              pathOptions={{ color: day.color, weight: 4, opacity: 0.9 }}
+              path={day.points}
+              options={{ strokeColor: day.color, strokeOpacity: 0.9, strokeWeight: 4 }}
             />
             {day.points.map((p, idx) => {
-              const isSelected = selectedPoint && selectedPoint.meta.key === p.meta.key;
+              const isActive = activeKey === p.meta.key;
+              // InfoWindowの内容
+              const info = (
+                <div style={{ fontSize: 14, lineHeight: 1.4, maxWidth: 240 }}>
+                  <div><strong>Day {p.meta.day}</strong>（{p.meta.area}）</div>
+                  <div>{p.meta.time ? `${p.meta.time}：` : ''}{p.meta.name}</div>
+                  {p.meta.desc && <div style={{ marginTop: 6, color: '#555' }}>{p.meta.desc}</div>}
+                  {p.meta.url && (
+                    <div style={{ marginTop: 6 }}>
+                      <a href={p.meta.url} target="_blank" rel="noreferrer">詳細を見る</a>
+                    </div>
+                  )}
+                </div>
+              );
+
+              // 参照を保持（選択スクロールや外部からのflyに使うなら）
+              markersRef.current[p.meta.key] = p;
+
               return (
                 <React.Fragment key={`${day.day}-${idx}`}>
-                  {isSelected && (
-                    <CircleMarker center={[p.lat, p.lon]} radius={10} pathOptions={{ color: day.color, weight: 3, fillOpacity: 0.3 }} />
+                  {/* 選択中の強調円 */}
+                  {isActive && (
+                    <Circle
+                      center={p}
+                      radius={60}
+                      options={{
+                        strokeColor: day.color,
+                        strokeOpacity: 0.9,
+                        strokeWeight: 3,
+                        fillOpacity: 0.15,
+                      }}
+                    />
                   )}
                   <Marker
-                    position={[p.lat, p.lon]}
-                    ref={(el) => { if (el) markerRefs.current[p.meta.key] = el; }}
-                    eventHandlers={{
-                      click: () => onSelect?.({ day: p.meta.day, name: p.meta.name }),
+                    position={p}
+                    onClick={() => {
+                      setActiveKey(p.meta.key);
+                      onSelect?.({ day: p.meta.day, name: p.meta.name });
                     }}
-                  >
-                    <Popup>
-                      <div style={{ fontSize: 14, lineHeight: 1.4 }}>
-                        <div><strong>Day {p.meta.day}</strong>（{p.meta.area}）</div>
-                        <div>{p.meta.time ? `${p.meta.time}：` : ''}{p.meta.name}</div>
-                        {p.meta.desc && <div style={{ marginTop: 6, color: '#555' }}>{p.meta.desc}</div>}
-                        {p.meta.url && (
-                          <div style={{ marginTop: 6 }}>
-                            <a href={p.meta.url} target="_blank" rel="noreferrer">詳細を見る</a>
-                          </div>
-                        )}
-                      </div>
-                    </Popup>
-                  </Marker>
+                  />
+                  {isActive && (
+                    <InfoWindow position={p} onCloseClick={() => setActiveKey(null)}>
+                      {info}
+                    </InfoWindow>
+                  )}
                 </React.Fragment>
               );
             })}
           </React.Fragment>
         ))}
-      </MapContainer>
+      </GoogleMap>
 
       {error && <div style={{ padding: 8, color: '#c62828' }}>地図データ取得に失敗: {error}</div>}
     </div>
