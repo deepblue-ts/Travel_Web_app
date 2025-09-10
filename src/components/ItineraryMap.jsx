@@ -1,4 +1,4 @@
-// src/components/ItineraryMap.jsx
+// src/components/ItineraryMap.jsx  ← 全文置換
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   GoogleMap,
@@ -20,6 +20,13 @@ const makeKey = (day, name) => `${day}||${norm(name)}`;
 const makeQuery = (name, area, dest) =>
   [name, area, dest, '日本'].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
 
+// ▼ 環境変数名を一本化（旧名 fallback つき）
+const GMAPS_KEY =
+  import.meta.env.VITE_GOOGLE_MAPS_JS_API_KEY || // 推奨（新）
+  import.meta.env.VITE_GMAPS_BROWSER_KEY;        // 旧
+const GMAPS_MAP_ID =
+  (import.meta.env.VITE_GMAPS_MAP_ID || import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || '').trim() || undefined;
+
 export default function ItineraryMap({ destination, itinerary, selected, onSelect }) {
   const [destCenter, setDestCenter] = useState(null);   // 目的地中心
   const [geo, setGeo] = useState(null);                 // バッチジオコード結果
@@ -31,8 +38,13 @@ export default function ItineraryMap({ destination, itinerary, selected, onSelec
 
   // Google Maps JS API の読み込み
   const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: import.meta.env.VITE_GMAPS_BROWSER_KEY,
     id: 'gmap-script',
+    googleMapsApiKey: GMAPS_KEY,
+    // AdvancedMarker を使う時に必要（今回は通常 Marker だが future-proof）
+    libraries: ['marker'],
+    // locale
+    language: 'ja',
+    region: 'JP',
   });
 
   // 1) 目的地センター
@@ -122,6 +134,15 @@ export default function ItineraryMap({ destination, itinerary, selected, onSelec
     setActiveKey(selectedPoint.meta.key);
   }, [selectedPoint]);
 
+  // --- UI ガード ---
+  if (!GMAPS_KEY) {
+    return (
+      <div style={{ padding: 12, color: '#c62828', background: '#fff3f3', borderRadius: 8 }}>
+        Google Maps のブラウザ用 API キーが設定されていません。<br />
+        <code>VITE_GOOGLE_MAPS_JS_API_KEY</code> を GitHub Secrets → <code>.env.production</code> に流し込んでください。
+      </div>
+    );
+  }
   if (loadError) {
     return <div style={{ padding: 8, color: '#c62828' }}>Google Mapsの読み込みに失敗しました。</div>;
   }
@@ -135,7 +156,8 @@ export default function ItineraryMap({ destination, itinerary, selected, onSelec
         center={destCenter || DEFAULT_CENTER}
         zoom={destCenter ? 12 : 6}
         options={{
-          mapId: import.meta.env.VITE_GMAPS_MAP_ID || undefined, // 任意
+          // mapId はキーと同じ GCP プロジェクトで発行したものだけ設定する
+          mapId: GMAPS_MAP_ID,
           clickableIcons: false,
           gestureHandling: 'greedy',
         }}
@@ -149,7 +171,6 @@ export default function ItineraryMap({ destination, itinerary, selected, onSelec
             />
             {day.points.map((p, idx) => {
               const isActive = activeKey === p.meta.key;
-              // InfoWindowの内容
               const info = (
                 <div style={{ fontSize: 14, lineHeight: 1.4, maxWidth: 240 }}>
                   <div><strong>Day {p.meta.day}</strong>（{p.meta.area}）</div>
@@ -163,12 +184,10 @@ export default function ItineraryMap({ destination, itinerary, selected, onSelec
                 </div>
               );
 
-              // 参照を保持（選択スクロールや外部からのflyに使うなら）
               markersRef.current[p.meta.key] = p;
 
               return (
                 <React.Fragment key={`${day.day}-${idx}`}>
-                  {/* 選択中の強調円 */}
                   {isActive && (
                     <Circle
                       center={p}

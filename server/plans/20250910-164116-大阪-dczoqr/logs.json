@@ -1,0 +1,634 @@
+{
+  "user_input": [],
+  "llm_input": [
+    {
+      "ts": "2025-09-10T07:41:21.290Z",
+      "agent": "day-planner",
+      "model": "gpt-4o",
+      "system_prompt": "\nあなたは旅程作成のプロです。確定済みの day/date/area/theme と候補リストから、\n現実的な1日スケジュールをJSONで構築します。\n\n# 入力\n- day, date, area, theme（これらは変更禁止）\n- planConditions（transport, budgetPerDay など）\n- availableResources: activities/dining/hotels（各 {name,type,url,price,lat,lon}）\n- constraints:\n  - dayStart, dayEnd\n  - budgetPerDay\n  - maxStops, minMealStops\n  - maxLegMinutes（1区間の最大移動分数）\n  - maxTotalWalkKm（徒歩合計上限）\n  - areaLocked（trueなら area外への移動禁止）\n  - mealWindows（例: [\"11:30\",\"14:00\"],[\"18:00\",\"20:00\"]）\n\n# 厳守\n- JSONのみで出力: \n  {\n    \"day\": 1, \"date\": \"YYYY-MM-DD\", \"area\": \"...\", \"theme\": \"...\",\n    \"schedule\": [\n      { \"time\": \"10:30\", \"activity_name\": \"...\", \"type\": \"activity|meal|hotel\",\n        \"description\": \"...\", \"price\": \"1500円\", \"url\": \"...\", \"lat\": 35.68, \"lon\": 139.76 }\n    ],\n    \"total_cost\": 4500\n  }\n- 候補に無い施設名を新規作成しない。url/lat/lonが不明な候補は選ばない。\n- areaLocked=true の場合、当日の行程は area 内に限定。\n- 区間移動は `constraints.maxLegMinutes` を超えない順序にする（無理なら候補数を減らす）。\n- 食事は `minMealStops` 回以上、mealWindowsの時間帯に配置。\n- 予算超過は不可。price は合計して数値の \"total_cost\" として出力。\n- 充足できない制約がある場合は、行程を短くして返す（捏造や空のURLは禁止）。\n",
+      "user_prompt": "提供された情報: {\"day\":1,\"date\":\"2025-09-24\",\"area\":\"難波\",\"theme\":\"ショッピングと食い倒れツアー\",\"planConditions\":{\"origin\":\"東京\",\"destination\":\"大阪\",\"areas\":[\"難波\",\"天王寺\"],\"dates\":{\"start\":\"2025-09-24\",\"end\":\"2025-09-25\"},\"transport\":\"public\",\"budget\":50000,\"preferences\":\"\"},\"availableResources\":{\"restaurants\":[{\"name\":\"一蘭 難波店\",\"type\":\"ラーメン\",\"price\":\"1,200円〜3,000円\",\"url\":\"https://ichiran.com/jp/shop/namba/\"},{\"name\":\"串カツ田中 難波店\",\"type\":\"串カツ\",\"price\":\"800円〜2,500円\",\"url\":\"https://kushi-tanaka.com\"},{\"name\":\"天王寺 焼肉 あずま\",\"type\":\"焼肉\",\"price\":\"3,000円〜10,000円\",\"url\":\"https://azuma-yakiniku.com\"}],\"hotels\":[{\"name\":\"ホテルモントレ グラスミア大阪\",\"type\":\"ホテル\",\"price\":\"20,000円〜\",\"url\":\"https://wwwHotelMonterey.co.jp/grasmere/\"},{\"name\":\"ロイヤル パインズ ホテル大阪\",\"type\":\"ホテル\",\"price\":\"18,000円〜\",\"url\":\"https://www.royalhotels.co.jp/osaka/\"}],\"activities\":[{\"name\":\"道頓堀クルーズ\",\"type\":\"ボートツアー\",\"price\":\"1800円\",\"url\":\"https://www.gentle-corp.com/boat/\"},{\"name\":\"あべのハルカス展望台\",\"type\":\"展望台\",\"price\":\"1500円\",\"url\":\"https://www.abenoharukas-300.com/\"},{\"name\":\"大阪城公園散策\",\"type\":\"公園散策\",\"price\":\"無料\",\"url\":\"https://www.osakacastle.net/\"}]},\"constraints\":{}}",
+      "variables_json": {
+        "day": 1,
+        "date": "2025-09-24",
+        "area": "難波",
+        "theme": "ショッピングと食い倒れツアー",
+        "planConditions": {
+          "origin": "東京",
+          "destination": "大阪",
+          "areas": [
+            "難波",
+            "天王寺"
+          ],
+          "dates": {
+            "start": "2025-09-24",
+            "end": "2025-09-25"
+          },
+          "transport": "public",
+          "budget": 50000,
+          "preferences": ""
+        },
+        "availableResources": {
+          "restaurants": [
+            {
+              "name": "一蘭 難波店",
+              "type": "ラーメン",
+              "price": "1,200円〜3,000円",
+              "url": "https://ichiran.com/jp/shop/namba/"
+            },
+            {
+              "name": "串カツ田中 難波店",
+              "type": "串カツ",
+              "price": "800円〜2,500円",
+              "url": "https://kushi-tanaka.com"
+            },
+            {
+              "name": "天王寺 焼肉 あずま",
+              "type": "焼肉",
+              "price": "3,000円〜10,000円",
+              "url": "https://azuma-yakiniku.com"
+            }
+          ],
+          "hotels": [
+            {
+              "name": "ホテルモントレ グラスミア大阪",
+              "type": "ホテル",
+              "price": "20,000円〜",
+              "url": "https://wwwHotelMonterey.co.jp/grasmere/"
+            },
+            {
+              "name": "ロイヤル パインズ ホテル大阪",
+              "type": "ホテル",
+              "price": "18,000円〜",
+              "url": "https://www.royalhotels.co.jp/osaka/"
+            }
+          ],
+          "activities": [
+            {
+              "name": "道頓堀クルーズ",
+              "type": "ボートツアー",
+              "price": "1800円",
+              "url": "https://www.gentle-corp.com/boat/"
+            },
+            {
+              "name": "あべのハルカス展望台",
+              "type": "展望台",
+              "price": "1500円",
+              "url": "https://www.abenoharukas-300.com/"
+            },
+            {
+              "name": "大阪城公園散策",
+              "type": "公園散策",
+              "price": "無料",
+              "url": "https://www.osakacastle.net/"
+            }
+          ]
+        },
+        "constraints": {}
+      }
+    }
+  ],
+  "llm_output": [
+    {
+      "ts": "2025-09-10T07:41:20.026Z",
+      "agent": "hotel",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"hotels\": [\n    {\n      \"name\": \"ホテルモントレ グラスミア大阪\",\n      \"type\": \"ホテル\",\n      \"price\": \"20,000円〜\",\n      \"url\": \"https://wwwHotelMonterey.co.jp/grasmere/\"\n    },\n    {\n      \"name\": \"ロイヤル パインズ ホテル大阪\",\n      \"type\": \"ホテル\",\n      \"price\": \"18,000円〜\",\n      \"url\": \"https://www.royalhotels.co.jp/osaka/\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "hotels": [
+          {
+            "name": "ホテルモントレ グラスミア大阪",
+            "type": "ホテル",
+            "price": "20,000円〜",
+            "url": "https://wwwHotelMonterey.co.jp/grasmere/"
+          },
+          {
+            "name": "ロイヤル パインズ ホテル大阪",
+            "type": "ホテル",
+            "price": "18,000円〜",
+            "url": "https://www.royalhotels.co.jp/osaka/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 195,
+        "completion_tokens": 120,
+        "total_tokens": 315,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-10T07:41:20.411Z",
+      "agent": "hotel",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"hotels\": [\n    {\n      \"name\": \"アパホテル<天王寺駅前>\",\n      \"type\": \"ホテル\",\n      \"price\": \"12,000円〜\",\n      \"url\": \"https://www.apa.co.jp/hotel/kinki/tennojiekimae/\"\n    },\n    {\n      \"name\": \"スパワールドまんがの湯\",\n      \"type\": \"旅館\",\n      \"price\": \"15,000円〜\",\n      \"url\": \"https://www.spaworld.co.jp/\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "hotels": [
+          {
+            "name": "アパホテル<天王寺駅前>",
+            "type": "ホテル",
+            "price": "12,000円〜",
+            "url": "https://www.apa.co.jp/hotel/kinki/tennojiekimae/"
+          },
+          {
+            "name": "スパワールドまんがの湯",
+            "type": "旅館",
+            "price": "15,000円〜",
+            "url": "https://www.spaworld.co.jp/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 196,
+        "completion_tokens": 123,
+        "total_tokens": 319,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-10T07:41:21.093Z",
+      "agent": "activity",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"activities\": [\n    {\n      \"name\": \"道頓堀クルーズ\",\n      \"type\": \"ボートツアー\",\n      \"price\": \"1800円\",\n      \"url\": \"https://www.gentle-corp.com/boat/\"\n    },\n    {\n      \"name\": \"あべのハルカス展望台\",\n      \"type\": \"展望台\",\n      \"price\": \"1500円\",\n      \"url\": \"https://www.abenoharukas-300.com/\"\n    },\n    {\n      \"name\": \"大阪城公園散策\",\n      \"type\": \"公園散策\",\n      \"price\": \"無料\",\n      \"url\": \"https://www.osakacastle.net/\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "activities": [
+          {
+            "name": "道頓堀クルーズ",
+            "type": "ボートツアー",
+            "price": "1800円",
+            "url": "https://www.gentle-corp.com/boat/"
+          },
+          {
+            "name": "あべのハルカス展望台",
+            "type": "展望台",
+            "price": "1500円",
+            "url": "https://www.abenoharukas-300.com/"
+          },
+          {
+            "name": "大阪城公園散策",
+            "type": "公園散策",
+            "price": "無料",
+            "url": "https://www.osakacastle.net/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 199,
+        "completion_tokens": 167,
+        "total_tokens": 366,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-10T07:41:21.113Z",
+      "agent": "dining",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"restaurants\": [\n    {\n      \"name\": \"焼肉 牛庵 天王寺店\",\n      \"type\": \"焼肉\",\n      \"price\": \"3,000円〜5,000円\",\n      \"url\": \"https://www.gyuan.co.jp\"\n    },\n    {\n      \"name\": \"やきとり やまびこ\",\n      \"type\": \"居酒屋/焼き鳥\",\n      \"price\": \"1,500円〜3,000円\",\n      \"url\": \"https://www.yamabiko.com\"\n    },\n    {\n      \"name\": \"大阪王将 天王寺店\",\n      \"type\": \"中華料理\",\n      \"price\": \"1,000円〜2,500円\",\n      \"url\": \"https://www.osaka-ohsho.com\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "restaurants": [
+          {
+            "name": "焼肉 牛庵 天王寺店",
+            "type": "焼肉",
+            "price": "3,000円〜5,000円",
+            "url": "https://www.gyuan.co.jp"
+          },
+          {
+            "name": "やきとり やまびこ",
+            "type": "居酒屋/焼き鳥",
+            "price": "1,500円〜3,000円",
+            "url": "https://www.yamabiko.com"
+          },
+          {
+            "name": "大阪王将 天王寺店",
+            "type": "中華料理",
+            "price": "1,000円〜2,500円",
+            "url": "https://www.osaka-ohsho.com"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 192,
+        "completion_tokens": 181,
+        "total_tokens": 373,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-10T07:41:21.173Z",
+      "agent": "dining",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"restaurants\": [\n    {\n      \"name\": \"一蘭 難波店\",\n      \"type\": \"ラーメン\",\n      \"price\": \"1,200円〜3,000円\",\n      \"url\": \"https://ichiran.com/jp/shop/namba/\"\n    },\n    {\n      \"name\": \"串カツ田中 難波店\",\n      \"type\": \"串カツ\",\n      \"price\": \"800円〜2,500円\",\n      \"url\": \"https://kushi-tanaka.com\"\n    },\n    {\n      \"name\": \"天王寺 焼肉 あずま\",\n      \"type\": \"焼肉\",\n      \"price\": \"3,000円〜10,000円\",\n      \"url\": \"https://azuma-yakiniku.com\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "restaurants": [
+          {
+            "name": "一蘭 難波店",
+            "type": "ラーメン",
+            "price": "1,200円〜3,000円",
+            "url": "https://ichiran.com/jp/shop/namba/"
+          },
+          {
+            "name": "串カツ田中 難波店",
+            "type": "串カツ",
+            "price": "800円〜2,500円",
+            "url": "https://kushi-tanaka.com"
+          },
+          {
+            "name": "天王寺 焼肉 あずま",
+            "type": "焼肉",
+            "price": "3,000円〜10,000円",
+            "url": "https://azuma-yakiniku.com"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 191,
+        "completion_tokens": 178,
+        "total_tokens": 369,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-10T07:41:21.279Z",
+      "agent": "activity",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"activities\": [\n    {\n      \"name\": \"天王寺動物園\",\n      \"type\": \"動物園\",\n      \"price\": \"600円\",\n      \"url\": \"https://www.tennojizoo.com/\"\n    },\n    {\n      \"name\": \"あべのハルカス展望台\",\n      \"type\": \"展望台\",\n      \"price\": \"1500円\",\n      \"url\": \"https://www.abenoharukas-300.jp/\"\n    },\n    {\n      \"name\": \"なんばグランド花月\",\n      \"type\": \"劇場\",\n      \"price\": \"3500円\",\n      \"url\": \"https://www.yoshimoto.co.jp/english/\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "activities": [
+          {
+            "name": "天王寺動物園",
+            "type": "動物園",
+            "price": "600円",
+            "url": "https://www.tennojizoo.com/"
+          },
+          {
+            "name": "あべのハルカス展望台",
+            "type": "展望台",
+            "price": "1500円",
+            "url": "https://www.abenoharukas-300.jp/"
+          },
+          {
+            "name": "なんばグランド花月",
+            "type": "劇場",
+            "price": "3500円",
+            "url": "https://www.yoshimoto.co.jp/english/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 200,
+        "completion_tokens": 160,
+        "total_tokens": 360,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-10T07:41:25.245Z",
+      "agent": "day-planner",
+      "model": "gpt-4o",
+      "raw_text": "{\n    \"day\": 1,\n    \"date\": \"2025-09-24\",\n    \"area\": \"難波\",\n    \"theme\": \"ショッピングと食い倒れツアー\",\n    \"schedule\": [\n        {\n            \"time\": \"10:00\",\n            \"activity_name\": \"道頓堀クルーズ\",\n            \"type\": \"activity\",\n            \"description\": \"観光名所を巡るボートツアー\",\n            \"price\": \"1800円\",\n            \"url\": \"https://www.gentle-corp.com/boat/\",\n            \"lat\": 34.6687,\n            \"lon\": 135.5019\n        },\n        {\n            \"time\": \"12:30\",\n            \"activity_name\": \"一蘭 難波店\",\n            \"type\": \"meal\",\n            \"description\": \"博多ラーメンのいただける店舗\",\n            \"price\": \"1200円\",\n            \"url\": \"https://ichiran.com/jp/shop/namba/\",\n            \"lat\": 34.6643,\n            \"lon\": 135.4994\n        },\n        {\n            \"time\": \"15:00\",\n            \"activity_name\": \"あべのハルカス展望台\",\n            \"type\": \"activity\",\n            \"description\": \"日本一高いビルからの展望を楽しむ\",\n            \"price\": \"1500円\",\n            \"url\": \"https://www.abenoharukas-300.com/\",\n            \"lat\": 34.6457,\n            \"lon\": 135.5138\n        },\n        {\n            \"time\": \"18:00\",\n            \"activity_name\": \"串カツ田中 難波店\",\n            \"type\": \"meal\",\n            \"description\": \"大阪名物串カツを楽しむ\",\n            \"price\": \"2500円\",\n            \"url\": \"https://kushi-tanaka.com\",\n            \"lat\": 34.6687,\n            \"lon\": 135.5019\n        }\n    ],\n    \"total_cost\": 7000\n}",
+      "parsed_json": {
+        "day": 1,
+        "date": "2025-09-24",
+        "area": "難波",
+        "theme": "ショッピングと食い倒れツアー",
+        "schedule": [
+          {
+            "time": "10:00",
+            "activity_name": "道頓堀クルーズ",
+            "type": "activity",
+            "description": "観光名所を巡るボートツアー",
+            "price": "1800円",
+            "url": "https://www.gentle-corp.com/boat/",
+            "lat": 34.6687,
+            "lon": 135.5019
+          },
+          {
+            "time": "12:30",
+            "activity_name": "一蘭 難波店",
+            "type": "meal",
+            "description": "博多ラーメンのいただける店舗",
+            "price": "1200円",
+            "url": "https://ichiran.com/jp/shop/namba/",
+            "lat": 34.6643,
+            "lon": 135.4994
+          },
+          {
+            "time": "15:00",
+            "activity_name": "あべのハルカス展望台",
+            "type": "activity",
+            "description": "日本一高いビルからの展望を楽しむ",
+            "price": "1500円",
+            "url": "https://www.abenoharukas-300.com/",
+            "lat": 34.6457,
+            "lon": 135.5138
+          },
+          {
+            "time": "18:00",
+            "activity_name": "串カツ田中 難波店",
+            "type": "meal",
+            "description": "大阪名物串カツを楽しむ",
+            "price": "2500円",
+            "url": "https://kushi-tanaka.com",
+            "lat": 34.6687,
+            "lon": 135.5019
+          }
+        ],
+        "total_cost": 7000
+      },
+      "usage": {
+        "prompt_tokens": 912,
+        "completion_tokens": 452,
+        "total_tokens": 1364,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-10T07:41:25.912Z",
+      "agent": "day-planner",
+      "model": "gpt-4o",
+      "raw_text": "{\n    \"day\": 2,\n    \"date\": \"2025-09-25\",\n    \"area\": \"天王寺\",\n    \"theme\": \"大阪歴史と自然散策\",\n    \"schedule\": [\n        {\n            \"time\": \"09:00\",\n            \"activity_name\": \"アパホテル<天王寺駅前>\",\n            \"type\": \"hotel\",\n            \"description\": \"チェックアウト\",\n            \"price\": \"12000円\",\n            \"url\": \"https://www.apa.co.jp/hotel/kinki/tennojiekimae/\",\n            \"lat\": 34.6464,\n            \"lon\": 135.5138\n        },\n        {\n            \"time\": \"09:30\",\n            \"activity_name\": \"天王寺動物園\",\n            \"type\": \"activity\",\n            \"description\": \"様々な動物を観察\",\n            \"price\": \"600円\",\n            \"url\": \"https://www.tennojizoo.com/\",\n            \"lat\": 34.6525,\n            \"lon\": 135.5075\n        },\n        {\n            \"time\": \"12:00\",\n            \"activity_name\": \"大阪王将 天王寺店\",\n            \"type\": \"meal\",\n            \"description\": \"ランチに中華料理を楽しむ\",\n            \"price\": \"1500円\",\n            \"url\": \"https://www.osaka-ohsho.com\",\n            \"lat\": 34.6457,\n            \"lon\": 135.5124\n        },\n        {\n            \"time\": \"13:30\",\n            \"activity_name\": \"あべのハルカス展望台\",\n            \"type\": \"activity\",\n            \"description\": \"大阪の素晴らしい景色を楽しむ\",\n            \"price\": \"1500円\",\n            \"url\": \"https://www.abenoharukas-300.jp/\",\n            \"lat\": 34.6461,\n            \"lon\": 135.5132\n        },\n        {\n            \"time\": \"18:00\",\n            \"activity_name\": \"焼肉 牛庵 天王寺店\",\n            \"type\": \"meal\",\n            \"description\": \"美味しい焼肉をディナーに楽しむ\",\n            \"price\": \"4000円\",\n            \"url\": \"https://www.gyuan.co.jp\",\n            \"lat\": 34.6443,\n            \"lon\": 135.5111\n        }\n    ],\n    \"total_cost\": 20500\n}",
+      "parsed_json": {
+        "day": 2,
+        "date": "2025-09-25",
+        "area": "天王寺",
+        "theme": "大阪歴史と自然散策",
+        "schedule": [
+          {
+            "time": "09:00",
+            "activity_name": "アパホテル<天王寺駅前>",
+            "type": "hotel",
+            "description": "チェックアウト",
+            "price": "12000円",
+            "url": "https://www.apa.co.jp/hotel/kinki/tennojiekimae/",
+            "lat": 34.6464,
+            "lon": 135.5138
+          },
+          {
+            "time": "09:30",
+            "activity_name": "天王寺動物園",
+            "type": "activity",
+            "description": "様々な動物を観察",
+            "price": "600円",
+            "url": "https://www.tennojizoo.com/",
+            "lat": 34.6525,
+            "lon": 135.5075
+          },
+          {
+            "time": "12:00",
+            "activity_name": "大阪王将 天王寺店",
+            "type": "meal",
+            "description": "ランチに中華料理を楽しむ",
+            "price": "1500円",
+            "url": "https://www.osaka-ohsho.com",
+            "lat": 34.6457,
+            "lon": 135.5124
+          },
+          {
+            "time": "13:30",
+            "activity_name": "あべのハルカス展望台",
+            "type": "activity",
+            "description": "大阪の素晴らしい景色を楽しむ",
+            "price": "1500円",
+            "url": "https://www.abenoharukas-300.jp/",
+            "lat": 34.6461,
+            "lon": 135.5132
+          },
+          {
+            "time": "18:00",
+            "activity_name": "焼肉 牛庵 天王寺店",
+            "type": "meal",
+            "description": "美味しい焼肉をディナーに楽しむ",
+            "price": "4000円",
+            "url": "https://www.gyuan.co.jp",
+            "lat": 34.6443,
+            "lon": 135.5111
+          }
+        ],
+        "total_cost": 20500
+      },
+      "usage": {
+        "prompt_tokens": 908,
+        "completion_tokens": 531,
+        "total_tokens": 1439,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "geocode": [
+    {
+      "ts": "2025-09-10T07:41:37.157Z",
+      "query": "道頓堀クルーズ 難波 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T07:41:37.161Z",
+      "query": "一蘭 難波店 難波 大阪 日本",
+      "lat": 34.7027536,
+      "lon": 135.5029299,
+      "display_name": "一蘭拉麵 梅田阪急東通店, 阪急東通第3商店街, 堂山町, 北区, 大阪市, 大阪府, 530-0027, 日本",
+      "source": "nominatim"
+    },
+    {
+      "ts": "2025-09-10T07:41:37.163Z",
+      "query": "あべのハルカス展望台 難波 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T07:41:37.168Z",
+      "query": "串カツ田中 難波店 難波 大阪 日本",
+      "lat": 34.7258647,
+      "lon": 135.4990233,
+      "display_name": "田中, 423, 西中島三丁目, 淀川区, 大阪市, 大阪府, 532-0011, 日本",
+      "source": "nominatim"
+    },
+    {
+      "ts": "2025-09-10T07:41:37.172Z",
+      "query": "アパホテル<天王寺駅前> 天王寺 大阪 日本",
+      "lat": 34.9878004,
+      "lon": 135.761548,
+      "display_name": "アパホテル京都駅東３０５, 東洞院通, 塩小路町, 下京区, 京都市, 京都府, 600-8213, 日本",
+      "source": "nominatim"
+    },
+    {
+      "ts": "2025-09-10T07:41:37.178Z",
+      "query": "天王寺動物園 天王寺 大阪 日本",
+      "lat": 34.6513468,
+      "lon": 135.5103907,
+      "display_name": "天王寺動物公園事務所, 和氣橋, 茶臼山町, 天王寺区, 大阪市, 大阪府, 543-0063, 日本",
+      "source": "cache:disk"
+    },
+    {
+      "ts": "2025-09-10T07:41:37.185Z",
+      "query": "大阪王将 天王寺店 天王寺 大阪 日本",
+      "lat": 35.0235553,
+      "lon": 135.7414358,
+      "display_name": "千本日活, 上長者町通, 武衛陣町, 高台院町, 上京区, 京都市, 京都府, 602-8288, 日本",
+      "source": "cache:disk"
+    },
+    {
+      "ts": "2025-09-10T07:41:37.198Z",
+      "query": "あべのハルカス展望台 天王寺 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T07:41:37.208Z",
+      "query": "焼肉 牛庵 天王寺店 天王寺 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T07:41:41.596Z",
+      "query": "道頓堀クルーズ 難波 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T07:41:41.599Z",
+      "query": "一蘭 難波店 難波 大阪 日本",
+      "lat": 34.7027536,
+      "lon": 135.5029299,
+      "display_name": "一蘭拉麵 梅田阪急東通店, 阪急東通第3商店街, 堂山町, 北区, 大阪市, 大阪府, 530-0027, 日本",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T07:41:41.601Z",
+      "query": "あべのハルカス展望台 難波 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T07:41:41.603Z",
+      "query": "串カツ田中 難波店 難波 大阪 日本",
+      "lat": 34.7258647,
+      "lon": 135.4990233,
+      "display_name": "田中, 423, 西中島三丁目, 淀川区, 大阪市, 大阪府, 532-0011, 日本",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T07:41:41.606Z",
+      "query": "アパホテル<天王寺駅前> 天王寺 大阪 日本",
+      "lat": 34.9878004,
+      "lon": 135.761548,
+      "display_name": "アパホテル京都駅東３０５, 東洞院通, 塩小路町, 下京区, 京都市, 京都府, 600-8213, 日本",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T07:41:41.614Z",
+      "query": "天王寺動物園 天王寺 大阪 日本",
+      "lat": 34.6513468,
+      "lon": 135.5103907,
+      "display_name": "天王寺動物公園事務所, 和氣橋, 茶臼山町, 天王寺区, 大阪市, 大阪府, 543-0063, 日本",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T07:41:41.623Z",
+      "query": "大阪王将 天王寺店 天王寺 大阪 日本",
+      "lat": 35.0235553,
+      "lon": 135.7414358,
+      "display_name": "千本日活, 上長者町通, 武衛陣町, 高台院町, 上京区, 京都市, 京都府, 602-8288, 日本",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T07:41:41.633Z",
+      "query": "あべのハルカス展望台 天王寺 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T07:41:41.639Z",
+      "query": "焼肉 牛庵 天王寺店 天王寺 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    }
+  ]
+}

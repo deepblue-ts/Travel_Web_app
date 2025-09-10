@@ -1,0 +1,156 @@
+{
+  "places": [
+    {
+      "id": "p1",
+      "name": "梅田スカイビル 空中庭園展望台",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 1500,
+      "url": "https://www.skybldg.co.jp/sky/index.html",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p2",
+      "name": "たこ焼き道楽 わかな 梅田店",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 1500,
+      "url": "https://tako-wakana.com",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p3",
+      "name": "HEP FIVE観覧車",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 500,
+      "url": "https://www.hepfive.jp/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p4",
+      "name": "串カツ田中 梅田店",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 2500,
+      "url": "https://kushikatsu-tanaka.com",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p5",
+      "name": "うどん水野",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 1000,
+      "url": "https://udonmizuno.com",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p6",
+      "name": "HEP FIVE 観覧車",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 500,
+      "url": "https://www.hepfive.jp/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p7",
+      "name": "グランフロント大阪",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 0,
+      "url": "https://grandfront-osaka.jp/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p8",
+      "name": "串カツ田中",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 2000,
+      "url": "https://kushikatsu-tanaka.com",
+      "lat": "",
+      "lon": ""
+    }
+  ],
+  "days": [
+    {
+      "day": 1,
+      "date": "2025-09-24",
+      "stops": [
+        {
+          "time": "10:00",
+          "placeId": "p1",
+          "note": "梅田スカイビルの展望台から大阪の街並みを一望。",
+          "costYen": 1500
+        },
+        {
+          "time": "12:00",
+          "placeId": "p2",
+          "note": "本場のたこ焼きを堪能。",
+          "costYen": 1500
+        },
+        {
+          "time": "14:00",
+          "placeId": "p3",
+          "note": "梅田のランドマーク観覧車に乗る。",
+          "costYen": 500
+        },
+        {
+          "time": "18:30",
+          "placeId": "p4",
+          "note": "大阪名物の串カツを堪能。",
+          "costYen": 2500
+        }
+      ]
+    },
+    {
+      "day": 2,
+      "date": "2025-09-25",
+      "stops": [
+        {
+          "time": "9:30",
+          "placeId": "p1",
+          "note": "大阪の街並みを一望できる展望台。近代的な建築を楽しめる。",
+          "costYen": 1500
+        },
+        {
+          "time": "11:45",
+          "placeId": "p5",
+          "note": "梅田で人気のうどん店でランチ。",
+          "costYen": 1000
+        },
+        {
+          "time": "13:00",
+          "placeId": "p6",
+          "note": "梅田のランドマーク、赤い観覧車からの景色を楽しむ。",
+          "costYen": 500
+        },
+        {
+          "time": "15:00",
+          "placeId": "p7",
+          "note": "多くの店舗が集まる複合施設で、ショッピングや食事を楽しむ。",
+          "costYen": 0
+        },
+        {
+          "time": "18:30",
+          "placeId": "p8",
+          "note": "大阪名物の串カツを楽しむ夕食。",
+          "costYen": 2000
+        }
+      ]
+    }
+  ],
+  "estimates": {
+    "totalCostYen": 11000
+  },
+  "title": "大阪への2日間の旅"
+}

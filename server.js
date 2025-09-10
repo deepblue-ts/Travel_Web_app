@@ -620,15 +620,21 @@ app.post('/api/geocode-batch', async (req, res) => {
     if (!Array.isArray(items)) {
       return res.status(400).json({ error: 'items は配列である必要があります' });
     }
+
     const results = await geocodeBatchInternal(destination || '', items, planId);
+
+    // ヘッダーは ASCII のみ。説明系は JSON で返す。
     res.set('X-Geocoder', GOOGLE_MAPS_API_KEY ? 'google+cache(+nominatim-fallback)' : 'cache+nominatim');
-    res.set('X-Cache-Dir', CACHE_DIR);
-    return res.json({ results });
+
+    // 代わりに JSON に含める
+    return res.json({ results, cacheDir: CACHE_DIR });
   } catch (e) {
     console.error('geocode-batch error:', e);
+    // 失敗時も JSON に cacheDir を含めてデバッグしやすく
     return res.status(500).json({ error: e.message || 'geocode-batch failed', cacheDir: CACHE_DIR });
   }
 });
+
 
 // ─────────────────────────────────────────────
 // 5) Excel ログ連携 API
