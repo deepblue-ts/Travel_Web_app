@@ -1,0 +1,364 @@
+{
+  "user_input": [],
+  "llm_input": [],
+  "llm_output": [
+    {
+      "ts": "2025-09-10T07:47:49.155Z",
+      "agent": "day-planner",
+      "model": "gpt-4o",
+      "raw_text": "{\"day\":1,\"date\":\"2025-09-24\",\"area\":\"梅田\",\"theme\":\"ショッピングとグルメ巡り\",\"schedule\":[{\"time\":\"10:00\",\"activity_name\":\"梅田スカイビル 空中庭園展望台\",\"type\":\"activity\",\"description\":\"梅田スカイビルの展望台から大阪の街並みを一望。\",\"price\":\"1500円\",\"url\":\"https://www.skybldg.co.jp/sky/index.html\",\"lat\":34.705551,\"lon\":135.489373},{\"time\":\"12:00\",\"activity_name\":\"たこ焼き道楽 わかな 梅田店\",\"type\":\"meal\",\"description\":\"本場のたこ焼きを堪能。\",\"price\":\"1500円\",\"url\":\"https://tako-wakana.com\",\"lat\":34.703957,\"lon\":135.497727},{\"time\":\"14:00\",\"activity_name\":\"HEP FIVE観覧車\",\"type\":\"activity\",\"description\":\"梅田のランドマーク観覧車に乗る。\",\"price\":\"500円\",\"url\":\"https://www.hepfive.jp/\",\"lat\":34.704956,\"lon\":135.500516},{\"time\":\"18:30\",\"activity_name\":\"串カツ田中 梅田店\",\"type\":\"meal\",\"description\":\"大阪名物の串カツを堪能。\",\"price\":\"2500円\",\"url\":\"https://kushikatsu-tanaka.com\",\"lat\":34.704999,\"lon\":135.495737}],\"total_cost\":6000}",
+      "parsed_json": {
+        "day": 1,
+        "date": "2025-09-24",
+        "area": "梅田",
+        "theme": "ショッピングとグルメ巡り",
+        "schedule": [
+          {
+            "time": "10:00",
+            "activity_name": "梅田スカイビル 空中庭園展望台",
+            "type": "activity",
+            "description": "梅田スカイビルの展望台から大阪の街並みを一望。",
+            "price": "1500円",
+            "url": "https://www.skybldg.co.jp/sky/index.html",
+            "lat": 34.705551,
+            "lon": 135.489373
+          },
+          {
+            "time": "12:00",
+            "activity_name": "たこ焼き道楽 わかな 梅田店",
+            "type": "meal",
+            "description": "本場のたこ焼きを堪能。",
+            "price": "1500円",
+            "url": "https://tako-wakana.com",
+            "lat": 34.703957,
+            "lon": 135.497727
+          },
+          {
+            "time": "14:00",
+            "activity_name": "HEP FIVE観覧車",
+            "type": "activity",
+            "description": "梅田のランドマーク観覧車に乗る。",
+            "price": "500円",
+            "url": "https://www.hepfive.jp/",
+            "lat": 34.704956,
+            "lon": 135.500516
+          },
+          {
+            "time": "18:30",
+            "activity_name": "串カツ田中 梅田店",
+            "type": "meal",
+            "description": "大阪名物の串カツを堪能。",
+            "price": "2500円",
+            "url": "https://kushikatsu-tanaka.com",
+            "lat": 34.704999,
+            "lon": 135.495737
+          }
+        ],
+        "total_cost": 6000
+      },
+      "usage": {
+        "prompt_tokens": 920,
+        "completion_tokens": 336,
+        "total_tokens": 1256,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-10T07:47:51.314Z",
+      "agent": "day-planner",
+      "model": "gpt-4o",
+      "raw_text": "{\n    \"day\": 2,\n    \"date\": \"2025-09-25\",\n    \"area\": \"梅田\",\n    \"theme\": \"近代建築と文化体験\",\n    \"schedule\": [\n        {\n            \"time\": \"9:30\",\n            \"activity_name\": \"梅田スカイビル 空中庭園展望台\",\n            \"type\": \"activity\",\n            \"description\": \"大阪の街並みを一望できる展望台。近代的な建築を楽しめる。\",\n            \"price\": \"1500円\",\n            \"url\": \"https://www.skybldg.co.jp/observatory/\",\n            \"lat\": 34.7055,\n            \"lon\": 135.4909\n        },\n        {\n            \"time\": \"11:45\",\n            \"activity_name\": \"うどん水野\",\n            \"type\": \"meal\",\n            \"description\": \"梅田で人気のうどん店でランチ。\",\n            \"price\": \"1000円\",\n            \"url\": \"https://udonmizuno.com\",\n            \"lat\": 34.7012,\n            \"lon\": 135.497\n        },\n        {\n            \"time\": \"13:00\",\n            \"activity_name\": \"HEP FIVE 観覧車\",\n            \"type\": \"activity\",\n            \"description\": \"梅田のランドマーク、赤い観覧車からの景色を楽しむ。\",\n            \"price\": \"500円\",\n            \"url\": \"https://www.hepfive.jp/\",\n            \"lat\": 34.7052,\n            \"lon\": 135.5006\n        },\n        {\n            \"time\": \"15:00\",\n            \"activity_name\": \"グランフロント大阪\",\n            \"type\": \"activity\",\n            \"description\": \"多くの店舗が集まる複合施設で、ショッピングや食事を楽しむ。\",\n            \"price\": \"0円\",\n            \"url\": \"https://grandfront-osaka.jp/\",\n            \"lat\": 34.7058,\n            \"lon\": 135.4979\n        },\n        {\n            \"time\": \"18:30\",\n            \"activity_name\": \"串カツ田中\",\n            \"type\": \"meal\",\n            \"description\": \"大阪名物の串カツを楽しむ夕食。\",\n            \"price\": \"2000円\",\n            \"url\": \"https://kushikatsu-tanaka.com\",\n            \"lat\": 34.7033,\n            \"lon\": 135.4972\n        }\n    ],\n    \"total_cost\": 5000\n}",
+      "parsed_json": {
+        "day": 2,
+        "date": "2025-09-25",
+        "area": "梅田",
+        "theme": "近代建築と文化体験",
+        "schedule": [
+          {
+            "time": "9:30",
+            "activity_name": "梅田スカイビル 空中庭園展望台",
+            "type": "activity",
+            "description": "大阪の街並みを一望できる展望台。近代的な建築を楽しめる。",
+            "price": "1500円",
+            "url": "https://www.skybldg.co.jp/observatory/",
+            "lat": 34.7055,
+            "lon": 135.4909
+          },
+          {
+            "time": "11:45",
+            "activity_name": "うどん水野",
+            "type": "meal",
+            "description": "梅田で人気のうどん店でランチ。",
+            "price": "1000円",
+            "url": "https://udonmizuno.com",
+            "lat": 34.7012,
+            "lon": 135.497
+          },
+          {
+            "time": "13:00",
+            "activity_name": "HEP FIVE 観覧車",
+            "type": "activity",
+            "description": "梅田のランドマーク、赤い観覧車からの景色を楽しむ。",
+            "price": "500円",
+            "url": "https://www.hepfive.jp/",
+            "lat": 34.7052,
+            "lon": 135.5006
+          },
+          {
+            "time": "15:00",
+            "activity_name": "グランフロント大阪",
+            "type": "activity",
+            "description": "多くの店舗が集まる複合施設で、ショッピングや食事を楽しむ。",
+            "price": "0円",
+            "url": "https://grandfront-osaka.jp/",
+            "lat": 34.7058,
+            "lon": 135.4979
+          },
+          {
+            "time": "18:30",
+            "activity_name": "串カツ田中",
+            "type": "meal",
+            "description": "大阪名物の串カツを楽しむ夕食。",
+            "price": "2000円",
+            "url": "https://kushikatsu-tanaka.com",
+            "lat": 34.7033,
+            "lon": 135.4972
+          }
+        ],
+        "total_cost": 5000
+      },
+      "usage": {
+        "prompt_tokens": 900,
+        "completion_tokens": 565,
+        "total_tokens": 1465,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "geocode": [
+    {
+      "ts": "2025-09-10T07:47:59.465Z",
+      "query": "梅田スカイビル 空中庭園展望台 梅田 大阪 日本",
+      "lat": 34.7052993,
+      "lon": 135.490172,
+      "display_name": "〒531-6039 大阪府大阪市北区大淀中１丁目１−８８ 梅田スカイビル",
+      "source": "gmaps_places"
+    },
+    {
+      "ts": "2025-09-10T07:47:59.467Z",
+      "query": "たこ焼き道楽 わかな 梅田店 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T07:47:59.469Z",
+      "query": "HEP FIVE観覧車 梅田 大阪 日本",
+      "lat": 34.7038153,
+      "lon": 135.499969,
+      "display_name": "〒530-0017 大阪府大阪市北区角田町５−１５ HEP FIVE 7F",
+      "source": "gmaps_places"
+    },
+    {
+      "ts": "2025-09-10T07:47:59.471Z",
+      "query": "串カツ田中 梅田店 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T07:47:59.474Z",
+      "query": "梅田スカイビル 空中庭園展望台 梅田 大阪 日本",
+      "lat": 34.7052993,
+      "lon": 135.490172,
+      "display_name": "〒531-6039 大阪府大阪市北区大淀中１丁目１−８８ 梅田スカイビル",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T07:47:59.476Z",
+      "query": "うどん水野 梅田 大阪 日本",
+      "lat": 35.0049524,
+      "lon": 135.7633681,
+      "display_name": "富美家うどん, 錦小路通, 東魚屋町, 中京区, 京都市, 京都府, 600-8006, 日本",
+      "source": "nominatim"
+    },
+    {
+      "ts": "2025-09-10T07:47:59.477Z",
+      "query": "HEP FIVE 観覧車 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T07:47:59.479Z",
+      "query": "グランフロント大阪 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T07:47:59.481Z",
+      "query": "串カツ田中 梅田 大阪 日本",
+      "lat": 34.7842989,
+      "lon": 135.62873,
+      "display_name": "串カツ田中, 香里センター街, 香里新町, 寝屋川市, 大阪府, 572-0085, 日本",
+      "source": "nominatim"
+    },
+    {
+      "ts": "2025-09-10T07:48:03.390Z",
+      "query": "梅田スカイビル 空中庭園展望台 梅田 大阪 日本",
+      "lat": 34.7052993,
+      "lon": 135.490172,
+      "display_name": "〒531-6039 大阪府大阪市北区大淀中１丁目１−８８ 梅田スカイビル",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T07:48:03.392Z",
+      "query": "たこ焼き道楽 わかな 梅田店 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T07:48:03.394Z",
+      "query": "HEP FIVE観覧車 梅田 大阪 日本",
+      "lat": 34.7038153,
+      "lon": 135.499969,
+      "display_name": "〒530-0017 大阪府大阪市北区角田町５−１５ HEP FIVE 7F",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T07:48:03.395Z",
+      "query": "串カツ田中 梅田店 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T07:48:03.397Z",
+      "query": "梅田スカイビル 空中庭園展望台 梅田 大阪 日本",
+      "lat": 34.7052993,
+      "lon": 135.490172,
+      "display_name": "〒531-6039 大阪府大阪市北区大淀中１丁目１−８８ 梅田スカイビル",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T07:48:03.399Z",
+      "query": "うどん水野 梅田 大阪 日本",
+      "lat": 35.0049524,
+      "lon": 135.7633681,
+      "display_name": "富美家うどん, 錦小路通, 東魚屋町, 中京区, 京都市, 京都府, 600-8006, 日本",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T07:48:03.400Z",
+      "query": "HEP FIVE 観覧車 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T07:48:03.402Z",
+      "query": "グランフロント大阪 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T07:48:03.403Z",
+      "query": "串カツ田中 梅田 大阪 日本",
+      "lat": 34.7842989,
+      "lon": 135.62873,
+      "display_name": "串カツ田中, 香里センター街, 香里新町, 寝屋川市, 大阪府, 572-0085, 日本",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T07:48:03.417Z",
+      "query": "梅田スカイビル 空中庭園展望台 梅田 大阪 日本",
+      "lat": 34.7052993,
+      "lon": 135.490172,
+      "display_name": "〒531-6039 大阪府大阪市北区大淀中１丁目１−８８ 梅田スカイビル",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T07:48:03.419Z",
+      "query": "たこ焼き道楽 わかな 梅田店 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T07:48:03.422Z",
+      "query": "HEP FIVE観覧車 梅田 大阪 日本",
+      "lat": 34.7038153,
+      "lon": 135.499969,
+      "display_name": "〒530-0017 大阪府大阪市北区角田町５−１５ HEP FIVE 7F",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T07:48:03.424Z",
+      "query": "串カツ田中 梅田店 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T07:48:03.426Z",
+      "query": "梅田スカイビル 空中庭園展望台 梅田 大阪 日本",
+      "lat": 34.7052993,
+      "lon": 135.490172,
+      "display_name": "〒531-6039 大阪府大阪市北区大淀中１丁目１−８８ 梅田スカイビル",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T07:48:03.427Z",
+      "query": "うどん水野 梅田 大阪 日本",
+      "lat": 35.0049524,
+      "lon": 135.7633681,
+      "display_name": "富美家うどん, 錦小路通, 東魚屋町, 中京区, 京都市, 京都府, 600-8006, 日本",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T07:48:03.429Z",
+      "query": "HEP FIVE 観覧車 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T07:48:03.431Z",
+      "query": "グランフロント大阪 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T07:48:03.432Z",
+      "query": "串カツ田中 梅田 大阪 日本",
+      "lat": 34.7842989,
+      "lon": 135.62873,
+      "display_name": "串カツ田中, 香里センター街, 香里新町, 寝屋川市, 大阪府, 572-0085, 日本",
+      "source": "cache:l1"
+    }
+  ]
+}
