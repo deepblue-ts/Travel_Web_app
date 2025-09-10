@@ -1,5 +1,5 @@
 // server.js (ESM) — Google Maps API を使った高速ジオコーディング対応版
-// プロンプトは server/prompts.js に分離（areaSystemPrompt など）
+// プロンプトは server/prompts.js に分離
 
 import express from 'express';
 import cors from 'cors';
@@ -25,16 +25,23 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3001;
 
-const AREA_CACHE_FILE = path.join(__dirname, 'cache', 'area-cache.json');
-const GEOCODE_CACHE_FILE = path.join(__dirname, 'cache', 'geocode-cache.json');
+// ★ Render 対策：本番は /tmp を使う。環境変数 CACHE_DIR があれば最優先。
+const CACHE_DIR =
+  process.env.CACHE_DIR ||
+  (process.env.NODE_ENV === 'production'
+    ? '/tmp/travel-cache'
+    : path.join(__dirname, 'cache'));
 
-// Google Maps（サーバ用キー）
+const AREA_CACHE_FILE = path.join(CACHE_DIR, 'area-cache.json');
+const GEOCODE_CACHE_FILE = path.join(CACHE_DIR, 'geocode-cache.json');
+
+// Google Maps
 const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY || '';
 const GOOGLE_MAPS_REGION = process.env.GOOGLE_MAPS_REGION || 'jp';
 const GOOGLE_MAPS_LANG   = process.env.GOOGLE_MAPS_LANG   || 'ja';
 
 // ─────────────────────────────────────────────
-/** 1) サーバー初期化 */
+// 1) サーバー初期化
 // ─────────────────────────────────────────────
 const app = express();
 app.use(express.json({ limit: '10mb' }));
@@ -44,12 +51,14 @@ const defaultOrigins = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
   'https://deepblue-ts.github.io', // GitHub Pages（org用）
+  'https://deepblue-ts.github.io/Travel_Web_app', // 末尾スラなしでOK
 ];
 const allowList = (process.env.ALLOWED_ORIGINS || '')
   .split(',')
   .map(s => s.trim())
   .filter(Boolean);
 const origins = [...new Set([...defaultOrigins, ...allowList])];
+
 app.use(cors({ origin: origins }));
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
@@ -57,7 +66,7 @@ app.get('/api/health', (_req, res) => res.json({ ok: true }));
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // ─────────────────────────────────────────────
-/** 2) ユーティリティ */
+// 2) 共通ユーティリティ
 // ─────────────────────────────────────────────
 async function ensureFile(p, init = '{}\n') {
   await fs.mkdir(path.dirname(p), { recursive: true });
@@ -111,19 +120,18 @@ function isValidAreas(areas) {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // ─────────────────────────────────────────────
-/** 旅程の保存＆Excel再出力（lat/lon 反映版） */
+// 旅程の保存＆Excel再出力（lat/lon 反映版）
 // ─────────────────────────────────────────────
 async function persistItineraryAndExport(planId, itinerary, extra = {}) {
   if (!planId || !Array.isArray(itinerary)) return null;
   const logger = new ExcelLogger(planId);
   const finalPlan = { itinerary, ...extra };
-  await logger.writeJson('finalPlan', finalPlan);
   const xlsxPath = await logger.exportXlsx(finalPlan);
   return { finalPlan, xlsxPath };
 }
 
 // ─────────────────────────────────────────────
-/** 3) ジオコーディング（Google 優先 → Nominatim Fallback + L1/L2 キャッシュ） */
+// 内部ジオコーディング（Google Maps 優先 → OSM/Nominatim Fallback）
 // ─────────────────────────────────────────────
 function buildGeocodeQuery(it, destination) {
   return [
@@ -212,6 +220,9 @@ async function geocodeViaNominatim(query) {
 }
 
 async function geocodeBatchInternal(destination, items, planId) {
+  // まず CACHE_DIR を必ず作る（Render 本番で /tmp に作成）
+  await fs.mkdir(CACHE_DIR, { recursive: true });
+
   const diskCache = await readJsonFile(GEOCODE_CACHE_FILE);
   const results = [];
   const now = Date.now();
@@ -239,9 +250,10 @@ async function geocodeBatchInternal(destination, items, planId) {
     // 3) Google Maps（優先）
     let hit = await geocodeViaGoogle(query);
 
-    // 4) Fallback: Nominatim（レート制限に配慮して待機）
+    // 4) Fallback: Nominatim
     if (!hit) {
       hit = await geocodeViaNominatim(query);
+      // Nominatim はレート制限が厳しいため、次のループ前に待機
       await sleep(1100);
     }
 
@@ -284,7 +296,7 @@ function mergeGeocodesIntoItinerary(destination, itinerary, geocodeResults) {
 }
 
 // ─────────────────────────────────────────────
-/** 4) LLM 呼び出しヘルパ */
+// 3) LLM 呼び出しヘルパ
 // ─────────────────────────────────────────────
 async function callLLMJson({ systemPrompt, userBody, model = 'gpt-4o-mini', planId, agent }) {
   const filtered = { ...(userBody || {}) };
@@ -370,10 +382,10 @@ const createApiHandlerWithModel = (systemPrompt, agent, model) => async (req, re
 };
 
 // ─────────────────────────────────────────────
-/** 5) ルーティング */
+// 5) ルーティング
 // ─────────────────────────────────────────────
 
-// ==== /api/get-areas（POST互換） + GET版 ====
+// ==== /api/get-areas（POST互換） + GET新設 ====
 
 // L1メモリキャッシュ（エリア）
 const L1_AREAS = new Map(); // key => { areas, updatedAt, cache_key, expiresAt }
@@ -414,6 +426,7 @@ async function handleGetAreas(destination, res) {
   }
 
   // 2) Disk
+  await fs.mkdir(CACHE_DIR, { recursive: true });
   const cacheObj = await readJsonFile(AREA_CACHE_FILE);
   const hitKeyByFn = findCacheKey(cacheObj, destination);
   const hitKeyByCanon = Object.keys(cacheObj).find(k => canonicalizeDestination(k) === ckey);
@@ -559,7 +572,7 @@ app.post('/api/create-day-plans', async (req, res) => {
   }
 });
 
-// 5-4) ジオコーディング（Google 優先 + キャッシュ + Nominatim Fallback）
+// 5-4) ジオコーディング（Google Maps 優先 + キャッシュ + Nominatim Fallback）
 app.post('/api/geocode-batch', async (req, res) => {
   try {
     const { destination, items, planId } = req.body || {};
@@ -576,7 +589,7 @@ app.post('/api/geocode-batch', async (req, res) => {
 });
 
 // ─────────────────────────────────────────────
-/** 6) Excel ログ連携 API */
+// 6) Excel ログ連携 API
 // ─────────────────────────────────────────────
 app.post('/api/plan/start', async (req, res) => {
   try {
@@ -693,13 +706,17 @@ app.get('/api/plan/state', async (req, res) => {
 });
 
 // ─────────────────────────────────────────────
-/** 7) 起動 */
+// 7) 起動
 // ─────────────────────────────────────────────
 app
-  .listen(PORT, () => {
+  .listen(PORT, async () => {
+    // Cache ディレクトリ作成（先回り）
+    try { await fs.mkdir(CACHE_DIR, { recursive: true }); } catch {}
+
     console.log('\x1b[32m%s\x1b[0m', `Backend server listening at http://localhost:${PORT}`);
     console.log('OPENAI key exists?', !!process.env.OPENAI_API_KEY);
     console.log('GOOGLE_MAPS_API_KEY exists?', !!GOOGLE_MAPS_API_KEY);
+    console.log('CACHE_DIR:', CACHE_DIR);
     console.log('CORS origins:', origins.join(', '));
   })
   .on('error', (err) => {

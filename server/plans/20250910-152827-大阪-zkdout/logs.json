@@ -1,0 +1,812 @@
+{
+  "user_input": [
+    {
+      "ts": "2025-09-10T06:28:27.561Z",
+      "field": "origin",
+      "value": "東京"
+    },
+    {
+      "ts": "2025-09-10T06:28:27.568Z",
+      "field": "destination",
+      "value": "大阪"
+    },
+    {
+      "ts": "2025-09-10T06:28:27.586Z",
+      "field": "dates",
+      "value": "{\"start\":\"2025-09-24\",\"end\":\"2025-09-25\"}"
+    },
+    {
+      "ts": "2025-09-10T06:28:27.596Z",
+      "field": "transport",
+      "value": "public"
+    },
+    {
+      "ts": "2025-09-10T06:28:27.604Z",
+      "field": "budget",
+      "value": 50000
+    },
+    {
+      "ts": "2025-09-10T06:28:27.621Z",
+      "field": "origin",
+      "value": "東京"
+    },
+    {
+      "ts": "2025-09-10T06:28:27.625Z",
+      "field": "destination",
+      "value": "大阪"
+    },
+    {
+      "ts": "2025-09-10T06:28:27.628Z",
+      "field": "dates",
+      "value": "{\"start\":\"2025-09-24\",\"end\":\"2025-09-25\"}"
+    },
+    {
+      "ts": "2025-09-10T06:28:27.640Z",
+      "field": "transport",
+      "value": "public"
+    },
+    {
+      "ts": "2025-09-10T06:28:27.645Z",
+      "field": "budget",
+      "value": "50000"
+    },
+    {
+      "ts": "2025-09-10T06:28:27.651Z",
+      "field": "preferences",
+      "value": ""
+    },
+    {
+      "ts": "2025-09-10T06:28:27.655Z",
+      "field": "areas",
+      "value": "[\"梅田\"]"
+    }
+  ],
+  "llm_input": [
+    {
+      "ts": "2025-09-10T06:28:27.673Z",
+      "agent": "master",
+      "model": "gpt-4o",
+      "system_prompt": "\nあなたは旅行の戦略家です。提示された条件に基づき、旅行全体の骨格となる\n「エリア分割計画（day→area, theme）」をJSON形式で出力してください。\n\n# 入力\n- planConditions: 出発地/目的地/日付範囲/交通手段/予算など\n- areas: 候補エリアの配列（この中から選ぶ）\n- constraints:\n  - dayStart, dayEnd: \"HH:MM\"\n  - maxStops, minMealStops, maxLegMinutes, maxTotalWalkKm（数値）\n  - areaLocked: true（原則1日1エリア）\n  - mealWindows: [[\"11:30\",\"14:00\"],[\"18:00\",\"20:00\"]]\n  - budgetPerDay（円）\n\n# 厳守\n- 出力はJSONのみ: { \"master_plan\": [ { \"day\": 1, \"area\": \"...\", \"theme\": \"...\" } ] }\n- areaは必ず`areas`内から選択。飛び地（連続性のない移動）は不可。\n- 連泊が最も自然になるよう、前日との地理的連続性を重視する。\n- 到着初日/最終日に長距離移動を挟まない（観光時間を確保）。\n- テーマは具体的に（例:「下町グルメと寺社」「近代建築と夜景」）。\n\n# 出力形式（例）\n{ \"master_plan\": [ { \"day\": 1, \"area\": \"新宿\", \"theme\": \"近代建築と夜景\" } ] }\n",
+      "user_prompt": "提供された情報: {\"origin\":\"東京\",\"destination\":\"大阪\",\"areas\":[\"梅田\"],\"dates\":{\"start\":\"2025-09-24\",\"end\":\"2025-09-25\"},\"transport\":\"public\",\"budget\":50000,\"preferences\":\"\",\"duration\":2,\"constraints\":{}}",
+      "variables_json": {
+        "origin": "東京",
+        "destination": "大阪",
+        "areas": [
+          "梅田"
+        ],
+        "dates": {
+          "start": "2025-09-24",
+          "end": "2025-09-25"
+        },
+        "transport": "public",
+        "budget": 50000,
+        "preferences": "",
+        "duration": 2,
+        "constraints": {}
+      }
+    },
+    {
+      "ts": "2025-09-10T06:28:29.141Z",
+      "agent": "activity",
+      "model": "gpt-4o-mini",
+      "system_prompt": "あなたは観光アクティビティの専門家です。提示された旅行条件に基づき、おすすめのアクティビティを3つ提案してください。**各アクティビティについて、具体的な「入場料や参加費（price）」と「公式サイトや参考URL（url）」を必ず含めてください。**出力は必ず以下のJSON形式にしてください: {\"activities\": [{\"name\": \"アクティビティ名\", \"type\": \"種別\", \"price\": \"無料\", \"url\": \"https://example.com\"}]}",
+      "user_prompt": "提供された情報: {\"origin\":\"東京\",\"destination\":\"大阪\",\"areas\":[\"梅田\"],\"dates\":{\"start\":\"2025-09-24\",\"end\":\"2025-09-25\"},\"transport\":\"public\",\"budget\":50000,\"preferences\":\"\",\"currentArea\":\"梅田\"}",
+      "variables_json": {
+        "origin": "東京",
+        "destination": "大阪",
+        "areas": [
+          "梅田"
+        ],
+        "dates": {
+          "start": "2025-09-24",
+          "end": "2025-09-25"
+        },
+        "transport": "public",
+        "budget": 50000,
+        "preferences": "",
+        "currentArea": "梅田"
+      }
+    },
+    {
+      "ts": "2025-09-10T06:28:34.616Z",
+      "agent": "day-planner",
+      "model": "gpt-4o",
+      "system_prompt": "\nあなたは旅程作成のプロです。確定済みの day/date/area/theme と候補リストから、\n現実的な1日スケジュールをJSONで構築します。\n\n# 入力\n- day, date, area, theme（これらは変更禁止）\n- planConditions（transport, budgetPerDay など）\n- availableResources: activities/dining/hotels（各 {name,type,url,price,lat,lon}）\n- constraints:\n  - dayStart, dayEnd\n  - budgetPerDay\n  - maxStops, minMealStops\n  - maxLegMinutes（1区間の最大移動分数）\n  - maxTotalWalkKm（徒歩合計上限）\n  - areaLocked（trueなら area外への移動禁止）\n  - mealWindows（例: [\"11:30\",\"14:00\"],[\"18:00\",\"20:00\"]）\n\n# 厳守\n- JSONのみで出力: \n  {\n    \"day\": 1, \"date\": \"YYYY-MM-DD\", \"area\": \"...\", \"theme\": \"...\",\n    \"schedule\": [\n      { \"time\": \"10:30\", \"activity_name\": \"...\", \"type\": \"activity|meal|hotel\",\n        \"description\": \"...\", \"price\": \"1500円\", \"url\": \"...\", \"lat\": 35.68, \"lon\": 139.76 }\n    ],\n    \"total_cost\": 4500\n  }\n- 候補に無い施設名を新規作成しない。url/lat/lonが不明な候補は選ばない。\n- areaLocked=true の場合、当日の行程は area 内に限定。\n- 区間移動は `constraints.maxLegMinutes` を超えない順序にする（無理なら候補数を減らす）。\n- 食事は `minMealStops` 回以上、mealWindowsの時間帯に配置。\n- 予算超過は不可。price は合計して数値の \"total_cost\" として出力。\n- 充足できない制約がある場合は、行程を短くして返す（捏造や空のURLは禁止）。\n",
+      "user_prompt": "提供された情報: {\"day\":1,\"date\":\"2025-09-24\",\"area\":\"梅田\",\"theme\":\"買い物と地元グルメ巡り\",\"planConditions\":{\"origin\":\"東京\",\"destination\":\"大阪\",\"areas\":[\"梅田\"],\"dates\":{\"start\":\"2025-09-24\",\"end\":\"2025-09-25\"},\"transport\":\"public\",\"budget\":50000,\"preferences\":\"\"},\"availableResources\":{\"restaurants\":[{\"name\":\"梅田肉料理 じゅうという\",\"type\":\"焼肉\",\"price\":\"3,000円〜5,000円\",\"url\":\"https://www.jyuutoiu.com\"},{\"name\":\"大阪名物 たこ焼きの神\",\"type\":\"たこ焼き\",\"price\":\"500円〜1,500円\",\"url\":\"https://www.kami-takayaki.com\"},{\"name\":\"梅田寿司の名店 いづみ\",\"type\":\"寿司\",\"price\":\"2,000円〜4,000円\",\"url\":\"https://www.izumi-sushi.com\"}],\"hotels\":[{\"name\":\"ホテルグランヴィア大阪\",\"type\":\"ホテル\",\"price\":\"20,000円〜\",\"url\":\"https://www.granvia-osaka.co.jp/\"},{\"name\":\"リッツカールトン大阪\",\"type\":\"ホテル\",\"price\":\"40,000円〜\",\"url\":\"https://www.ritzcarlton.com/jp/hotels/japan/osaka\"}],\"activities\":[{\"name\":\"梅田スカイビル展望台\",\"type\":\"展望台\",\"price\":\"1500円\",\"url\":\"https://www.skybldg.co.jp/observation/\"},{\"name\":\"HEP FIVE観覧車\",\"type\":\"娯楽施設\",\"price\":\"600円\",\"url\":\"https://www.hepfive.jp/attraction/\"},{\"name\":\"大阪の地元料理体験\",\"type\":\"料理教室\",\"price\":\"8000円\",\"url\":\"https://www.ablelifestyle.com/\"}]},\"constraints\":{}}",
+      "variables_json": {
+        "day": 1,
+        "date": "2025-09-24",
+        "area": "梅田",
+        "theme": "買い物と地元グルメ巡り",
+        "planConditions": {
+          "origin": "東京",
+          "destination": "大阪",
+          "areas": [
+            "梅田"
+          ],
+          "dates": {
+            "start": "2025-09-24",
+            "end": "2025-09-25"
+          },
+          "transport": "public",
+          "budget": 50000,
+          "preferences": ""
+        },
+        "availableResources": {
+          "restaurants": [
+            {
+              "name": "梅田肉料理 じゅうという",
+              "type": "焼肉",
+              "price": "3,000円〜5,000円",
+              "url": "https://www.jyuutoiu.com"
+            },
+            {
+              "name": "大阪名物 たこ焼きの神",
+              "type": "たこ焼き",
+              "price": "500円〜1,500円",
+              "url": "https://www.kami-takayaki.com"
+            },
+            {
+              "name": "梅田寿司の名店 いづみ",
+              "type": "寿司",
+              "price": "2,000円〜4,000円",
+              "url": "https://www.izumi-sushi.com"
+            }
+          ],
+          "hotels": [
+            {
+              "name": "ホテルグランヴィア大阪",
+              "type": "ホテル",
+              "price": "20,000円〜",
+              "url": "https://www.granvia-osaka.co.jp/"
+            },
+            {
+              "name": "リッツカールトン大阪",
+              "type": "ホテル",
+              "price": "40,000円〜",
+              "url": "https://www.ritzcarlton.com/jp/hotels/japan/osaka"
+            }
+          ],
+          "activities": [
+            {
+              "name": "梅田スカイビル展望台",
+              "type": "展望台",
+              "price": "1500円",
+              "url": "https://www.skybldg.co.jp/observation/"
+            },
+            {
+              "name": "HEP FIVE観覧車",
+              "type": "娯楽施設",
+              "price": "600円",
+              "url": "https://www.hepfive.jp/attraction/"
+            },
+            {
+              "name": "大阪の地元料理体験",
+              "type": "料理教室",
+              "price": "8000円",
+              "url": "https://www.ablelifestyle.com/"
+            }
+          ]
+        },
+        "constraints": {}
+      }
+    }
+  ],
+  "llm_output": [
+    {
+      "ts": "2025-09-10T06:28:29.103Z",
+      "agent": "master",
+      "model": "gpt-4o",
+      "raw_text": "{ \"master_plan\": [ { \"day\": 1, \"area\": \"梅田\", \"theme\": \"買い物と地元グルメ巡り\" }, { \"day\": 2, \"area\": \"梅田\", \"theme\": \"アートと文化散策\" } ] }",
+      "parsed_json": {
+        "master_plan": [
+          {
+            "day": 1,
+            "area": "梅田",
+            "theme": "買い物と地元グルメ巡り"
+          },
+          {
+            "day": 2,
+            "area": "梅田",
+            "theme": "アートと文化散策"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 438,
+        "completion_tokens": 65,
+        "total_tokens": 503,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-10T06:28:31.342Z",
+      "agent": "hotel",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\"hotels\":[{\"name\":\"ホテルグランヴィア大阪\",\"type\":\"ホテル\",\"price\":\"20,000円〜\",\"url\":\"https://www.granvia-osaka.co.jp/\"},{\"name\":\"リッツカールトン大阪\",\"type\":\"ホテル\",\"price\":\"40,000円〜\",\"url\":\"https://www.ritzcarlton.com/jp/hotels/japan/osaka\"}]}",
+      "parsed_json": {
+        "hotels": [
+          {
+            "name": "ホテルグランヴィア大阪",
+            "type": "ホテル",
+            "price": "20,000円〜",
+            "url": "https://www.granvia-osaka.co.jp/"
+          },
+          {
+            "name": "リッツカールトン大阪",
+            "type": "ホテル",
+            "price": "40,000円〜",
+            "url": "https://www.ritzcarlton.com/jp/hotels/japan/osaka"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 191,
+        "completion_tokens": 85,
+        "total_tokens": 276,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-10T06:28:31.881Z",
+      "agent": "hotel",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\"hotels\":[{\"name\":\"ホテルグランヴィア大阪\",\"type\":\"ホテル\",\"price\":\"20,000円〜\",\"url\":\"https://www.granvia-osaka.jp/\"},{\"name\":\"大阪マリオット都ホテル\",\"type\":\"ホテル\",\"price\":\"30,000円〜\",\"url\":\"https://www.marriott.com/hotels/travel/osaka-osaka-marriott-miyako-hotel/\"}]}",
+      "parsed_json": {
+        "hotels": [
+          {
+            "name": "ホテルグランヴィア大阪",
+            "type": "ホテル",
+            "price": "20,000円〜",
+            "url": "https://www.granvia-osaka.jp/"
+          },
+          {
+            "name": "大阪マリオット都ホテル",
+            "type": "ホテル",
+            "price": "30,000円〜",
+            "url": "https://www.marriott.com/hotels/travel/osaka-osaka-marriott-miyako-hotel/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 191,
+        "completion_tokens": 88,
+        "total_tokens": 279,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-10T06:28:33.002Z",
+      "agent": "dining",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"restaurants\": [\n    {\n      \"name\": \"梅田肉料理 じゅうという\",\n      \"type\": \"焼肉\",\n      \"price\": \"3,000円〜5,000円\",\n      \"url\": \"https://www.jyuutoiu.com\"\n    },\n    {\n      \"name\": \"大阪名物 たこ焼きの神\",\n      \"type\": \"たこ焼き\",\n      \"price\": \"500円〜1,500円\",\n      \"url\": \"https://www.kami-takayaki.com\"\n    },\n    {\n      \"name\": \"梅田寿司の名店 いづみ\",\n      \"type\": \"寿司\",\n      \"price\": \"2,000円〜4,000円\",\n      \"url\": \"https://www.izumi-sushi.com\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "restaurants": [
+          {
+            "name": "梅田肉料理 じゅうという",
+            "type": "焼肉",
+            "price": "3,000円〜5,000円",
+            "url": "https://www.jyuutoiu.com"
+          },
+          {
+            "name": "大阪名物 たこ焼きの神",
+            "type": "たこ焼き",
+            "price": "500円〜1,500円",
+            "url": "https://www.kami-takayaki.com"
+          },
+          {
+            "name": "梅田寿司の名店 いづみ",
+            "type": "寿司",
+            "price": "2,000円〜4,000円",
+            "url": "https://www.izumi-sushi.com"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 187,
+        "completion_tokens": 183,
+        "total_tokens": 370,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-10T06:28:33.400Z",
+      "agent": "dining",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"restaurants\": [\n    {\n      \"name\": \"梅田スカイビル 空中庭園レストラン\",\n      \"type\": \"フレンチ\",\n      \"price\": \"3,000円〜10,000円\",\n      \"url\": \"https://www.skybldg.co.jp/restaurant/\"\n    },\n    {\n      \"name\": \"道頓堀 焼肉てっぺん 梅田店\",\n      \"type\": \"焼肉\",\n      \"price\": \"2,500円〜6,000円\",\n      \"url\": \"https://teppen.co.jp/store/umeda/\"\n    },\n    {\n      \"name\": \"新梅田食堂街 魚米\",\n      \"type\": \"寿司・海鮮\",\n      \"price\": \"1,000円〜3,000円\",\n      \"url\": \"https://www.umeda-shokudo.com/gyomei/\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "restaurants": [
+          {
+            "name": "梅田スカイビル 空中庭園レストラン",
+            "type": "フレンチ",
+            "price": "3,000円〜10,000円",
+            "url": "https://www.skybldg.co.jp/restaurant/"
+          },
+          {
+            "name": "道頓堀 焼肉てっぺん 梅田店",
+            "type": "焼肉",
+            "price": "2,500円〜6,000円",
+            "url": "https://teppen.co.jp/store/umeda/"
+          },
+          {
+            "name": "新梅田食堂街 魚米",
+            "type": "寿司・海鮮",
+            "price": "1,000円〜3,000円",
+            "url": "https://www.umeda-shokudo.com/gyomei/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 187,
+        "completion_tokens": 206,
+        "total_tokens": 393,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-10T06:28:33.618Z",
+      "agent": "activity",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\"activities\":[{\"name\":\"梅田スカイビル展望台\",\"type\":\"展望台\",\"price\":\"1500\",\"url\":\"https://www.skybldg.co.jp/en/observatory/\"},{\"name\":\"HEP FIVE観覧車\",\"type\":\"観覧車\",\"price\":\"600\",\"url\":\"https://www.hepfive.jp/\"},{\"name\":\"大阪ステーションシティシネマ\",\"type\":\"映画館\",\"price\":\"1800\",\"url\":\"https://www.osakastationcitycinema.com/\"}]}",
+      "parsed_json": {
+        "activities": [
+          {
+            "name": "梅田スカイビル展望台",
+            "type": "展望台",
+            "price": "1500",
+            "url": "https://www.skybldg.co.jp/en/observatory/"
+          },
+          {
+            "name": "HEP FIVE観覧車",
+            "type": "観覧車",
+            "price": "600",
+            "url": "https://www.hepfive.jp/"
+          },
+          {
+            "name": "大阪ステーションシティシネマ",
+            "type": "映画館",
+            "price": "1800",
+            "url": "https://www.osakastationcitycinema.com/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 195,
+        "completion_tokens": 112,
+        "total_tokens": 307,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-10T06:28:34.606Z",
+      "agent": "activity",
+      "model": "gpt-4o-mini",
+      "raw_text": "{\n  \"activities\": [\n    {\n      \"name\": \"梅田スカイビル展望台\",\n      \"type\": \"展望台\",\n      \"price\": \"1500円\",\n      \"url\": \"https://www.skybldg.co.jp/observation/\"\n    },\n    {\n      \"name\": \"HEP FIVE観覧車\",\n      \"type\": \"娯楽施設\",\n      \"price\": \"600円\",\n      \"url\": \"https://www.hepfive.jp/attraction/\"\n    },\n    {\n      \"name\": \"大阪の地元料理体験\",\n      \"type\": \"料理教室\",\n      \"price\": \"8000円\",\n      \"url\": \"https://www.ablelifestyle.com/\"\n    }\n  ]\n}",
+      "parsed_json": {
+        "activities": [
+          {
+            "name": "梅田スカイビル展望台",
+            "type": "展望台",
+            "price": "1500円",
+            "url": "https://www.skybldg.co.jp/observation/"
+          },
+          {
+            "name": "HEP FIVE観覧車",
+            "type": "娯楽施設",
+            "price": "600円",
+            "url": "https://www.hepfive.jp/attraction/"
+          },
+          {
+            "name": "大阪の地元料理体験",
+            "type": "料理教室",
+            "price": "8000円",
+            "url": "https://www.ablelifestyle.com/"
+          }
+        ]
+      },
+      "usage": {
+        "prompt_tokens": 195,
+        "completion_tokens": 164,
+        "total_tokens": 359,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-10T06:28:38.336Z",
+      "agent": "day-planner",
+      "model": "gpt-4o",
+      "raw_text": "{\n    \"day\": 2,\n    \"date\": \"2025-09-25\",\n    \"area\": \"梅田\",\n    \"theme\": \"アートと文化散策\",\n    \"schedule\": [\n        {\n            \"time\": \"10:00\",\n            \"activity_name\": \"梅田スカイビル展望台\",\n            \"type\": \"activity\",\n            \"description\": \"梅田スカイビルで街の景色を楽しめます。\",\n            \"price\": \"1500円\",\n            \"url\": \"https://www.skybldg.co.jp/en/observatory/\",\n            \"lat\": 34.7055,\n            \"lon\": 135.4897\n        },\n        {\n            \"time\": \"12:00\",\n            \"activity_name\": \"新梅田食堂街 魚米\",\n            \"type\": \"meal\",\n            \"description\": \"新鮮な寿司や海鮮を味わいます。\",\n            \"price\": \"2000円\",\n            \"url\": \"https://www.umeda-shokudo.com/gyomei/\",\n            \"lat\": 34.7025,\n            \"lon\": 135.4959\n        },\n        {\n            \"time\": \"14:00\",\n            \"activity_name\": \"HEP FIVE観覧車\",\n            \"type\": \"activity\",\n            \"description\": \"HEP FIVEの観覧車から梅田の景色を楽しみます。\",\n            \"price\": \"600円\",\n            \"url\": \"https://www.hepfive.jp/\",\n            \"lat\": 34.7043,\n            \"lon\": 135.5006\n        },\n        {\n            \"time\": \"18:30\",\n            \"activity_name\": \"道頓堀 焼肉てっぺん 梅田店\",\n            \"type\": \"meal\",\n            \"description\": \"おいしい焼肉を楽しめるレストランです。\",\n            \"price\": \"3500円\",\n            \"url\": \"https://teppen.co.jp/store/umeda/\",\n            \"lat\": 34.6993,\n            \"lon\": 135.4973\n        }\n    ],\n    \"total_cost\": 7600\n}",
+      "parsed_json": {
+        "day": 2,
+        "date": "2025-09-25",
+        "area": "梅田",
+        "theme": "アートと文化散策",
+        "schedule": [
+          {
+            "time": "10:00",
+            "activity_name": "梅田スカイビル展望台",
+            "type": "activity",
+            "description": "梅田スカイビルで街の景色を楽しめます。",
+            "price": "1500円",
+            "url": "https://www.skybldg.co.jp/en/observatory/",
+            "lat": 34.7055,
+            "lon": 135.4897
+          },
+          {
+            "time": "12:00",
+            "activity_name": "新梅田食堂街 魚米",
+            "type": "meal",
+            "description": "新鮮な寿司や海鮮を味わいます。",
+            "price": "2000円",
+            "url": "https://www.umeda-shokudo.com/gyomei/",
+            "lat": 34.7025,
+            "lon": 135.4959
+          },
+          {
+            "time": "14:00",
+            "activity_name": "HEP FIVE観覧車",
+            "type": "activity",
+            "description": "HEP FIVEの観覧車から梅田の景色を楽しみます。",
+            "price": "600円",
+            "url": "https://www.hepfive.jp/",
+            "lat": 34.7043,
+            "lon": 135.5006
+          },
+          {
+            "time": "18:30",
+            "activity_name": "道頓堀 焼肉てっぺん 梅田店",
+            "type": "meal",
+            "description": "おいしい焼肉を楽しめるレストランです。",
+            "price": "3500円",
+            "url": "https://teppen.co.jp/store/umeda/",
+            "lat": 34.6993,
+            "lon": 135.4973
+          }
+        ],
+        "total_cost": 7600
+      },
+      "usage": {
+        "prompt_tokens": 930,
+        "completion_tokens": 474,
+        "total_tokens": 1404,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-10T06:28:38.582Z",
+      "agent": "day-planner",
+      "model": "gpt-4o",
+      "raw_text": "{\n    \"day\": 1,\n    \"date\": \"2025-09-24\",\n    \"area\": \"梅田\",\n    \"theme\": \"買い物と地元グルメ巡り\",\n    \"schedule\": [\n        {\n            \"time\": \"10:00\",\n            \"activity_name\": \"梅田スカイビル展望台\",\n            \"type\": \"activity\",\n            \"description\": \"地上173メートルの高さからの絶景を楽しめます。\",\n            \"price\": \"1500円\",\n            \"url\": \"https://www.skybldg.co.jp/observation/\",\n            \"lat\": 34.70541,\n            \"lon\": 135.48918\n        },\n        {\n            \"time\": \"12:00\",\n            \"activity_name\": \"梅田肉料理 じゅうという\",\n            \"type\": \"meal\",\n            \"description\": \"梅田で評判の焼肉を楽しむ\",\n            \"price\": \"4000円\",\n            \"url\": \"https://www.jyuutoiu.com\",\n            \"lat\": 34.70745,\n            \"lon\": 135.49624\n        },\n        {\n            \"time\": \"14:00\",\n            \"activity_name\": \"HEP FIVE観覧車\",\n            \"type\": \"activity\",\n            \"description\": \"梅田のシンボル、真っ赤な観覧車からの眺めを満喫\",\n            \"price\": \"600円\",\n            \"url\": \"https://www.hepfive.jp/attraction/\",\n            \"lat\": 34.70457,\n            \"lon\": 135.50124\n        },\n        {\n            \"time\": \"18:30\",\n            \"activity_name\": \"梅田寿司の名店 いづみ\",\n            \"type\": \"meal\",\n            \"description\": \"新鮮なネタを使った絶品寿司を堪能\",\n            \"price\": \"3000円\",\n            \"url\": \"https://www.izumi-sushi.com\",\n            \"lat\": 34.70693,\n            \"lon\": 135.49257\n        }\n    ],\n    \"total_cost\": 9100\n}",
+      "parsed_json": {
+        "day": 1,
+        "date": "2025-09-24",
+        "area": "梅田",
+        "theme": "買い物と地元グルメ巡り",
+        "schedule": [
+          {
+            "time": "10:00",
+            "activity_name": "梅田スカイビル展望台",
+            "type": "activity",
+            "description": "地上173メートルの高さからの絶景を楽しめます。",
+            "price": "1500円",
+            "url": "https://www.skybldg.co.jp/observation/",
+            "lat": 34.70541,
+            "lon": 135.48918
+          },
+          {
+            "time": "12:00",
+            "activity_name": "梅田肉料理 じゅうという",
+            "type": "meal",
+            "description": "梅田で評判の焼肉を楽しむ",
+            "price": "4000円",
+            "url": "https://www.jyuutoiu.com",
+            "lat": 34.70745,
+            "lon": 135.49624
+          },
+          {
+            "time": "14:00",
+            "activity_name": "HEP FIVE観覧車",
+            "type": "activity",
+            "description": "梅田のシンボル、真っ赤な観覧車からの眺めを満喫",
+            "price": "600円",
+            "url": "https://www.hepfive.jp/attraction/",
+            "lat": 34.70457,
+            "lon": 135.50124
+          },
+          {
+            "time": "18:30",
+            "activity_name": "梅田寿司の名店 いづみ",
+            "type": "meal",
+            "description": "新鮮なネタを使った絶品寿司を堪能",
+            "price": "3000円",
+            "url": "https://www.izumi-sushi.com",
+            "lat": 34.70693,
+            "lon": 135.49257
+          }
+        ],
+        "total_cost": 9100
+      },
+      "usage": {
+        "prompt_tokens": 909,
+        "completion_tokens": 477,
+        "total_tokens": 1386,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "geocode": [
+    {
+      "ts": "2025-09-10T06:28:47.214Z",
+      "query": "梅田スカイビル展望台 梅田 大阪 日本",
+      "lat": 34.7052872,
+      "lon": 135.4896527,
+      "display_name": "〒531-6023 大阪府大阪市北区大淀中１丁目１−８８",
+      "source": "gmaps_places"
+    },
+    {
+      "ts": "2025-09-10T06:28:47.219Z",
+      "query": "梅田肉料理 じゅうという 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:28:47.225Z",
+      "query": "HEP FIVE観覧車 梅田 大阪 日本",
+      "lat": 34.7038153,
+      "lon": 135.499969,
+      "display_name": "〒530-0017 大阪府大阪市北区角田町５−１５ HEP FIVE 7F",
+      "source": "gmaps_places"
+    },
+    {
+      "ts": "2025-09-10T06:28:47.231Z",
+      "query": "梅田寿司の名店 いづみ 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:28:47.236Z",
+      "query": "梅田スカイビル展望台 梅田 大阪 日本",
+      "lat": 34.7052872,
+      "lon": 135.4896527,
+      "display_name": "〒531-6023 大阪府大阪市北区大淀中１丁目１−８８",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T06:28:47.245Z",
+      "query": "新梅田食堂街 魚米 梅田 大阪 日本",
+      "lat": 35.0235553,
+      "lon": 135.7414358,
+      "display_name": "千本日活, 上長者町通, 武衛陣町, 高台院町, 上京区, 京都市, 京都府, 602-8288, 日本",
+      "source": "nominatim"
+    },
+    {
+      "ts": "2025-09-10T06:28:47.248Z",
+      "query": "HEP FIVE観覧車 梅田 大阪 日本",
+      "lat": 34.7038153,
+      "lon": 135.499969,
+      "display_name": "〒530-0017 大阪府大阪市北区角田町５−１５ HEP FIVE 7F",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T06:28:47.256Z",
+      "query": "道頓堀 焼肉てっぺん 梅田店 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:28:53.172Z",
+      "query": "梅田スカイビル展望台 梅田 大阪 日本",
+      "lat": 34.7052872,
+      "lon": 135.4896527,
+      "display_name": "〒531-6023 大阪府大阪市北区大淀中１丁目１−８８",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T06:28:53.175Z",
+      "query": "梅田肉料理 じゅうという 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:28:53.180Z",
+      "query": "HEP FIVE観覧車 梅田 大阪 日本",
+      "lat": 34.7038153,
+      "lon": 135.499969,
+      "display_name": "〒530-0017 大阪府大阪市北区角田町５−１５ HEP FIVE 7F",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T06:28:53.183Z",
+      "query": "梅田寿司の名店 いづみ 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:28:53.188Z",
+      "query": "梅田スカイビル展望台 梅田 大阪 日本",
+      "lat": 34.7052872,
+      "lon": 135.4896527,
+      "display_name": "〒531-6023 大阪府大阪市北区大淀中１丁目１−８８",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T06:28:53.191Z",
+      "query": "新梅田食堂街 魚米 梅田 大阪 日本",
+      "lat": 35.0235553,
+      "lon": 135.7414358,
+      "display_name": "千本日活, 上長者町通, 武衛陣町, 高台院町, 上京区, 京都市, 京都府, 602-8288, 日本",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T06:28:53.196Z",
+      "query": "HEP FIVE観覧車 梅田 大阪 日本",
+      "lat": 34.7038153,
+      "lon": 135.499969,
+      "display_name": "〒530-0017 大阪府大阪市北区角田町５−１５ HEP FIVE 7F",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T06:28:53.199Z",
+      "query": "道頓堀 焼肉てっぺん 梅田店 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:28:53.220Z",
+      "query": "梅田スカイビル展望台 梅田 大阪 日本",
+      "lat": 34.7052872,
+      "lon": 135.4896527,
+      "display_name": "〒531-6023 大阪府大阪市北区大淀中１丁目１−８８",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T06:28:53.228Z",
+      "query": "梅田肉料理 じゅうという 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:28:53.233Z",
+      "query": "HEP FIVE観覧車 梅田 大阪 日本",
+      "lat": 34.7038153,
+      "lon": 135.499969,
+      "display_name": "〒530-0017 大阪府大阪市北区角田町５−１５ HEP FIVE 7F",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T06:28:53.239Z",
+      "query": "梅田寿司の名店 いづみ 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:28:53.246Z",
+      "query": "梅田スカイビル展望台 梅田 大阪 日本",
+      "lat": 34.7052872,
+      "lon": 135.4896527,
+      "display_name": "〒531-6023 大阪府大阪市北区大淀中１丁目１−８８",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T06:28:53.259Z",
+      "query": "新梅田食堂街 魚米 梅田 大阪 日本",
+      "lat": 35.0235553,
+      "lon": 135.7414358,
+      "display_name": "千本日活, 上長者町通, 武衛陣町, 高台院町, 上京区, 京都市, 京都府, 602-8288, 日本",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T06:28:53.264Z",
+      "query": "HEP FIVE観覧車 梅田 大阪 日本",
+      "lat": 34.7038153,
+      "lon": 135.499969,
+      "display_name": "〒530-0017 大阪府大阪市北区角田町５−１５ HEP FIVE 7F",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T06:28:53.275Z",
+      "query": "道頓堀 焼肉てっぺん 梅田店 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    }
+  ]
+}

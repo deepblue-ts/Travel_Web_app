@@ -1,0 +1,182 @@
+{
+  "places": [
+    {
+      "id": "p1",
+      "name": "梅田スカイビル 空中庭園展望台",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 1500,
+      "url": "https://www.skybldg.co.jp/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p2",
+      "name": "梅田海鮮市場",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 3500,
+      "url": "https://umeda-kaisenei.com/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p3",
+      "name": "グランフロント大阪",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 0,
+      "url": "https://www.grandfront-osaka.com/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p4",
+      "name": "炭火焼肉とんとん 梅田店",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 4000,
+      "url": "https://tontontonton.com/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p5",
+      "name": "HEP FIVE 観覧車",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 500,
+      "url": "https://www.hepfive.jp/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p6",
+      "name": "ホテル阪急インターナショナル",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 20000,
+      "url": "https://www.hankyu-hotel.com/hotel/hh/hankyu_international/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p7",
+      "name": "大阪梅田スカイビル空中庭園展望台",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 1500,
+      "url": "https://www.skybldg.co.jp/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p8",
+      "name": "梅田スカイビル 空中庭園レストラン",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 3000,
+      "url": "https://www.skybuil.com/restaurant/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p9",
+      "name": "グランフロント大阪のショッピング",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 0,
+      "url": "https://www.grandfront-osaka.jp/",
+      "lat": "",
+      "lon": ""
+    },
+    {
+      "id": "p10",
+      "name": "串カツ田中 梅田店",
+      "type": "poi",
+      "area": "梅田",
+      "priceYen": 2000,
+      "url": "https://www.kushikatsu-tanaka.com/",
+      "lat": "",
+      "lon": ""
+    }
+  ],
+  "days": [
+    {
+      "day": 1,
+      "date": "2025-09-24",
+      "stops": [
+        {
+          "time": "10:00",
+          "placeId": "p1",
+          "note": "壮大な景色が楽しめる展望台から梅田の街を一望。",
+          "costYen": 1500
+        },
+        {
+          "time": "12:30",
+          "placeId": "p2",
+          "note": "新鮮な海鮮料理を楽しめるランチ。",
+          "costYen": 3500
+        },
+        {
+          "time": "14:00",
+          "placeId": "p3",
+          "note": "ショッピングや飲食が楽しめる大型商業施設。",
+          "costYen": 0
+        },
+        {
+          "time": "18:30",
+          "placeId": "p4",
+          "note": "美味しい炭火焼肉を堪能できるディナー。",
+          "costYen": 4000
+        },
+        {
+          "time": "20:00",
+          "placeId": "p5",
+          "note": "夜景を楽しめる観覧車で素敵なひととき。",
+          "costYen": 500
+        },
+        {
+          "time": "21:00",
+          "placeId": "p6",
+          "note": "快適に過ごせる高級ホテルで宿泊。",
+          "costYen": 20000
+        }
+      ]
+    },
+    {
+      "day": 2,
+      "date": "2025-09-25",
+      "stops": [
+        {
+          "time": "10:00",
+          "placeId": "p7",
+          "note": "梅田スカイビルの屋上庭園から市内の景色を楽しむ。",
+          "costYen": 1500
+        },
+        {
+          "time": "12:00",
+          "placeId": "p8",
+          "note": "屋上庭園の隣でイタリアンランチを楽しむ。",
+          "costYen": 3000
+        },
+        {
+          "time": "14:00",
+          "placeId": "p9",
+          "note": "ショッピングモールで買い物を楽しむ。",
+          "costYen": 0
+        },
+        {
+          "time": "18:00",
+          "placeId": "p10",
+          "note": "地方名物の串カツを堪能するディナー。",
+          "costYen": 2000
+        }
+      ]
+    }
+  ],
+  "estimates": {
+    "totalCostYen": 36000
+  },
+  "title": "大阪への2日間の旅"
+}
