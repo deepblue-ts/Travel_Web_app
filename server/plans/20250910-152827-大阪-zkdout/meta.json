@@ -1,0 +1,14 @@
+{
+  "planId": "20250910-152827-大阪-zkdout",
+  "createdAt": "2025-09-10T06:28:27.488Z",
+  "status": "Done",
+  "origin": "東京",
+  "destination": "大阪",
+  "dates": {
+    "start": "2025-09-24",
+    "end": "2025-09-25"
+  },
+  "duration": 2,
+  "budgetPerDay": 50000,
+  "transport": "public"
+}

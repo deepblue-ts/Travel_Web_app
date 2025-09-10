@@ -1,0 +1,386 @@
+{
+  "user_input": [],
+  "llm_input": [],
+  "llm_output": [
+    {
+      "ts": "2025-09-10T06:33:52.982Z",
+      "agent": "day-planner",
+      "model": "gpt-4o",
+      "raw_text": "{\n    \"day\": 2,\n    \"date\": \"2025-09-25\",\n    \"area\": \"梅田\",\n    \"theme\": \"アートギャラリー巡りとグルメ体験\",\n    \"schedule\": [\n        {\n            \"time\": \"10:00\",\n            \"activity_name\": \"大阪梅田スカイビル空中庭園展望台\",\n            \"type\": \"activity\",\n            \"description\": \"梅田スカイビルの屋上庭園から市内の景色を楽しむ。\",\n            \"price\": \"1500円\",\n            \"url\": \"https://www.skybldg.co.jp/\",\n            \"lat\": 34.7055,\n            \"lon\": 135.4905\n        },\n        {\n            \"time\": \"12:00\",\n            \"activity_name\": \"梅田スカイビル 空中庭園レストラン\",\n            \"type\": \"meal\",\n            \"description\": \"屋上庭園の隣でイタリアンランチを楽しむ。\",\n            \"price\": \"3000円\",\n            \"url\": \"https://www.skybuil.com/restaurant/\",\n            \"lat\": 34.7054,\n            \"lon\": 135.4904\n        },\n        {\n            \"time\": \"14:00\",\n            \"activity_name\": \"グランフロント大阪のショッピング\",\n            \"type\": \"activity\",\n            \"description\": \"ショッピングモールで買い物を楽しむ。\",\n            \"price\": \"無料\",\n            \"url\": \"https://www.grandfront-osaka.jp/\",\n            \"lat\": 34.7052,\n            \"lon\": 135.4981\n        },\n        {\n            \"time\": \"18:00\",\n            \"activity_name\": \"串カツ田中 梅田店\",\n            \"type\": \"meal\",\n            \"description\": \"地方名物の串カツを堪能するディナー。\",\n            \"price\": \"2000円\",\n            \"url\": \"https://www.kushikatsu-tanaka.com/\",\n            \"lat\": 34.7032,\n            \"lon\": 135.5007\n        }\n    ],\n    \"total_cost\": 6500\n}",
+      "parsed_json": {
+        "day": 2,
+        "date": "2025-09-25",
+        "area": "梅田",
+        "theme": "アートギャラリー巡りとグルメ体験",
+        "schedule": [
+          {
+            "time": "10:00",
+            "activity_name": "大阪梅田スカイビル空中庭園展望台",
+            "type": "activity",
+            "description": "梅田スカイビルの屋上庭園から市内の景色を楽しむ。",
+            "price": "1500円",
+            "url": "https://www.skybldg.co.jp/",
+            "lat": 34.7055,
+            "lon": 135.4905
+          },
+          {
+            "time": "12:00",
+            "activity_name": "梅田スカイビル 空中庭園レストラン",
+            "type": "meal",
+            "description": "屋上庭園の隣でイタリアンランチを楽しむ。",
+            "price": "3000円",
+            "url": "https://www.skybuil.com/restaurant/",
+            "lat": 34.7054,
+            "lon": 135.4904
+          },
+          {
+            "time": "14:00",
+            "activity_name": "グランフロント大阪のショッピング",
+            "type": "activity",
+            "description": "ショッピングモールで買い物を楽しむ。",
+            "price": "無料",
+            "url": "https://www.grandfront-osaka.jp/",
+            "lat": 34.7052,
+            "lon": 135.4981
+          },
+          {
+            "time": "18:00",
+            "activity_name": "串カツ田中 梅田店",
+            "type": "meal",
+            "description": "地方名物の串カツを堪能するディナー。",
+            "price": "2000円",
+            "url": "https://www.kushikatsu-tanaka.com/",
+            "lat": 34.7032,
+            "lon": 135.5007
+          }
+        ],
+        "total_cost": 6500
+      },
+      "usage": {
+        "prompt_tokens": 931,
+        "completion_tokens": 483,
+        "total_tokens": 1414,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "ts": "2025-09-10T06:33:57.857Z",
+      "agent": "day-planner",
+      "model": "gpt-4o",
+      "raw_text": "{\n  \"day\": 1,\n  \"date\": \"2025-09-24\",\n  \"area\": \"梅田\",\n  \"theme\": \"ショッピングと都会のナイトライフ\",\n  \"schedule\": [\n    {\n      \"time\": \"10:00\",\n      \"activity_name\": \"梅田スカイビル 空中庭園展望台\",\n      \"type\": \"activity\",\n      \"description\": \"壮大な景色が楽しめる展望台から梅田の街を一望。\",\n      \"price\": \"1500円\",\n      \"url\": \"https://www.skybldg.co.jp/\",\n      \"lat\": 34.7055,\n      \"lon\": 135.4892\n    },\n    {\n      \"time\": \"12:30\",\n      \"activity_name\": \"梅田海鮮市場\",\n      \"type\": \"meal\",\n      \"description\": \"新鮮な海鮮料理を楽しめるランチ。\",\n      \"price\": \"3500円\",\n      \"url\": \"https://umeda-kaisenei.com/\",\n      \"lat\": 34.7025,\n      \"lon\": 135.4959\n    },\n    {\n      \"time\": \"14:00\",\n      \"activity_name\": \"グランフロント大阪\",\n      \"type\": \"activity\",\n      \"description\": \"ショッピングや飲食が楽しめる大型商業施設。\",\n      \"price\": \"無料\",\n      \"url\": \"https://www.grandfront-osaka.com/\",\n      \"lat\": 34.7058,\n      \"lon\": 135.4938\n    },\n    {\n      \"time\": \"18:30\",\n      \"activity_name\": \"炭火焼肉とんとん 梅田店\",\n      \"type\": \"meal\",\n      \"description\": \"美味しい炭火焼肉を堪能できるディナー。\",\n      \"price\": \"4000円\",\n      \"url\": \"https://tontontonton.com/\",\n      \"lat\": 34.701,\n      \"lon\": 135.499\n    },\n    {\n      \"time\": \"20:00\",\n      \"activity_name\": \"HEP FIVE 観覧車\",\n      \"type\": \"activity\",\n      \"description\": \"夜景を楽しめる観覧車で素敵なひととき。\",\n      \"price\": \"500円\",\n      \"url\": \"https://www.hepfive.jp/\",\n      \"lat\": 34.7044,\n      \"lon\": 135.5006\n    },\n    {\n      \"time\": \"21:00\",\n      \"activity_name\": \"ホテル阪急インターナショナル\",\n      \"type\": \"hotel\",\n      \"description\": \"快適に過ごせる高級ホテルで宿泊。\",\n      \"price\": \"20000円\",\n      \"url\": \"https://www.hankyu-hotel.com/hotel/hh/hankyu_international/\",\n      \"lat\": 34.7043,\n      \"lon\": 135.4966\n    }\n  ],\n  \"total_cost\": 29500\n}",
+      "parsed_json": {
+        "day": 1,
+        "date": "2025-09-24",
+        "area": "梅田",
+        "theme": "ショッピングと都会のナイトライフ",
+        "schedule": [
+          {
+            "time": "10:00",
+            "activity_name": "梅田スカイビル 空中庭園展望台",
+            "type": "activity",
+            "description": "壮大な景色が楽しめる展望台から梅田の街を一望。",
+            "price": "1500円",
+            "url": "https://www.skybldg.co.jp/",
+            "lat": 34.7055,
+            "lon": 135.4892
+          },
+          {
+            "time": "12:30",
+            "activity_name": "梅田海鮮市場",
+            "type": "meal",
+            "description": "新鮮な海鮮料理を楽しめるランチ。",
+            "price": "3500円",
+            "url": "https://umeda-kaisenei.com/",
+            "lat": 34.7025,
+            "lon": 135.4959
+          },
+          {
+            "time": "14:00",
+            "activity_name": "グランフロント大阪",
+            "type": "activity",
+            "description": "ショッピングや飲食が楽しめる大型商業施設。",
+            "price": "無料",
+            "url": "https://www.grandfront-osaka.com/",
+            "lat": 34.7058,
+            "lon": 135.4938
+          },
+          {
+            "time": "18:30",
+            "activity_name": "炭火焼肉とんとん 梅田店",
+            "type": "meal",
+            "description": "美味しい炭火焼肉を堪能できるディナー。",
+            "price": "4000円",
+            "url": "https://tontontonton.com/",
+            "lat": 34.701,
+            "lon": 135.499
+          },
+          {
+            "time": "20:00",
+            "activity_name": "HEP FIVE 観覧車",
+            "type": "activity",
+            "description": "夜景を楽しめる観覧車で素敵なひととき。",
+            "price": "500円",
+            "url": "https://www.hepfive.jp/",
+            "lat": 34.7044,
+            "lon": 135.5006
+          },
+          {
+            "time": "21:00",
+            "activity_name": "ホテル阪急インターナショナル",
+            "type": "hotel",
+            "description": "快適に過ごせる高級ホテルで宿泊。",
+            "price": "20000円",
+            "url": "https://www.hankyu-hotel.com/hotel/hh/hankyu_international/",
+            "lat": 34.7043,
+            "lon": 135.4966
+          }
+        ],
+        "total_cost": 29500
+      },
+      "usage": {
+        "prompt_tokens": 911,
+        "completion_tokens": 668,
+        "total_tokens": 1579,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "geocode": [
+    {
+      "ts": "2025-09-10T06:34:16.517Z",
+      "query": "梅田スカイビル 空中庭園展望台 梅田 大阪 日本",
+      "lat": 34.7052993,
+      "lon": 135.490172,
+      "display_name": "〒531-6039 大阪府大阪市北区大淀中１丁目１−８８ 梅田スカイビル",
+      "source": "gmaps_places"
+    },
+    {
+      "ts": "2025-09-10T06:34:16.522Z",
+      "query": "梅田海鮮市場 梅田 大阪 日本",
+      "lat": 34.9333966,
+      "lon": 135.7586426,
+      "display_name": "日本生命伏見ビル, 竹田街道, 肥後町, 伏見区, 京都市, 京都府, 612-8355, 日本",
+      "source": "nominatim"
+    },
+    {
+      "ts": "2025-09-10T06:34:16.527Z",
+      "query": "グランフロント大阪 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:34:16.532Z",
+      "query": "炭火焼肉とんとん 梅田店 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:34:16.535Z",
+      "query": "HEP FIVE 観覧車 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:34:16.539Z",
+      "query": "ホテル阪急インターナショナル 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:34:16.544Z",
+      "query": "大阪梅田スカイビル空中庭園展望台 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:34:16.548Z",
+      "query": "梅田スカイビル 空中庭園レストラン 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:34:16.551Z",
+      "query": "グランフロント大阪のショッピング 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:34:16.557Z",
+      "query": "串カツ田中 梅田店 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:34:31.514Z",
+      "query": "梅田スカイビル 空中庭園展望台 梅田 大阪 日本",
+      "lat": 34.7052993,
+      "lon": 135.490172,
+      "display_name": "〒531-6039 大阪府大阪市北区大淀中１丁目１−８８ 梅田スカイビル",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T06:34:31.517Z",
+      "query": "梅田海鮮市場 梅田 大阪 日本",
+      "lat": 34.9333966,
+      "lon": 135.7586426,
+      "display_name": "日本生命伏見ビル, 竹田街道, 肥後町, 伏見区, 京都市, 京都府, 612-8355, 日本",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T06:34:31.520Z",
+      "query": "グランフロント大阪 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:34:31.522Z",
+      "query": "炭火焼肉とんとん 梅田店 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:34:31.524Z",
+      "query": "HEP FIVE 観覧車 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:34:31.528Z",
+      "query": "ホテル阪急インターナショナル 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:34:31.533Z",
+      "query": "大阪梅田スカイビル空中庭園展望台 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:34:31.538Z",
+      "query": "梅田スカイビル 空中庭園レストラン 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:34:31.543Z",
+      "query": "グランフロント大阪のショッピング 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:34:31.548Z",
+      "query": "串カツ田中 梅田店 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:34:31.567Z",
+      "query": "梅田スカイビル 空中庭園展望台 梅田 大阪 日本",
+      "lat": 34.7052993,
+      "lon": 135.490172,
+      "display_name": "〒531-6039 大阪府大阪市北区大淀中１丁目１−８８ 梅田スカイビル",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T06:34:31.570Z",
+      "query": "梅田海鮮市場 梅田 大阪 日本",
+      "lat": 34.9333966,
+      "lon": 135.7586426,
+      "display_name": "日本生命伏見ビル, 竹田街道, 肥後町, 伏見区, 京都市, 京都府, 612-8355, 日本",
+      "source": "cache:l1"
+    },
+    {
+      "ts": "2025-09-10T06:34:31.575Z",
+      "query": "グランフロント大阪 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:34:31.579Z",
+      "query": "炭火焼肉とんとん 梅田店 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:34:31.584Z",
+      "query": "HEP FIVE 観覧車 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:34:31.611Z",
+      "query": "ホテル阪急インターナショナル 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:34:31.615Z",
+      "query": "大阪梅田スカイビル空中庭園展望台 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:34:31.618Z",
+      "query": "梅田スカイビル 空中庭園レストラン 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:34:31.623Z",
+      "query": "グランフロント大阪のショッピング 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    },
+    {
+      "ts": "2025-09-10T06:34:31.627Z",
+      "query": "串カツ田中 梅田店 梅田 大阪 日本",
+      "lat": null,
+      "lon": null,
+      "error": "not_found"
+    }
+  ]
+}
