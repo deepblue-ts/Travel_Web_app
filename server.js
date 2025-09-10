@@ -1,4 +1,4 @@
-// server.js (ESM) — Google Maps API を使った高速ジオコーディング対応版
+// server.js (ESM) — Google Maps API 優先の高速ジオコーディング + /tmp キャッシュ対応 完全版
 // プロンプトは server/prompts.js に分離
 
 import express from 'express';
@@ -19,23 +19,25 @@ import {
 } from './server/prompts.js';
 
 // ─────────────────────────────────────────────
-// 0) パス解決
+// 0) パス / 定数
 // ─────────────────────────────────────────────
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3001;
 
-// ★ Render 対策：本番は /tmp を使う。環境変数 CACHE_DIR があれば最優先。
+// ★ Render 等の本番で /tmp を使う。CACHE_DIR 環境変数があれば最優先。
+const IS_RENDER = !!(process.env.RENDER || process.env.RENDER_EXTERNAL_URL);
 const CACHE_DIR =
   process.env.CACHE_DIR ||
-  (process.env.NODE_ENV === 'production'
-    ? '/tmp/travel-cache'
-    : path.join(__dirname, 'cache'));
+  (IS_RENDER ? '/tmp/travel-cache'
+             : (process.env.NODE_ENV === 'production'
+                ? '/tmp/travel-cache'
+                : path.join(__dirname, 'cache')));
 
 const AREA_CACHE_FILE = path.join(CACHE_DIR, 'area-cache.json');
 const GEOCODE_CACHE_FILE = path.join(CACHE_DIR, 'geocode-cache.json');
 
-// Google Maps
+// Google Maps（ジオコーディング用）
 const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY || '';
 const GOOGLE_MAPS_REGION = process.env.GOOGLE_MAPS_REGION || 'jp';
 const GOOGLE_MAPS_LANG   = process.env.GOOGLE_MAPS_LANG   || 'ja';
@@ -50,8 +52,8 @@ app.use(express.json({ limit: '10mb' }));
 const defaultOrigins = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
-  'https://deepblue-ts.github.io', // GitHub Pages（org用）
-  'https://deepblue-ts.github.io/Travel_Web_app', // 末尾スラなしでOK
+  'https://deepblue-ts.github.io',               // GitHub Pages（org用）
+  'https://deepblue-ts.github.io/Travel_Web_app/' // 一応サブパス表記も
 ];
 const allowList = (process.env.ALLOWED_ORIGINS || '')
   .split(',')
@@ -66,19 +68,36 @@ app.get('/api/health', (_req, res) => res.json({ ok: true }));
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // ─────────────────────────────────────────────
-// 2) 共通ユーティリティ
+// 2) 共通ユーティリティ（I/O は失敗しても 500 にしない）
 // ─────────────────────────────────────────────
 async function ensureFile(p, init = '{}\n') {
-  await fs.mkdir(path.dirname(p), { recursive: true });
-  try { await fs.access(p); } catch { await fs.writeFile(p, init, 'utf8'); }
+  try {
+    await fs.mkdir(path.dirname(p), { recursive: true });
+    try { await fs.access(p); } catch { await fs.writeFile(p, init, 'utf8'); }
+  } catch (e) {
+    console.warn('ensureFile failed:', p, e.message);
+  }
 }
 async function readJsonFile(p) {
-  await ensureFile(p);
-  const raw = await fs.readFile(p, 'utf8');
-  return raw.trim() ? JSON.parse(raw) : {};
+  try {
+    await ensureFile(p);
+    const raw = await fs.readFile(p, 'utf8').catch(async (e) => {
+      if (e.code === 'ENOENT') { await fs.writeFile(p, '{}\n'); return '{}\n'; }
+      throw e;
+    });
+    return raw.trim() ? JSON.parse(raw) : {};
+  } catch (e) {
+    console.warn('readJsonFile failed, fallback to {}:', p, e.message);
+    return {};
+  }
 }
 async function writeJsonFile(p, obj) {
-  await fs.writeFile(p, JSON.stringify(obj, null, 2) + '\n', 'utf8');
+  try {
+    await fs.mkdir(path.dirname(p), { recursive: true });
+    await fs.writeFile(p, JSON.stringify(obj, null, 2) + '\n', 'utf8');
+  } catch (e) {
+    console.warn('writeJsonFile failed (ignored):', p, e.message);
+  }
 }
 
 function normalizeCandidates(dest) {
@@ -124,14 +143,19 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // ─────────────────────────────────────────────
 async function persistItineraryAndExport(planId, itinerary, extra = {}) {
   if (!planId || !Array.isArray(itinerary)) return null;
-  const logger = new ExcelLogger(planId);
-  const finalPlan = { itinerary, ...extra };
-  const xlsxPath = await logger.exportXlsx(finalPlan);
-  return { finalPlan, xlsxPath };
+  try {
+    const logger = new ExcelLogger(planId);
+    const finalPlan = { itinerary, ...extra };
+    const xlsxPath = await logger.exportXlsx(finalPlan);
+    return { finalPlan, xlsxPath };
+  } catch (e) {
+    console.warn('persistItineraryAndExport failed (ignored):', e.message);
+    return null;
+  }
 }
 
 // ─────────────────────────────────────────────
-// 内部ジオコーディング（Google Maps 優先 → OSM/Nominatim Fallback）
+// 内部ジオコーディング（Google Maps 優先 → Nominatim Fallback）
 // ─────────────────────────────────────────────
 function buildGeocodeQuery(it, destination) {
   return [
@@ -149,7 +173,7 @@ const GEOCODE_TTL_MS = 1000 * 60 * 60 * 24 * 180; // 180日
 async function geocodeViaGoogle(query) {
   if (!GOOGLE_MAPS_API_KEY) return null;
 
-  // 1) Places Text Search（自由文検索に強い）
+  // 1) Places Text Search（自由文）
   const placesUrl =
     `https://maps.googleapis.com/maps/api/place/textsearch/json` +
     `?query=${encodeURIComponent(query)}` +
@@ -171,9 +195,11 @@ async function geocodeViaGoogle(query) {
         };
       }
     }
-  } catch (_) {}
+  } catch (e) {
+    console.warn('geocodeViaGoogle(places) error:', e.message);
+  }
 
-  // 2) Geocoding API（住所解決に強い）
+  // 2) Geocoding API（住所）
   const geocodeUrl =
     `https://maps.googleapis.com/maps/api/geocode/json` +
     `?address=${encodeURIComponent(query)}` +
@@ -195,33 +221,37 @@ async function geocodeViaGoogle(query) {
         };
       }
     }
-  } catch (_) {}
+  } catch (e) {
+    console.warn('geocodeViaGoogle(geocode) error:', e.message);
+  }
 
   return null;
 }
 
 async function geocodeViaNominatim(query) {
   const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=0&limit=1&accept-language=ja&q=${encodeURIComponent(query)}`;
-  const resp = await fetch(url, {
-    headers: { 'User-Agent': 'webapp-travel/1.0 (contact: you@example.com)' },
-  });
-  let arr = [];
-  try { arr = await resp.json(); } catch {}
-  if (Array.isArray(arr) && arr.length > 0) {
-    const top = arr[0];
-    return {
-      lat: Number(top.lat),
-      lon: Number(top.lon),
-      display_name: top.display_name,
-      source: 'nominatim',
-    };
+  try {
+    const resp = await fetch(url, {
+      headers: { 'User-Agent': 'webapp-travel/1.0 (contact: you@example.com)' },
+    });
+    const arr = await resp.json().catch(() => []);
+    if (Array.isArray(arr) && arr.length > 0) {
+      const top = arr[0];
+      return {
+        lat: Number(top.lat),
+        lon: Number(top.lon),
+        display_name: top.display_name,
+        source: 'nominatim',
+      };
+    }
+  } catch (e) {
+    console.warn('geocodeViaNominatim error:', e.message);
   }
   return null;
 }
 
 async function geocodeBatchInternal(destination, items, planId) {
-  // まず CACHE_DIR を必ず作る（Render 本番で /tmp に作成）
-  await fs.mkdir(CACHE_DIR, { recursive: true });
+  try { await fs.mkdir(CACHE_DIR, { recursive: true }); } catch (e) { console.warn('mkdir CACHE_DIR failed:', e.message); }
 
   const diskCache = await readJsonFile(GEOCODE_CACHE_FILE);
   const results = [];
@@ -239,42 +269,41 @@ async function geocodeBatchInternal(destination, items, planId) {
     }
 
     // 2) Disk
-    if (diskCache[query]) {
-      const entry = diskCache[query];
-      results.push({ query, ...entry, source: entry?.source?.startsWith('gmaps') ? entry.source : 'cache:disk' });
-      // L1へ格納
-      L1_GEOCODE.set(query, { ...entry, expiresAt: now + GEOCODE_TTL_MS });
+    const disk = diskCache[query];
+    if (disk) {
+      results.push({ query, ...disk, source: disk?.source?.startsWith('gmaps') ? disk.source : 'cache:disk' });
+      L1_GEOCODE.set(query, { ...disk, expiresAt: now + GEOCODE_TTL_MS });
       continue;
     }
 
-    // 3) Google Maps（優先）
+    // 3) Google → 4) Fallback OSM
     let hit = await geocodeViaGoogle(query);
-
-    // 4) Fallback: Nominatim
     if (!hit) {
       hit = await geocodeViaNominatim(query);
-      // Nominatim はレート制限が厳しいため、次のループ前に待機
+      if (!hit) {
+        results.push({ query, lat: null, lon: null, error: 'not_found' });
+        continue;
+      }
+      // Nominatim は丁寧に間隔を空ける
       await sleep(1100);
     }
 
-    if (hit) {
-      // ディスクへ保存
-      diskCache[query] = { lat: hit.lat, lon: hit.lon, display_name: hit.display_name, source: hit.source };
-      await writeJsonFile(GEOCODE_CACHE_FILE, diskCache);
-      // L1へ保存
-      L1_GEOCODE.set(query, { ...diskCache[query], expiresAt: now + GEOCODE_TTL_MS });
-      results.push({ query, ...diskCache[query], source: hit.source });
-    } else {
-      results.push({ query, lat: null, lon: null, error: 'not_found' });
-    }
+    // 永続化（失敗は無視）
+    diskCache[query] = { lat: hit.lat, lon: hit.lon, display_name: hit.display_name, source: hit.source };
+    await writeJsonFile(GEOCODE_CACHE_FILE, diskCache).catch(() => {});
+    L1_GEOCODE.set(query, { ...diskCache[query], expiresAt: now + GEOCODE_TTL_MS });
+
+    results.push({ query, ...diskCache[query], source: hit.source });
   }
 
-  // Excelログ（任意）
+  // Excel ログ（失敗は無視）
   if (planId) {
     try {
       const logger = new ExcelLogger(planId);
       for (const r of results) await logger.log('geocode', r);
-    } catch {}
+    } catch (e) {
+      console.warn('ExcelLogger log geocode failed (ignored):', e.message);
+    }
   }
 
   return results;
@@ -296,7 +325,7 @@ function mergeGeocodesIntoItinerary(destination, itinerary, geocodeResults) {
 }
 
 // ─────────────────────────────────────────────
-// 3) LLM 呼び出しヘルパ
+// 3) LLM 呼び出し
 // ─────────────────────────────────────────────
 async function callLLMJson({ systemPrompt, userBody, model = 'gpt-4o-mini', planId, agent }) {
   const filtered = { ...(userBody || {}) };
@@ -309,14 +338,18 @@ async function callLLMJson({ systemPrompt, userBody, model = 'gpt-4o-mini', plan
   ];
 
   if (planId) {
-    const logger = new ExcelLogger(planId);
-    await logger.log('llm_input', {
-      agent: agent || 'unknown',
-      model,
-      system_prompt: systemPrompt,
-      user_prompt: userPrompt,
-      variables_json: filtered,
-    });
+    try {
+      const logger = new ExcelLogger(planId);
+      await logger.log('llm_input', {
+        agent: agent || 'unknown',
+        model,
+        system_prompt: systemPrompt,
+        user_prompt: userPrompt,
+        variables_json: filtered,
+      });
+    } catch (e) {
+      console.warn('ExcelLogger log llm_input failed (ignored):', e.message);
+    }
   }
 
   const chat = await openai.chat.completions.create({
@@ -336,15 +369,19 @@ async function callLLMJson({ systemPrompt, userBody, model = 'gpt-4o-mini', plan
   }
 
   if (planId) {
-    const logger = new ExcelLogger(planId);
-    await logger.log('llm_output', {
-      agent: agent || 'unknown',
-      model,
-      raw_text: raw,
-      parsed_json: json,
-      usage: chat?.usage ?? null,
-      finish_reason: chat?.choices?.[0]?.finish_reason ?? null,
-    });
+    try {
+      const logger = new ExcelLogger(planId);
+      await logger.log('llm_output', {
+        agent: agent || 'unknown',
+        model,
+        raw_text: raw,
+        parsed_json: json,
+        usage: chat?.usage ?? null,
+        finish_reason: chat?.choices?.[0]?.finish_reason ?? null,
+      });
+    } catch (e) {
+      console.warn('ExcelLogger log llm_output failed (ignored):', e.message);
+    }
   }
 
   return json;
@@ -382,7 +419,7 @@ const createApiHandlerWithModel = (systemPrompt, agent, model) => async (req, re
 };
 
 // ─────────────────────────────────────────────
-// 5) ルーティング
+// 4) ルーティング
 // ─────────────────────────────────────────────
 
 // ==== /api/get-areas（POST互換） + GET新設 ====
@@ -426,7 +463,6 @@ async function handleGetAreas(destination, res) {
   }
 
   // 2) Disk
-  await fs.mkdir(CACHE_DIR, { recursive: true });
   const cacheObj = await readJsonFile(AREA_CACHE_FILE);
   const hitKeyByFn = findCacheKey(cacheObj, destination);
   const hitKeyByCanon = Object.keys(cacheObj).find(k => canonicalizeDestination(k) === ckey);
@@ -491,7 +527,7 @@ app.get('/api/get-areas', async (req, res) => {
   }
 });
 
-// 5-2) LLM系（ログ自動）
+// 4-2) LLM系（ログ自動）
 app.post('/api/find-dining',        createApiHandlerWithModel(diningSystemPrompt,        'dining',  'gpt-4o-mini'));
 app.post('/api/find-accommodation', createApiHandlerWithModel(accommodationSystemPrompt, 'hotel',   'gpt-4o-mini'));
 app.post('/api/find-activities',    createApiHandlerWithModel(activitySystemPrompt,      'activity','gpt-4o-mini'));
@@ -499,7 +535,7 @@ app.post('/api/find-activities',    createApiHandlerWithModel(activitySystemProm
 // 合成は 4o（ここが質の肝）
 app.post('/api/create-master-plan', createApiHandlerWithModel(createMasterPlanSystemPrompt, 'master', 'gpt-4o'));
 
-// 5-3) デイリープラン（バッチ）: 合成→geocode→保存→Excel再出力
+// 4-3) デイリープラン（バッチ）：合成→geocode→保存→Excel
 app.post('/api/create-day-plans', async (req, res) => {
   const { days, planId, constraints } = req.body || {};
   if (!Array.isArray(days)) return res.status(400).json({ error: 'daysは配列である必要があります' });
@@ -547,16 +583,20 @@ app.post('/api/create-day-plans', async (req, res) => {
       }
     }
     if (items.length > 0) {
-      const geos = await geocodeBatchInternal(destination, items, planId);
-      mergeGeocodesIntoItinerary(destination, itinerary, geos);
+      try {
+        const geos = await geocodeBatchInternal(destination, items, planId);
+        mergeGeocodesIntoItinerary(destination, itinerary, geos);
+      } catch (e) {
+        console.warn('geocodeBatchInternal failed (ignored in create-day-plans):', e.message);
+      }
     }
 
-    // 4) 保存＆Excel再出力
+    // 4) 保存＆Excel再出力（失敗は握りつぶす）
     let saved = null;
     try {
       saved = await persistItineraryAndExport(planId, itinerary, {});
     } catch (e) {
-      console.error('persist/export failed:', e);
+      console.warn('persist/export failed (ignored):', e.message);
     }
 
     res.json({
@@ -568,11 +608,12 @@ app.post('/api/create-day-plans', async (req, res) => {
       xlsxPath: saved?.xlsxPath || null,
     });
   } catch (error) {
+    console.error('create-day-plans error:', error);
     res.status(500).json({ error: `複数日プラン作成中にエラー: ${error?.message}` });
   }
 });
 
-// 5-4) ジオコーディング（Google Maps 優先 + キャッシュ + Nominatim Fallback）
+// 4-4) ジオコーディング（Google Maps 優先 + キャッシュ + Nominatim Fallback）
 app.post('/api/geocode-batch', async (req, res) => {
   try {
     const { destination, items, planId } = req.body || {};
@@ -581,15 +622,16 @@ app.post('/api/geocode-batch', async (req, res) => {
     }
     const results = await geocodeBatchInternal(destination || '', items, planId);
     res.set('X-Geocoder', GOOGLE_MAPS_API_KEY ? 'google+cache(+nominatim-fallback)' : 'cache+nominatim');
-    res.json({ results });
+    res.set('X-Cache-Dir', CACHE_DIR);
+    return res.json({ results });
   } catch (e) {
     console.error('geocode-batch error:', e);
-    res.status(500).json({ error: e.message });
+    return res.status(500).json({ error: e.message || 'geocode-batch failed', cacheDir: CACHE_DIR });
   }
 });
 
 // ─────────────────────────────────────────────
-// 6) Excel ログ連携 API
+// 5) Excel ログ連携 API
 // ─────────────────────────────────────────────
 app.post('/api/plan/start', async (req, res) => {
   try {
@@ -608,7 +650,7 @@ app.post('/api/plan/start', async (req, res) => {
     ];
     for (const [field, value] of kvs) {
       if (value !== undefined && value !== null && String(value) !== '') {
-        await logger.log('user_input', { field, value });
+        try { await logger.log('user_input', { field, value }); } catch {}
       }
     }
 
@@ -624,7 +666,7 @@ app.post('/api/plan/log-user', async (req, res) => {
     const { planId, items } = req.body || {};
     const logger = new ExcelLogger(planId);
     for (const it of items || []) {
-      await logger.log('user_input', { field: it.field, value: it.value });
+      try { await logger.log('user_input', { field: it.field, value: it.value }); } catch {}
     }
     res.json({ ok: true });
   } catch (e) {
@@ -637,7 +679,7 @@ app.post('/api/plan/log-llm', async (req, res) => {
     const { planId, agent, kind, summary, payload } = req.body || {};
     const logger = new ExcelLogger(planId);
     const type = kind === 'input' ? 'llm_input' : 'llm_output';
-    await logger.log(type, { agent, summary, payload });
+    try { await logger.log(type, { agent, summary, payload }); } catch {}
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -649,7 +691,7 @@ app.post('/api/plan/log-geocode', async (req, res) => {
     const { planId, results } = req.body || {};
     const logger = new ExcelLogger(planId);
     for (const r of results || []) {
-      await logger.log('geocode', r);
+      try { await logger.log('geocode', r); } catch {}
     }
     res.json({ ok: true });
   } catch (e) {
@@ -661,9 +703,10 @@ app.post('/api/plan/finalize', async (req, res) => {
   try {
     const { planId, finalPlan } = req.body || {};
     const logger = new ExcelLogger(planId);
-    await logger.writeJson('finalPlan', finalPlan);
-    const filePath = await logger.exportXlsx(finalPlan);
-    await ExcelLogger.updateStatus(planId, 'Done');
+    try { await logger.writeJson('finalPlan', finalPlan); } catch {}
+    let filePath = null;
+    try { filePath = await logger.exportXlsx(finalPlan); } catch {}
+    try { await ExcelLogger.updateStatus(planId, 'Done'); } catch {}
     res.json({ ok: true, filePath });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -706,13 +749,10 @@ app.get('/api/plan/state', async (req, res) => {
 });
 
 // ─────────────────────────────────────────────
-// 7) 起動
+// 6) 起動
 // ─────────────────────────────────────────────
 app
-  .listen(PORT, async () => {
-    // Cache ディレクトリ作成（先回り）
-    try { await fs.mkdir(CACHE_DIR, { recursive: true }); } catch {}
-
+  .listen(PORT, () => {
     console.log('\x1b[32m%s\x1b[0m', `Backend server listening at http://localhost:${PORT}`);
     console.log('OPENAI key exists?', !!process.env.OPENAI_API_KEY);
     console.log('GOOGLE_MAPS_API_KEY exists?', !!GOOGLE_MAPS_API_KEY);
