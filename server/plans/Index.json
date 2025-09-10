@@ -1,5 +1,25 @@
 [
   {
+    "planId": "20250910-145936-大阪-78p72o",
+    "createdAt": "2025-09-10T05:59:36.175Z",
+    "status": "Done",
+    "planPath": "20250910-145936-大阪-78p72o\\plan.xlsx",
+    "meta": {
+      "planId": "20250910-145936-大阪-78p72o",
+      "createdAt": "2025-09-10T05:59:36.175Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "大阪",
+      "dates": {
+        "start": "2025-09-24",
+        "end": "2025-09-25"
+      },
+      "duration": 2,
+      "budgetPerDay": 50000,
+      "transport": "public"
+    }
+  },
+  {
     "planId": "20250908-220434-大阪-b46o3s",
     "createdAt": "2025-09-08T13:04:34.111Z",
     "status": "Done",
