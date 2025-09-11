@@ -35,10 +35,11 @@ jobs:
         env:
           VITE_API_BASE: ${{ secrets.VITE_API_BASE }}
           VITE_GA_ID: ${{ secrets.VITE_GA_ID }}
+          VITE_GMAPS_BROWSER_KEY: ${{ secrets.VITE_GMAPS_BROWSER_KEY }}
         run: |
           echo "VITE_API_BASE=${VITE_API_BASE}" > .env.production
           echo "VITE_GA_ID=${VITE_GA_ID}" >> .env.production
-          cat .env.production
+          echo "VITE_GMAPS_BROWSER_KEY=${VITE_GMAPS_BROWSER_KEY}" >> .env.production
 
       - name: Build
         env:
