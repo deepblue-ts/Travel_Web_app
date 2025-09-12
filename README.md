@@ -18,5 +18,4 @@ GitHub Pages（`/Travel_Web_app/` 配下）でホストしている、AI補助�
 - **状態管理**：`contexts/PlanContext.jsx`
 - **API 呼び出し**：`api/llmService.js`（バックエンド or エッジ/API サービスに接続）
 - **GA4（任意）**：`VITE_GA_ID` を設定するとページビュー計測に対応
-- **ファビコン**：`public/favicon.svg`（小サイズでも潰れない紙飛行機＋点線ルート）
 
