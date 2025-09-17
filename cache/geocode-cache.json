@@ -3399,5 +3399,257 @@
     "place_id": "ChIJxS8bURTnAGARuvrXUAb3Zv0",
     "website": "",
     "gmaps_url": "https://maps.google.com/?cid=18259553345718450874"
+  },
+  "グリル一平 梅田 大阪 日本": {
+    "lat": 34.69591,
+    "lon": 135.1949547,
+    "display_name": "〒651-0094 兵庫県神戸市中央区琴ノ緒町５丁目５−２６ サンハイツ三宮",
+    "source": "gmaps_places",
+    "place_id": "ChIJl5sHoeWOAGARzjnweA049gE",
+    "website": "https://grill-ippei.co.jp/",
+    "gmaps_url": "https://maps.google.com/?cid=141362068823488974"
+  },
+  "鶴橋風月 梅田 梅田 大阪 日本": {
+    "lat": 34.70170239999999,
+    "lon": 135.5004102,
+    "display_name": "〒530-0057 大阪府大阪市北区曾根崎２丁目１６−２２ ジャスミン曽根崎ビル B1～２F",
+    "source": "gmaps_places",
+    "place_id": "ChIJ-3VoSpPmAGARrgxU--BzkPY",
+    "website": "https://fugetsu.jp/",
+    "gmaps_url": "https://maps.google.com/?cid=17766827940103064750"
+  },
+  "ホテルモントレ グラスミア大阪 梅田 大阪 日本": {
+    "lat": 34.6666181,
+    "lon": 135.4965623,
+    "display_name": "〒556-0017 大阪府大阪市浪速区湊町１丁目２−３",
+    "source": "gmaps_places",
+    "place_id": "ChIJI_--Eg3nAGARcvVi6kRKyKM",
+    "website": "https://www.hotelmonterey.co.jp/grasmere_osaka/?utm_source=google&utm_medium=mybusiness&utm_campaign=website_mongro",
+    "gmaps_url": "https://maps.google.com/?cid=11801764483374970226"
+  },
+  "なんばグランド花月での漫才鑑賞 難波 大阪 日本": {
+    "lat": 34.6649869,
+    "lon": 135.5036556,
+    "display_name": "〒542-0075 大阪府大阪市中央区難波千日前１１−６",
+    "source": "gmaps_places",
+    "place_id": "ChIJ5wIvqWvnAGAR5SLNzOrilQE",
+    "website": "https://ngk.yoshimoto.co.jp/schedule/?utm_source=GBP&utm_medium=social&utm_campaign=ngks",
+    "gmaps_url": "https://maps.google.com/?cid=114246863654036197"
+  },
+  "たこ焼きなんば本店でランチ 難波 大阪 日本": {
+    "lat": 34.665218,
+    "lon": 135.5033693,
+    "display_name": "〒542-0075 大阪府大阪市中央区難波千日前１１−１９",
+    "source": "gmaps_places",
+    "place_id": "ChIJY971B2vnAGAR9orLBLBsj8Y",
+    "website": "http://takoyaki-wanaka.com/",
+    "gmaps_url": "https://maps.google.com/?cid=14307774044429847286"
+  },
+  "串かつだるまでおやつ 難波 大阪 日本": {
+    "lat": 34.6678355,
+    "lon": 135.502221,
+    "display_name": "〒542-0076 大阪府大阪市中央区難波１丁目５−２４",
+    "source": "gmaps_places",
+    "place_id": "ChIJ710ooxTnAGARJ8kHqTV8fnw",
+    "website": "https://www.kushikatu-daruma.com/location/nanba_honten",
+    "gmaps_url": "https://maps.google.com/?cid=8970744077679577383"
+  },
+  "天下一品 難波店でディナー 難波 大阪 日本": {
+    "lat": 34.6627008,
+    "lon": 135.5009003,
+    "display_name": "〒556-0011 大阪府大阪市浪速区難波中２丁目８−９９",
+    "source": "gmaps_places",
+    "place_id": "ChIJ08v5EmznAGARDjUdxSeS57w",
+    "website": "https://www.tenkaippin.co.jp/",
+    "gmaps_url": "https://maps.google.com/?cid=13612009098259019022"
+  },
+  "難波ダイワロイネットホテルで宿泊 難波 大阪 日本": {
+    "lat": 34.6776535,
+    "lon": 135.5009828,
+    "display_name": "〒542-0081 大阪府大阪市中央区南船場３丁目９−８",
+    "source": "gmaps_places",
+    "place_id": "ChIJz3a7g1znAGARU83cExgdD-Y",
+    "website": "https://www.daiwaroynet.jp/osaka-shinsaibashi/",
+    "gmaps_url": "https://maps.google.com/?cid=16577500742623743315"
+  },
+  "グリル一平 大阪 大阪 日本": {
+    "lat": 34.7224696,
+    "lon": 135.4147931,
+    "display_name": "〒660-0892 兵庫県尼崎市東難波町５丁目１５−１４",
+    "source": "gmaps_places",
+    "place_id": "ChIJ0RNaqK3vAGARah9J-ZaDMeo",
+    "website": "https://grill-ippei-ama.com/",
+    "gmaps_url": "https://maps.google.com/?cid=16875413963184611178"
+  },
+  "鶴橋風月 梅田 大阪 大阪 日本": {
+    "lat": 34.7045251,
+    "lon": 135.4966046,
+    "display_name": "〒530-0011 大阪府大阪市北区大深町１−１ ヨドバシカメラ梅田 8階",
+    "source": "gmaps_places",
+    "place_id": "ChIJGzCIB47mAGAR8xhIxbbFjz8",
+    "website": "https://fugetsu.jp/?shop=162",
+    "gmaps_url": "https://maps.google.com/?cid=4580096734843640051"
+  },
+  "ホテルモントレ グラスミア大阪 大阪 大阪 日本": {
+    "lat": 34.6666181,
+    "lon": 135.4965623,
+    "display_name": "〒556-0017 大阪府大阪市浪速区湊町１丁目２−３",
+    "source": "gmaps_places",
+    "place_id": "ChIJI_--Eg3nAGARcvVi6kRKyKM",
+    "website": "https://www.hotelmonterey.co.jp/grasmere_osaka/?utm_source=google&utm_medium=mybusiness&utm_campaign=website_mongro",
+    "gmaps_url": "https://maps.google.com/?cid=11801764483374970226"
+  },
+  "なんばグランド花月での漫才鑑賞 大阪 大阪 日本": {
+    "lat": 34.6649869,
+    "lon": 135.5036556,
+    "display_name": "〒542-0075 大阪府大阪市中央区難波千日前１１−６",
+    "source": "gmaps_places",
+    "place_id": "ChIJ5wIvqWvnAGAR5SLNzOrilQE",
+    "website": "https://ngk.yoshimoto.co.jp/schedule/?utm_source=GBP&utm_medium=social&utm_campaign=ngks",
+    "gmaps_url": "https://maps.google.com/?cid=114246863654036197"
+  },
+  "たこ焼きなんば本店でランチ 大阪 大阪 日本": {
+    "lat": 34.665218,
+    "lon": 135.5033693,
+    "display_name": "〒542-0075 大阪府大阪市中央区難波千日前１１−１９",
+    "source": "gmaps_places",
+    "place_id": "ChIJY971B2vnAGAR9orLBLBsj8Y",
+    "website": "http://takoyaki-wanaka.com/",
+    "gmaps_url": "https://maps.google.com/?cid=14307774044429847286"
+  },
+  "串かつだるまでおやつ 大阪 大阪 日本": {
+    "lat": 34.6515865,
+    "lon": 135.5062044,
+    "display_name": "〒556-0002 大阪府大阪市浪速区恵美須東２丁目３−９",
+    "source": "gmaps_places",
+    "place_id": "ChIJ5V4HCWDnAGARd6bIaaK91O4",
+    "website": "https://k471500.gorp.jp/",
+    "gmaps_url": "https://maps.google.com/?cid=17209588581346616951"
+  },
+  "天下一品 難波店でディナー 大阪 大阪 日本": {
+    "lat": 34.6627008,
+    "lon": 135.5009003,
+    "display_name": "〒556-0011 大阪府大阪市浪速区難波中２丁目８−９９",
+    "source": "gmaps_places",
+    "place_id": "ChIJ08v5EmznAGARDjUdxSeS57w",
+    "website": "https://www.tenkaippin.co.jp/",
+    "gmaps_url": "https://maps.google.com/?cid=13612009098259019022"
+  },
+  "うどん屋 しんど 梅田 大阪 日本": {
+    "lat": 34.6984768,
+    "lon": 135.4992503,
+    "display_name": "〒530-0001 大阪府大阪市北区梅田１丁目１ 大阪駅前第3ビル 地下2階",
+    "source": "gmaps_places",
+    "place_id": "ChIJrYRtAO3mAGAR8qhjve-pTj0",
+    "website": "",
+    "gmaps_url": "https://maps.google.com/?cid=4417655131636738290"
+  },
+  "グランフロント大阪 梅田 大阪 日本": {
+    "lat": 34.7038664,
+    "lon": 135.4949205,
+    "display_name": "〒530-0011 大阪府大阪市北区大深町４−２０",
+    "source": "gmaps_places",
+    "place_id": "ChIJAQAAB4_mAGAR1alcFGtOaAo",
+    "website": "http://www.grandfront-osaka.jp/",
+    "gmaps_url": "https://maps.google.com/?cid=749935559767271893"
+  },
+  "レストラン コーベ 梅田 大阪 日本": {
+    "lat": 34.7068806,
+    "lon": 135.4991906,
+    "display_name": "〒530-0013 大阪府大阪市北区茶屋町１０−１２",
+    "source": "gmaps_places",
+    "place_id": "ChIJyXBZjz7nAGAR71yqpitehRE",
+    "website": "https://nasukamo.net/",
+    "gmaps_url": "https://maps.google.com/?cid=1262518812120079599"
+  },
+  "一鶴 難波店でランチ 難波 大阪 日本": {
+    "lat": 34.6702543,
+    "lon": 135.5005914,
+    "display_name": "〒542-0085 大阪府大阪市中央区心斎橋筋２丁目６−１４ アクロスビル ３階",
+    "source": "gmaps_places",
+    "place_id": "ChIJiYm_5hPnAGARiHtRUTNLbao",
+    "website": "http://www.ikkaku.co.jp/index.html",
+    "gmaps_url": "https://maps.google.com/?cid=12280554442688920456"
+  },
+  "グリコ看板の前で記念撮影 難波 大阪 日本": {
+    "lat": 34.6689076,
+    "lon": 135.5010568,
+    "display_name": "〒542-0071 大阪府大阪市中央区道頓堀１丁目１０−４",
+    "source": "gmaps_places",
+    "place_id": "ChIJ6XHOkxTnAGARvyn92D4gWVs",
+    "website": "https://www.glico.com/jp/health/contents/glicosign/",
+    "gmaps_url": "https://maps.google.com/?cid=6582327784679221695"
+  },
+  "ホテルグランヴィア大阪 難波 大阪 日本": {
+    "lat": 34.701726,
+    "lon": 135.4963754,
+    "display_name": "〒530-0001 大阪府大阪市北区梅田３丁目１−１",
+    "source": "gmaps_places",
+    "place_id": "ChIJy1pGdo3mAGARjbQgwjt3bl4",
+    "website": "https://www.granvia-osaka.jp/?utm_source=google&utm_medium=my_business&utm_campaign=hgo",
+    "gmaps_url": "https://maps.google.com/?cid=6804507185547097229"
+  },
+  "肉の匠 なかむらでディナー 難波 大阪 日本": {
+    "lat": 34.668085,
+    "lon": 135.5009576,
+    "display_name": "〒542-0076 大阪府大阪市中央区難波１丁目７−１６ 現代こいさんビル 5F",
+    "source": "gmaps_places",
+    "place_id": "ChIJvRX1cBPnAGAR5GOm90jvUSE",
+    "website": "https://nikusyo-nakata.jp/nanba_honten.html",
+    "gmaps_url": "https://maps.google.com/?cid=2400963173036745700"
+  },
+  "うどん屋 しんど 大阪 大阪 日本": {
+    "lat": 34.6678125,
+    "lon": 135.5042165,
+    "display_name": "〒542-0074 大阪府大阪市中央区千日前１丁目８−２",
+    "source": "gmaps_places",
+    "place_id": "ChIJbz1pMZnnAGARZaEEmrVwO9c",
+    "website": "https://inanozi.com/",
+    "gmaps_url": "https://maps.google.com/?cid=15509113667055821157"
+  },
+  "グランフロント大阪 大阪 大阪 日本": {
+    "lat": 34.7038664,
+    "lon": 135.4949205,
+    "display_name": "〒530-0011 大阪府大阪市北区大深町４−２０",
+    "source": "gmaps_places",
+    "place_id": "ChIJAQAAB4_mAGAR1alcFGtOaAo",
+    "website": "http://www.grandfront-osaka.jp/",
+    "gmaps_url": "https://maps.google.com/?cid=749935559767271893"
+  },
+  "レストラン コーベ 大阪 大阪 日本": {
+    "lat": 34.7038272,
+    "lon": 135.4948118,
+    "display_name": "〒530-0011 大阪府大阪市北区大深町４−２０ グランフロント大阪南館 7F",
+    "source": "gmaps_places",
+    "place_id": "ChIJpREsy07nAGAR0Aqnu1DngRU",
+    "website": "https://roast-osaka.com/",
+    "gmaps_url": "https://maps.google.com/?cid=1549774080723847888"
+  },
+  "一鶴 難波店でランチ 大阪 大阪 日本": {
+    "lat": 34.6702543,
+    "lon": 135.5005914,
+    "display_name": "〒542-0085 大阪府大阪市中央区心斎橋筋２丁目６−１４ アクロスビル ３階",
+    "source": "gmaps_places",
+    "place_id": "ChIJiYm_5hPnAGARiHtRUTNLbao",
+    "website": "http://www.ikkaku.co.jp/index.html",
+    "gmaps_url": "https://maps.google.com/?cid=12280554442688920456"
+  },
+  "グリコ看板の前で記念撮影 大阪 大阪 日本": {
+    "lat": 34.6689076,
+    "lon": 135.5010568,
+    "display_name": "〒542-0071 大阪府大阪市中央区道頓堀１丁目１０−４",
+    "source": "gmaps_places",
+    "place_id": "ChIJ6XHOkxTnAGARvyn92D4gWVs",
+    "website": "https://www.glico.com/jp/health/contents/glicosign/",
+    "gmaps_url": "https://maps.google.com/?cid=6582327784679221695"
+  },
+  "肉の匠 なかむらでディナー 大阪 大阪 日本": {
+    "lat": 34.668085,
+    "lon": 135.5009576,
+    "display_name": "〒542-0076 大阪府大阪市中央区難波１丁目７−１６ 現代こいさんビル 5F",
+    "source": "gmaps_places",
+    "place_id": "ChIJvRX1cBPnAGAR5GOm90jvUSE",
+    "website": "https://nikusyo-nakata.jp/nanba_honten.html",
+    "gmaps_url": "https://maps.google.com/?cid=2400963173036745700"
   }
 }
