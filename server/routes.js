@@ -3,7 +3,7 @@
  * ------------------------------------------------------------
  * 役割:
  *  - 既存の API パスを変更せずに Express へルーティングを一括登録
- *  - 実処理は services 層に委譲（LLM呼び出し / ジオコーディング / 運賃見積もり など）
+ *  - 実処理は services 層に委譲（LLM呼び出し / ジオコーディング / 運賃見積もり / URL補完 など）
  *  - ExcelLogger を使ったログ連携系エンドポイントもここに集約
  *
  * 外部からは registerRoutes(app, config) を呼び出すだけでOK。
@@ -12,6 +12,7 @@
 
 import fs from 'fs/promises';
 import path from 'path';
+
 import {
   // 汎用ユーティリティ & LLM/Geocode/URL 補完ロジック
   createLLMHandler,
@@ -22,7 +23,6 @@ import {
   mergeGeocodesIntoItinerary,
   persistItineraryAndExport,
   estimateFare,
-  buildGeocodeQuery,
 } from './services.js';
 
 import {
@@ -69,6 +69,7 @@ export async function registerRoutes(app, cfg) {
       res.status(status).json({ error: e?.message || 'Unknown server error' });
     }
   });
+
   app.get('/api/get-areas', async (req, res) => {
     try {
       await handleGetAreas(req.query?.destination, res);
@@ -79,16 +80,32 @@ export async function registerRoutes(app, cfg) {
   });
 
   // ========= LLM 単発系 =========
-  app.post('/api/find-dining',        createLLMHandler(openai, diningSystemPrompt,        'dining',  'gpt-4o-mini'));
-  app.post('/api/find-accommodation', createLLMHandler(openai, accommodationSystemPrompt, 'hotel',   'gpt-4o-mini'));
-  app.post('/api/find-activities',    createLLMHandler(openai, activitySystemPrompt,      'activity','gpt-4o-mini'));
-  app.post('/api/create-master-plan', createLLMHandler(openai, createMasterPlanSystemPrompt, 'master', 'gpt-4o'));
+  app.post(
+    '/api/find-dining',
+    createLLMHandler(openai, diningSystemPrompt, 'dining', 'gpt-4o-mini')
+  );
+  app.post(
+    '/api/find-accommodation',
+    createLLMHandler(openai, accommodationSystemPrompt, 'hotel', 'gpt-4o-mini')
+  );
+  app.post(
+    '/api/find-activities',
+    createLLMHandler(openai, activitySystemPrompt, 'activity', 'gpt-4o-mini')
+  );
+  app.post(
+    '/api/create-master-plan',
+    createLLMHandler(openai, createMasterPlanSystemPrompt, 'master', 'gpt-4o')
+  );
 
   // ========= /api/create-day-plans =========
   app.post('/api/create-day-plans', async (req, res) => {
     const { planId, constraints } = req.body || {};
-    const days = Array.isArray(req.body?.batchInput) ? req.body.batchInput : req.body?.days;
-    if (!Array.isArray(days)) return res.status(400).json({ error: 'days/batchInput は配列である必要があります' });
+    const days = Array.isArray(req.body?.batchInput)
+      ? req.body.batchInput
+      : req.body?.days;
+    if (!Array.isArray(days)) {
+      return res.status(400).json({ error: 'days/batchInput は配列である必要があります' });
+    }
 
     const pickDestination = (arr) => {
       for (const d of arr || []) {
@@ -99,11 +116,17 @@ export async function registerRoutes(app, cfg) {
     };
     const destination = pickDestination(days);
 
-    const callLLMJson = createLLMHandler(openai, createDayPlanSystemPrompt, 'day-planner', 'gpt-4o', { raw: true });
+    const llmDayPlanner = createLLMHandler(
+      openai,
+      createDayPlanSystemPrompt,
+      'day-planner',
+      'gpt-4o',
+      { raw: true }
+    );
 
     const createOne = async (dayData) => {
       const body = { ...dayData, constraints: dayData.constraints || constraints || {} };
-      const json = await callLLMJson.__call({ body, planId });
+      const json = await llmDayPlanner.__call({ body, planId });
       return json;
     };
 
@@ -118,14 +141,19 @@ export async function registerRoutes(app, cfg) {
 
       // 2) 暫定 itinerary
       const itinerary = results
-        .filter(r => r.ok && r.plan && Array.isArray(r.plan.schedule))
-        .map(r => r.plan);
+        .filter((r) => r.ok && r.plan && Array.isArray(r.plan.schedule))
+        .map((r) => r.plan);
 
       // 3) geocode（URL 補完込み）
       const items = [];
       for (const d of itinerary) {
-        for (const s of (d.schedule || [])) {
-          items.push({ name: s.activity_name || s.name, area: d.area, day: d.day, time: s.time });
+        for (const s of d.schedule || []) {
+          items.push({
+            name: s.activity_name || s.name,
+            area: d.area,
+            day: d.day,
+            time: s.time,
+          });
         }
       }
       if (items.length > 0) {
@@ -141,7 +169,10 @@ export async function registerRoutes(app, cfg) {
           });
           mergeGeocodesIntoItinerary(destination, itinerary, geos);
         } catch (e) {
-          console.warn('geocodeBatchInternal failed (ignored in create-day-plans):', e.message);
+          console.warn(
+            'geocodeBatchInternal failed (ignored in create-day-plans):',
+            e.message
+          );
         }
       }
 
@@ -163,11 +194,14 @@ export async function registerRoutes(app, cfg) {
       });
     } catch (error) {
       console.error('create-day-plans error:', error);
-      res.status(500).json({ error: `複数日プラン作成中にエラー: ${error?.message}` });
+      res
+        .status(500)
+        .json({ error: `複数日プラン作成中にエラー: ${error?.message}` });
     }
   });
 
   // ========= /api/estimate-fare =========
+  // POST 版（既存）
   app.post('/api/estimate-fare', async (req, res) => {
     try {
       const { origin, destination, transport = 'public' } = req.body || {};
@@ -175,11 +209,37 @@ export async function registerRoutes(app, cfg) {
         return res.status(400).json({ error: 'origin/destination required' });
       }
       const out = await estimateFare({
-        origin, destination, transport, GOOGLE_MAPS_API_KEY,
+        origin,
+        destination,
+        transport,
+        GOOGLE_MAPS_API_KEY,
       });
       res.json(out);
     } catch (e) {
       res.status(500).json({ error: e.message || 'estimate-fare failed' });
+    }
+  });
+
+  // GET 版（CDNの GET リライトやブラウザ直叩き対策）
+  app.get('/api/estimate-fare', async (req, res) => {
+    try {
+      const { origin, destination, transport = 'public' } = req.query || {};
+      if (!origin || !destination) {
+        return res
+          .status(400)
+          .json({ error: 'origin/destination required (query)' });
+      }
+      const out = await estimateFare({
+        origin: String(origin),
+        destination: String(destination),
+        transport: String(transport || 'public'),
+        GOOGLE_MAPS_API_KEY,
+      });
+      res.json(out);
+    } catch (e) {
+      res
+        .status(500)
+        .json({ error: e.message || 'estimate-fare failed (GET)' });
     }
   });
 
@@ -191,7 +251,13 @@ export async function registerRoutes(app, cfg) {
         return res.status(400).json({ error: 'invalid itinerary' });
       }
 
-      const llm = createLLMHandler(openai, revisePlanSystemPrompt, 'revise', 'gpt-4o-mini', { raw: true });
+      const llm = createLLMHandler(
+        openai,
+        revisePlanSystemPrompt,
+        'revise',
+        'gpt-4o-mini',
+        { raw: true }
+      );
       const json = await llm.__call({
         body: { planId, planConditions, itinerary, instructions },
         planId,
@@ -199,12 +265,18 @@ export async function registerRoutes(app, cfg) {
 
       const revised = json?.revised_itinerary || [];
       if (!Array.isArray(revised) || revised.length === 0) {
-        return res.status(500).json({ error: 'empty revised_itinerary', raw: json });
+        return res
+          .status(500)
+          .json({ error: 'empty revised_itinerary', raw: json });
       }
 
-      // 必要なら geocode してもOK（今回は戻り値はそのまま）
+      // 必要なら geocode（戻り値はそのまま）
       const items = [];
-      for (const d of revised) for (const s of d?.schedule || []) items.push({ name: s.activity_name, area: d.area });
+      for (const d of revised) {
+        for (const s of d?.schedule || []) {
+          items.push({ name: s.activity_name, area: d.area });
+        }
+      }
       await geocodeBatchInternal({
         destination: planConditions?.destination || '',
         items,
@@ -229,7 +301,9 @@ export async function registerRoutes(app, cfg) {
       if (!query) return res.status(400).json({ error: 'query required' });
 
       let hit = await geocodeViaGoogle(query, {
-        GOOGLE_MAPS_API_KEY, GOOGLE_MAPS_LANG, GOOGLE_MAPS_REGION,
+        GOOGLE_MAPS_API_KEY,
+        GOOGLE_MAPS_LANG,
+        GOOGLE_MAPS_REGION,
       });
       if (!hit) hit = await geocodeViaNominatim(query);
 
@@ -273,7 +347,9 @@ export async function registerRoutes(app, cfg) {
     try {
       const { destination, items, planId } = req.body || {};
       if (!Array.isArray(items)) {
-        return res.status(400).json({ error: 'items は配列である必要があります' });
+        return res
+          .status(400)
+          .json({ error: 'items は配列である必要があります' });
       }
 
       const results = await geocodeBatchInternal({
@@ -286,11 +362,19 @@ export async function registerRoutes(app, cfg) {
         GOOGLE_MAPS_REGION,
       });
 
-      res.set('X-Geocoder', GOOGLE_MAPS_API_KEY ? 'google+cache(+nominatim-fallback)' : 'cache+nominatim');
+      res.set(
+        'X-Geocoder',
+        GOOGLE_MAPS_API_KEY
+          ? 'google+cache(+nominatim-fallback)'
+          : 'cache+nominatim'
+      );
       return res.json({ results, cacheDir: CACHE_DIR });
     } catch (e) {
       console.error('geocode-batch error:', e);
-      return res.status(500).json({ error: e.message || 'geocode-batch failed', cacheDir: CACHE_DIR });
+      return res.status(500).json({
+        error: e.message || 'geocode-batch failed',
+        cacheDir: CACHE_DIR,
+      });
     }
   });
 
@@ -312,7 +396,9 @@ export async function registerRoutes(app, cfg) {
       ];
       for (const [field, value] of kvs) {
         if (value !== undefined && value !== null && String(value) !== '') {
-          try { await logger.log('user_input', { field, value }); } catch {}
+          try {
+            await logger.log('user_input', { field, value });
+          } catch {}
         }
       }
 
@@ -328,7 +414,9 @@ export async function registerRoutes(app, cfg) {
       const { planId, items } = req.body || {};
       const logger = new ExcelLogger(planId);
       for (const it of items || []) {
-        try { await logger.log('user_input', { field: it.field, value: it.value }); } catch {}
+        try {
+          await logger.log('user_input', { field: it.field, value: it.value });
+        } catch {}
       }
       res.json({ ok: true });
     } catch (e) {
@@ -341,7 +429,9 @@ export async function registerRoutes(app, cfg) {
       const { planId, agent, kind, summary, payload } = req.body || {};
       const logger = new ExcelLogger(planId);
       const type = kind === 'input' ? 'llm_input' : 'llm_output';
-      try { await logger.log(type, { agent, summary, payload }); } catch {}
+      try {
+        await logger.log(type, { agent, summary, payload });
+      } catch {}
       res.json({ ok: true });
     } catch (e) {
       res.status(500).json({ error: e.message });
@@ -353,7 +443,9 @@ export async function registerRoutes(app, cfg) {
       const { planId, results } = req.body || {};
       const logger = new ExcelLogger(planId);
       for (const r of results || []) {
-        try { await logger.log('geocode', r); } catch {}
+        try {
+          await logger.log('geocode', r);
+        } catch {}
       }
       res.json({ ok: true });
     } catch (e) {
@@ -365,10 +457,16 @@ export async function registerRoutes(app, cfg) {
     try {
       const { planId, finalPlan } = req.body || {};
       const logger = new ExcelLogger(planId);
-      try { await logger.writeJson('finalPlan', finalPlan); } catch {}
+      try {
+        await logger.writeJson('finalPlan', finalPlan);
+      } catch {}
       let filePath = null;
-      try { filePath = await logger.exportXlsx(finalPlan); } catch {}
-      try { await ExcelLogger.updateStatus(planId, 'Done'); } catch {}
+      try {
+        filePath = await logger.exportXlsx(finalPlan);
+      } catch {}
+      try {
+        await ExcelLogger.updateStatus(planId, 'Done');
+      } catch {}
       res.json({ ok: true, filePath });
     } catch (e) {
       res.status(500).json({ error: e.message });
@@ -391,8 +489,14 @@ export async function registerRoutes(app, cfg) {
       const logger = new ExcelLogger(String(planId));
       const abs = logger.planXlsx;
       await fs.access(abs);
-      res.setHeader('Content-Disposition', `attachment; filename="${path.basename(abs)}"`);
-      res.setHeader('Content-Type','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${path.basename(abs)}"`
+      );
+      res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      );
       res.sendFile(abs);
     } catch (e) {
       res.status(404).json({ error: 'file not found' });
@@ -403,7 +507,9 @@ export async function registerRoutes(app, cfg) {
     try {
       const { planId } = req.query || {};
       if (!planId) return res.status(400).json({ error: 'planId is required' });
-      const { meta, logs, finalPlan } = await ExcelLogger.readState(String(planId));
+      const { meta, logs, finalPlan } = await ExcelLogger.readState(
+        String(planId)
+      );
       res.json({ ok: true, meta, logs, finalPlan });
     } catch (e) {
       res.status(500).json({ error: e.message });
