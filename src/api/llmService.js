@@ -215,3 +215,35 @@ export const getPlanState = async (planId) => {
   const j = await parseJsonSafe(res);
   return j ?? {};
 };
+
+
+// src/api/llmService.js の末尾などに追加
+export async function revisePlan(planConditions, currentItinerary, instructions, planId) {
+  const res = await fetch('/api/revise-plan', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      planId,
+      planConditions,
+      itinerary: currentItinerary,
+      instructions,
+    }),
+  });
+  if (!res.ok) {
+    const t = await res.text();
+    throw new Error(`revise-plan failed: ${res.status} ${t}`);
+  }
+  return res.json(); // { revised_itinerary: [...] }
+}
+
+
+export async function estimateFare(origin, destination, transport) {
+  const r = await fetch('/api/estimate-fare', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ origin, destination, transport }),
+  });
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error || 'estimate-fare failed');
+  return j; // { fareYen, distanceKm, source, ... }
+}

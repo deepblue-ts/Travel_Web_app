@@ -1,5 +1,465 @@
 [
   {
+    "planId": "20250917-170100-大阪-izkujb",
+    "createdAt": "2025-09-17T08:01:00.500Z",
+    "status": "Done",
+    "planPath": "20250917-170100-大阪-izkujb\\plan.xlsx",
+    "meta": {
+      "planId": "20250917-170100-大阪-izkujb",
+      "createdAt": "2025-09-17T08:01:00.500Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "大阪",
+      "dates": {
+        "start": "2025-09-23",
+        "end": "2025-09-24"
+      },
+      "duration": 2,
+      "budgetPerDay": 40000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250917-165847-大阪-1v7hb8",
+    "createdAt": "2025-09-17T07:58:47.182Z",
+    "status": "Done",
+    "planPath": "20250917-165847-大阪-1v7hb8\\plan.xlsx",
+    "meta": {
+      "planId": "20250917-165847-大阪-1v7hb8",
+      "createdAt": "2025-09-17T07:58:47.182Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "大阪",
+      "dates": {
+        "start": "2025-09-23",
+        "end": "2025-09-24"
+      },
+      "duration": 2,
+      "budgetPerDay": 50000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250917-165229-大阪-zhpmfd",
+    "createdAt": "2025-09-17T07:52:29.171Z",
+    "status": "Done",
+    "planPath": "20250917-165229-大阪-zhpmfd\\plan.xlsx",
+    "meta": {
+      "planId": "20250917-165229-大阪-zhpmfd",
+      "createdAt": "2025-09-17T07:52:29.171Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "大阪",
+      "dates": {
+        "start": "2025-09-23",
+        "end": "2025-09-24"
+      },
+      "duration": 2,
+      "budgetPerDay": 50000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250917-155925-東京-7l550x",
+    "createdAt": "2025-09-17T06:59:25.268Z",
+    "status": "Done",
+    "planPath": "20250917-155925-東京-7l550x\\plan.xlsx",
+    "meta": {
+      "planId": "20250917-155925-東京-7l550x",
+      "createdAt": "2025-09-17T06:59:25.268Z",
+      "status": "In Progress",
+      "origin": "大阪",
+      "destination": "東京",
+      "dates": {
+        "start": "2025-09-24",
+        "end": "2025-09-25"
+      },
+      "duration": 2,
+      "budgetPerDay": 50000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250917-155517-東京-oqqi9e",
+    "createdAt": "2025-09-17T06:55:17.310Z",
+    "status": "Done",
+    "planPath": "20250917-155517-東京-oqqi9e\\plan.xlsx",
+    "meta": {
+      "planId": "20250917-155517-東京-oqqi9e",
+      "createdAt": "2025-09-17T06:55:17.310Z",
+      "status": "In Progress",
+      "origin": "大阪",
+      "destination": "東京",
+      "dates": {
+        "start": "2025-09-24",
+        "end": "2025-09-25"
+      },
+      "duration": 2,
+      "budgetPerDay": 50000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250917-144210-大阪-t1t3yr",
+    "createdAt": "2025-09-17T05:42:10.359Z",
+    "status": "Done",
+    "planPath": "20250917-144210-大阪-t1t3yr\\plan.xlsx",
+    "meta": {
+      "planId": "20250917-144210-大阪-t1t3yr",
+      "createdAt": "2025-09-17T05:42:10.359Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "大阪",
+      "dates": {
+        "start": "2025-09-24",
+        "end": "2025-09-25"
+      },
+      "duration": 2,
+      "budgetPerDay": 50000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250917-143022-岐阜-2xkbs4",
+    "createdAt": "2025-09-17T05:30:22.840Z",
+    "status": "Done",
+    "planPath": "20250917-143022-岐阜-2xkbs4\\plan.xlsx",
+    "meta": {
+      "planId": "20250917-143022-岐阜-2xkbs4",
+      "createdAt": "2025-09-17T05:30:22.840Z",
+      "status": "In Progress",
+      "origin": "東京駅",
+      "destination": "岐阜",
+      "dates": {
+        "start": "2025-09-24",
+        "end": "2025-09-25"
+      },
+      "duration": 2,
+      "budgetPerDay": 50000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250917-141626-横浜-mey1cv",
+    "createdAt": "2025-09-17T05:16:26.756Z",
+    "status": "Done",
+    "planPath": "20250917-141626-横浜-mey1cv\\plan.xlsx",
+    "meta": {
+      "planId": "20250917-141626-横浜-mey1cv",
+      "createdAt": "2025-09-17T05:16:26.756Z",
+      "status": "In Progress",
+      "origin": "仙台",
+      "destination": "横浜",
+      "dates": {
+        "start": "2025-09-24",
+        "end": "2025-09-25"
+      },
+      "duration": 2,
+      "budgetPerDay": 50000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250917-140019-京都-16k1ew",
+    "createdAt": "2025-09-17T05:00:19.591Z",
+    "status": "Done",
+    "planPath": "20250917-140019-京都-16k1ew\\plan.xlsx",
+    "meta": {
+      "planId": "20250917-140019-京都-16k1ew",
+      "createdAt": "2025-09-17T05:00:19.591Z",
+      "status": "In Progress",
+      "origin": "福島",
+      "destination": "京都",
+      "dates": {
+        "start": "2025-09-25",
+        "end": "2025-09-26"
+      },
+      "duration": 2,
+      "budgetPerDay": 50000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250917-134945-大阪-z9si9i",
+    "createdAt": "2025-09-17T04:49:45.955Z",
+    "status": "Done",
+    "planPath": "20250917-134945-大阪-z9si9i\\plan.xlsx",
+    "meta": {
+      "planId": "20250917-134945-大阪-z9si9i",
+      "createdAt": "2025-09-17T04:49:45.955Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "大阪",
+      "dates": {
+        "start": "2025-09-23",
+        "end": "2025-09-24"
+      },
+      "duration": 2,
+      "budgetPerDay": 50000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250917-132134-大阪-zcdcft",
+    "createdAt": "2025-09-17T04:21:34.198Z",
+    "status": "Done",
+    "planPath": "20250917-132134-大阪-zcdcft\\plan.xlsx",
+    "meta": {
+      "planId": "20250917-132134-大阪-zcdcft",
+      "createdAt": "2025-09-17T04:21:34.198Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "大阪",
+      "dates": {
+        "start": "2025-09-25",
+        "end": "2025-09-26"
+      },
+      "duration": 2,
+      "budgetPerDay": 50000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250917-120131-大阪-4negwn",
+    "createdAt": "2025-09-17T03:01:31.740Z",
+    "status": "Done",
+    "planPath": "20250917-120131-大阪-4negwn\\plan.xlsx",
+    "meta": {
+      "planId": "20250917-120131-大阪-4negwn",
+      "createdAt": "2025-09-17T03:01:31.740Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "大阪",
+      "dates": {
+        "start": "2025-09-24",
+        "end": "2025-09-25"
+      },
+      "duration": 2,
+      "budgetPerDay": 50000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250917-115024-大阪-3a938q",
+    "createdAt": "2025-09-17T02:50:24.794Z",
+    "status": "Done",
+    "planPath": "20250917-115024-大阪-3a938q\\plan.xlsx",
+    "meta": {
+      "planId": "20250917-115024-大阪-3a938q",
+      "createdAt": "2025-09-17T02:50:24.794Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "大阪",
+      "dates": {
+        "start": "2025-09-25",
+        "end": "2025-09-26"
+      },
+      "duration": 2,
+      "budgetPerDay": 35000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250916-171639-大阪-luxz9w",
+    "createdAt": "2025-09-16T08:16:39.598Z",
+    "status": "Done",
+    "planPath": "20250916-171639-大阪-luxz9w\\plan.xlsx",
+    "meta": {
+      "planId": "20250916-171639-大阪-luxz9w",
+      "createdAt": "2025-09-16T08:16:39.598Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "大阪",
+      "dates": {
+        "start": "2025-09-24",
+        "end": "2025-09-25"
+      },
+      "duration": 2,
+      "budgetPerDay": 50000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250916-165310-神戸-fdeba1",
+    "createdAt": "2025-09-16T07:53:10.076Z",
+    "status": "Done",
+    "planPath": "20250916-165310-神戸-fdeba1\\plan.xlsx",
+    "meta": {
+      "planId": "20250916-165310-神戸-fdeba1",
+      "createdAt": "2025-09-16T07:53:10.076Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "神戸",
+      "dates": {
+        "start": "2025-09-24",
+        "end": "2025-09-25"
+      },
+      "duration": 2,
+      "budgetPerDay": 50000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250916-164156-神戸-6fhgph",
+    "createdAt": "2025-09-16T07:41:56.301Z",
+    "status": "Done",
+    "planPath": "20250916-164156-神戸-6fhgph\\plan.xlsx",
+    "meta": {
+      "planId": "20250916-164156-神戸-6fhgph",
+      "createdAt": "2025-09-16T07:41:56.301Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "神戸",
+      "dates": {
+        "start": "2025-09-24",
+        "end": "2025-09-25"
+      },
+      "duration": 2,
+      "budgetPerDay": 32500,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250916-154813-京都-8jefpa",
+    "createdAt": "2025-09-16T06:48:13.115Z",
+    "status": "Done",
+    "planPath": "20250916-154813-京都-8jefpa\\plan.xlsx",
+    "meta": {
+      "planId": "20250916-154813-京都-8jefpa",
+      "createdAt": "2025-09-16T06:48:13.115Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "京都",
+      "dates": {
+        "start": "2025-09-23",
+        "end": "2025-09-25"
+      },
+      "duration": 3,
+      "budgetPerDay": 26666,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250916-154642-京都-5b16gs",
+    "createdAt": "2025-09-16T06:46:42.386Z",
+    "status": "Done",
+    "planPath": "20250916-154642-京都-5b16gs\\plan.xlsx",
+    "meta": {
+      "planId": "20250916-154642-京都-5b16gs",
+      "createdAt": "2025-09-16T06:46:42.386Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "京都",
+      "dates": {
+        "start": "2025-09-24",
+        "end": "2025-09-25"
+      },
+      "duration": 2,
+      "budgetPerDay": 40000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250916-152429-神戸-uw4i9j",
+    "createdAt": "2025-09-16T06:24:29.892Z",
+    "status": "Done",
+    "planPath": "20250916-152429-神戸-uw4i9j\\plan.xlsx",
+    "meta": {
+      "planId": "20250916-152429-神戸-uw4i9j",
+      "createdAt": "2025-09-16T06:24:29.892Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "神戸",
+      "dates": {
+        "start": "2025-09-24",
+        "end": "2025-09-25"
+      },
+      "duration": 2,
+      "budgetPerDay": 70000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250916-152105-神戸-gp72ow",
+    "createdAt": "2025-09-16T06:21:05.339Z",
+    "status": "Done",
+    "planPath": "20250916-152105-神戸-gp72ow\\plan.xlsx",
+    "meta": {
+      "planId": "20250916-152105-神戸-gp72ow",
+      "createdAt": "2025-09-16T06:21:05.339Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "神戸",
+      "dates": {
+        "start": "2025-09-24",
+        "end": "2025-09-25"
+      },
+      "duration": 2,
+      "budgetPerDay": 50000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250916-150238-神戸-zieafl",
+    "createdAt": "2025-09-16T06:02:38.293Z",
+    "status": "Done",
+    "planPath": "20250916-150238-神戸-zieafl\\plan.xlsx",
+    "meta": {
+      "planId": "20250916-150238-神戸-zieafl",
+      "createdAt": "2025-09-16T06:02:38.293Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "神戸",
+      "dates": {
+        "start": "2025-09-24",
+        "end": "2025-09-25"
+      },
+      "duration": 2,
+      "budgetPerDay": 50000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250916-145449-神戸-upocb1",
+    "createdAt": "2025-09-16T05:54:49.237Z",
+    "status": "Done",
+    "planPath": "20250916-145449-神戸-upocb1\\plan.xlsx",
+    "meta": {
+      "planId": "20250916-145449-神戸-upocb1",
+      "createdAt": "2025-09-16T05:54:49.237Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "神戸",
+      "dates": {
+        "start": "2025-09-22",
+        "end": "2025-09-23"
+      },
+      "duration": 2,
+      "budgetPerDay": 50000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250916-142942-神戸-2vft5n",
+    "createdAt": "2025-09-16T05:29:42.473Z",
+    "status": "Done",
+    "planPath": "20250916-142942-神戸-2vft5n\\plan.xlsx",
+    "meta": {
+      "planId": "20250916-142942-神戸-2vft5n",
+      "createdAt": "2025-09-16T05:29:42.473Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "神戸",
+      "dates": {
+        "start": "2025-09-24",
+        "end": "2025-09-25"
+      },
+      "duration": 2,
+      "budgetPerDay": 50000,
+      "transport": "public"
+    }
+  },
+  {
     "planId": "20250911-162549-大阪-cndhza",
     "createdAt": "2025-09-11T07:25:49.950Z",
     "status": "Done",

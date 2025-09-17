@@ -6,7 +6,7 @@ import {
   Polyline,
   InfoWindow,
   Circle,
-  Marker,              // ← フォールバック用
+  Marker,              // AdvancedMarker未使用時のフォールバック
   useJsApiLoader,
 } from '@react-google-maps/api';
 import { geocodeItinerary, geocodePlace } from '../api/llmService';
@@ -15,13 +15,30 @@ import { geocodeItinerary, geocodePlace } from '../api/llmService';
 const DAY_COLORS = ['#1976d2', '#2e7d32', '#ef6c00', '#6a1b9a', '#ad1457', '#00838f'];
 const MAP_CONTAINER_STYLE = { height: 640, width: '100%' };
 const DEFAULT_CENTER = { lat: 35.681236, lng: 139.767125 }; // 東京駅
-const GMAPS_LIBRARIES = ['places', 'geometry', 'marker'];  // AdvancedMarker 用に marker 必須
+const GMAPS_LIBRARIES = ['places', 'geometry', 'marker'];  // AdvancedMarker用
+
+// ★ 目的地からこの距離（km）を超える点は描画しない
+const MAX_KM_FROM_DEST = 70;
 
 // 正規化ユーティリティ
 const norm = (s) => String(s || '').replace(/\s+/g, '').toLowerCase();
 const makeKey = (day, name) => `${day}||${norm(name)}`;
 const makeQuery = (name, area, dest) =>
   [name, area, dest, '日本'].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+
+// 距離（km）計算：ハーサイン
+function distanceKm(a, b) {
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const R = 6371; // km
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const la1 = toRad(a.lat);
+  const la2 = toRad(b.lat);
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(la1) * Math.cos(la2) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
 
 // ▼ 環境変数名を一本化（旧名 fallback つき）
 const GMAPS_KEY =
@@ -86,7 +103,7 @@ export default function ItineraryMap({ destination, itinerary, selected, onSelec
     })();
   }, [destination, itinerary]);
 
-  // 3) dayごとの線・点・選択ポイント
+  // 3) dayごとの線・点・選択ポイント（★目的地からの距離でフィルタ）
   const { dayLines, selectedPoint, allPoints } = useMemo(() => {
     if (!geo?.results) return { dayLines: [], selectedPoint: null, allPoints: [] };
     const byQuery = new Map(geo.results.map((r) => [r.query, r]));
@@ -96,7 +113,7 @@ export default function ItineraryMap({ destination, itinerary, selected, onSelec
     let sel = null;
 
     for (const day of itinerary || []) {
-      const pts = [];
+      const rawPts = [];
       for (const s of day.schedule || []) {
         const q = makeQuery(s.activity_name, day.area, destination);
         const hit = byQuery.get(q);
@@ -107,12 +124,23 @@ export default function ItineraryMap({ destination, itinerary, selected, onSelec
             time: s.time, desc: s.description, url: s.url, key
           };
           const p = { lat: Number(hit.lat), lng: Number(hit.lon), meta };
-          pts.push(p);
-          all.push(p);
-          if (selected && key === makeKey(selected.day, selected.name)) sel = p;
+          rawPts.push(p);
         }
       }
-      if (pts.length) {
+
+      // ★ 目的地から一定距離を超える点は除外（誤ジオコーディング対策）
+      const pts = destCenter
+        ? rawPts.filter((p) => distanceKm(destCenter, p) <= MAX_KM_FROM_DEST)
+        : rawPts;
+
+      // 選択ポイントの解決（フィルタ後に選ぶ）
+      if (selected && !sel) {
+        const keyWanted = makeKey(selected.day, selected.name);
+        sel = pts.find((p) => p.meta.key === keyWanted) || null;
+      }
+
+      if (pts.length >= 1) {
+        pts.forEach((p) => all.push(p));
         lines.push({
           day: day.day,
           color: DAY_COLORS[(day.day - 1) % DAY_COLORS.length],
@@ -121,9 +149,9 @@ export default function ItineraryMap({ destination, itinerary, selected, onSelec
       }
     }
     return { dayLines: lines, selectedPoint: sel, allPoints: all };
-  }, [geo, itinerary, destination, selected]);
+  }, [geo, itinerary, destination, selected, destCenter]);
 
-  // 4) マップ初期表示
+  // 4) マップ初期表示（★フィルタ後の点のみで bounds 計算）
   const onMapLoad = (map) => {
     mapRef.current = map;
     if (allPoints.length > 0 && window.google) {
@@ -169,17 +197,19 @@ export default function ItineraryMap({ destination, itinerary, selected, onSelec
         center={destCenter || DEFAULT_CENTER}
         zoom={destCenter ? 12 : 6}
         options={{
-          mapId: GMAPS_MAP_ID, // AdvancedMarker 用に必要
+          mapId: GMAPS_MAP_ID, // AdvancedMarker 用
           clickableIcons: false,
           gestureHandling: 'greedy',
         }}
       >
         {dayLines.map((day) => (
           <React.Fragment key={day.day}>
-            <Polyline
-              path={day.points}
-              options={{ strokeColor: day.color, strokeOpacity: 0.9, strokeWeight: 4 }}
-            />
+            {day.points.length >= 2 && (
+              <Polyline
+                path={day.points}
+                options={{ strokeColor: day.color, strokeOpacity: 0.9, strokeWeight: 4 }}
+              />
+            )}
             {day.points.map((p, idx) => {
               const isActive = activeKey === p.meta.key;
               const info = (
@@ -211,21 +241,22 @@ export default function ItineraryMap({ destination, itinerary, selected, onSelec
                       }}
                     />
                   )}
+                  {/* AdvancedMarkerが使えればそれを、だめなら通常Marker */}
                   {canUseAdvanced ? (
-                    // AdvancedMarkerElement を直接利用
                     <div
                       ref={(el) => {
                         if (el && window.google?.maps?.marker?.AdvancedMarkerElement && mapRef.current) {
-                          new window.google.maps.marker.AdvancedMarkerElement({
+                          const am = new window.google.maps.marker.AdvancedMarkerElement({
                             map: mapRef.current,
                             position: p,
                             title: p.meta.name,
                           });
+                          // クリックで左のリストと連動
+                          am.addListener?.('click', () => {
+                            setActiveKey(p.meta.key);
+                            onSelect?.({ day: p.meta.day, name: p.meta.name });
+                          });
                         }
-                      }}
-                      onClick={() => {
-                        setActiveKey(p.meta.key);
-                        onSelect?.({ day: p.meta.day, name: p.meta.name });
                       }}
                     />
                   ) : (
