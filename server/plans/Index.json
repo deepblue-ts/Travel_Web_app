@@ -1,5 +1,85 @@
 [
   {
+    "planId": "20250918-122950-大阪-2n13mx",
+    "createdAt": "2025-09-18T03:29:50.355Z",
+    "status": "Done",
+    "planPath": "20250918-122950-大阪-2n13mx\\plan.xlsx",
+    "meta": {
+      "planId": "20250918-122950-大阪-2n13mx",
+      "createdAt": "2025-09-18T03:29:50.355Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "大阪",
+      "dates": {
+        "start": "2025-09-24",
+        "end": "2025-09-25"
+      },
+      "duration": 2,
+      "budgetPerDay": 50000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250917-180859-滋賀-yut3o9",
+    "createdAt": "2025-09-17T09:08:59.927Z",
+    "status": "Done",
+    "planPath": "20250917-180859-滋賀-yut3o9\\plan.xlsx",
+    "meta": {
+      "planId": "20250917-180859-滋賀-yut3o9",
+      "createdAt": "2025-09-17T09:08:59.927Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "滋賀",
+      "dates": {
+        "start": "2025-09-24",
+        "end": "2025-09-25"
+      },
+      "duration": 2,
+      "budgetPerDay": 15000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250917-180354-滋賀-4do1t7",
+    "createdAt": "2025-09-17T09:03:55.003Z",
+    "status": "Done",
+    "planPath": "20250917-180354-滋賀-4do1t7\\plan.xlsx",
+    "meta": {
+      "planId": "20250917-180354-滋賀-4do1t7",
+      "createdAt": "2025-09-17T09:03:55.003Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "滋賀",
+      "dates": {
+        "start": "2025-09-24",
+        "end": "2025-09-25"
+      },
+      "duration": 2,
+      "budgetPerDay": 500000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250917-180155-大阪-br5776",
+    "createdAt": "2025-09-17T09:01:55.660Z",
+    "status": "Done",
+    "planPath": "20250917-180155-大阪-br5776\\plan.xlsx",
+    "meta": {
+      "planId": "20250917-180155-大阪-br5776",
+      "createdAt": "2025-09-17T09:01:55.660Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "大阪",
+      "dates": {
+        "start": "2025-09-24",
+        "end": "2025-09-25"
+      },
+      "duration": 2,
+      "budgetPerDay": 42500,
+      "transport": "public"
+    }
+  },
+  {
     "planId": "20250917-175112-大阪-v6bp8o",
     "createdAt": "2025-09-17T08:51:12.139Z",
     "status": "Done",

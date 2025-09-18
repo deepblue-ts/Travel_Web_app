@@ -3651,5 +3651,563 @@
     "place_id": "ChIJvRX1cBPnAGAR5GOm90jvUSE",
     "website": "https://nikusyo-nakata.jp/nanba_honten.html",
     "gmaps_url": "https://maps.google.com/?cid=2400963173036745700"
+  },
+  "うどん居酒屋 お初 梅田 大阪 日本": {
+    "lat": 34.6997875,
+    "lon": 135.5005315,
+    "display_name": "〒530-0057 大阪府大阪市北区曾根崎２丁目７−１３",
+    "source": "gmaps_places",
+    "place_id": "ChIJm7JpcADnAGARgePZUWYbAX4",
+    "website": "",
+    "gmaps_url": "https://maps.google.com/?cid=9079568450029478785"
+  },
+  "HEP FIVE 観覧車 梅田 大阪 日本": {
+    "lat": 34.7038153,
+    "lon": 135.499969,
+    "display_name": "〒530-0017 大阪府大阪市北区角田町５−１５ HEP FIVE 7F",
+    "source": "gmaps_places",
+    "place_id": "ChIJAQDAo5PmAGARcMqvnh2Reqs",
+    "website": "https://www.hepfive.jp/ferriswheel",
+    "gmaps_url": "https://maps.google.com/?cid=12356348084046776944"
+  },
+  "博多串焼き たんか 梅田 大阪 日本": {
+    "lat": 34.7015077,
+    "lon": 135.4926954,
+    "display_name": "〒530-0001 大阪府大阪市北区梅田３丁目２−１２３ イノゲート大阪 バルチカ03 5F",
+    "source": "gmaps_places",
+    "place_id": "ChIJWXpcNSTnAGARIG6Ls6fbNvU",
+    "website": "http://www.genki-factory.com/",
+    "gmaps_url": "https://maps.google.com/?cid=17669551701353000480"
+  },
+  "回転寿司 魚がし日本一 難波店 難波 大阪 日本": {
+    "lat": 34.6667761,
+    "lon": 135.4997842,
+    "display_name": "〒542-0076 大阪府大阪市中央区難波４丁目１−１７ 近鉄 大阪難波駅 改札内",
+    "source": "gmaps_places",
+    "place_id": "ChIJf5dcDQPnAGARDpCBfhcAIjE",
+    "website": "https://uogashi-nihonichi.imachika.com/store/4",
+    "gmaps_url": "https://maps.google.com/?cid=3540392357973299214"
+  },
+  "道頓堀川クルーズ 難波 大阪 日本": {
+    "lat": 34.6691432,
+    "lon": 135.502709,
+    "display_name": "〒542-0084 大阪府大阪市中央区宗右衛門町７−１３",
+    "source": "gmaps_places",
+    "place_id": "ChIJ2ySFjBTnAGAR3ngfXW-dwaU",
+    "website": "http://www.ipponmatsu.co.jp/cruise/tombori.html",
+    "gmaps_url": "https://maps.google.com/?cid=11944000788392540382"
+  },
+  "大阪城公園散策 難波 大阪 日本": {
+    "lat": 34.6864797,
+    "lon": 135.5262114,
+    "display_name": "〒540-0002 大阪府大阪市中央区大阪城１−１",
+    "source": "gmaps_places",
+    "place_id": "ChIJVVVld8ngAGARi9mE-a6e9mc",
+    "website": "https://osakacastlepark.jp/",
+    "gmaps_url": "https://maps.google.com/?cid=7491349504525130123"
+  },
+  "道頓堀 かに道楽 難波 大阪 日本": {
+    "lat": 34.6687993,
+    "lon": 135.5014873,
+    "display_name": "〒542-0071 大阪府大阪市中央区道頓堀１丁目６−１８",
+    "source": "gmaps_places",
+    "place_id": "ChIJVVVFgBPnAGARLbCliBbVOI8",
+    "website": "https://douraku.co.jp/kansai/honten/",
+    "gmaps_url": "https://maps.google.com/?cid=10320232838878048301"
+  },
+  "梅田スカイビル 空中庭園 大阪 大阪 日本": {
+    "lat": 34.7052993,
+    "lon": 135.490172,
+    "display_name": "〒531-6039 大阪府大阪市北区大淀中１丁目１−８８ 梅田スカイビル",
+    "source": "gmaps_places",
+    "place_id": "ChIJbbXqmojmAGARh-OQXHzkwEc",
+    "website": "https://www.skybldg.co.jp/observatory/",
+    "gmaps_url": "https://maps.google.com/?cid=5170383595001406343"
+  },
+  "うどん居酒屋 お初 大阪 大阪 日本": {
+    "lat": 34.6997875,
+    "lon": 135.5005315,
+    "display_name": "〒530-0057 大阪府大阪市北区曾根崎２丁目７−１３",
+    "source": "gmaps_places",
+    "place_id": "ChIJm7JpcADnAGARgePZUWYbAX4",
+    "website": "",
+    "gmaps_url": "https://maps.google.com/?cid=9079568450029478785"
+  },
+  "HEP FIVE 観覧車 大阪 大阪 日本": {
+    "lat": 34.7038153,
+    "lon": 135.499969,
+    "display_name": "〒530-0017 大阪府大阪市北区角田町５−１５ HEP FIVE 7F",
+    "source": "gmaps_places",
+    "place_id": "ChIJAQDAo5PmAGARcMqvnh2Reqs",
+    "website": "https://www.hepfive.jp/ferriswheel",
+    "gmaps_url": "https://maps.google.com/?cid=12356348084046776944"
+  },
+  "博多串焼き たんか 大阪 大阪 日本": {
+    "lat": 34.7065173,
+    "lon": 135.5117729,
+    "display_name": "〒530-0041 大阪府大阪市北区天神橋５丁目６−３３ タニイ建物ビル 1F",
+    "source": "gmaps_places",
+    "place_id": "ChIJBVShWcfmAGARNMV5VurqNJ0",
+    "website": "https://www.instagram.com/battenyokatoh.tenma/?hl=ja",
+    "gmaps_url": "https://maps.google.com/?cid=11327937254937707828"
+  },
+  "回転寿司 魚がし日本一 難波店 大阪 大阪 日本": {
+    "lat": 34.6667761,
+    "lon": 135.4997842,
+    "display_name": "〒542-0076 大阪府大阪市中央区難波４丁目１−１７ 近鉄 大阪難波駅 改札内",
+    "source": "gmaps_places",
+    "place_id": "ChIJf5dcDQPnAGARDpCBfhcAIjE",
+    "website": "https://uogashi-nihonichi.imachika.com/store/4",
+    "gmaps_url": "https://maps.google.com/?cid=3540392357973299214"
+  },
+  "道頓堀川クルーズ 大阪 大阪 日本": {
+    "lat": 34.6691432,
+    "lon": 135.502709,
+    "display_name": "〒542-0084 大阪府大阪市中央区宗右衛門町７−１３",
+    "source": "gmaps_places",
+    "place_id": "ChIJ2ySFjBTnAGAR3ngfXW-dwaU",
+    "website": "http://www.ipponmatsu.co.jp/cruise/tombori.html",
+    "gmaps_url": "https://maps.google.com/?cid=11944000788392540382"
+  },
+  "大阪城公園散策 大阪 大阪 日本": {
+    "lat": 34.6864797,
+    "lon": 135.5262114,
+    "display_name": "〒540-0002 大阪府大阪市中央区大阪城１−１",
+    "source": "gmaps_places",
+    "place_id": "ChIJVVVld8ngAGARi9mE-a6e9mc",
+    "website": "https://osakacastlepark.jp/",
+    "gmaps_url": "https://maps.google.com/?cid=7491349504525130123"
+  },
+  "道頓堀 かに道楽 大阪 大阪 日本": {
+    "lat": 34.6687993,
+    "lon": 135.5014873,
+    "display_name": "〒542-0071 大阪府大阪市中央区道頓堀１丁目６−１８",
+    "source": "gmaps_places",
+    "place_id": "ChIJVVVFgBPnAGARLbCliBbVOI8",
+    "website": "https://douraku.co.jp/kansai/honten/",
+    "gmaps_url": "https://maps.google.com/?cid=10320232838878048301"
+  },
+  "移動（出発） 大津市 滋賀 日本": {
+    "lat": 34.9736375,
+    "lon": 135.9135091,
+    "display_name": "〒520-2132 滋賀県大津市神領１丁目１６−１",
+    "source": "gmaps_places",
+    "place_id": "ChIJIw9-nVBtAWARGAmAkE36zPQ",
+    "website": "http://takebetaisha.jp/",
+    "gmaps_url": "https://maps.google.com/?cid=17639749051547126040"
+  },
+  "比叡山延暦寺 大津市 滋賀 日本": {
+    "lat": 35.0704634,
+    "lon": 135.8411275,
+    "display_name": "〒520-0116 滋賀県大津市坂本本町４２２０",
+    "source": "gmaps_places",
+    "place_id": "ChIJMyzNoxsKAWARlcl_aAD9XZA",
+    "website": "https://www.hieizan.or.jp/",
+    "gmaps_url": "https://maps.google.com/?cid=10402748892490746261"
+  },
+  "琵琶湖大津プリンスホテルにてランチビュッフェ 大津市 滋賀 日本": {
+    "lat": 35.00522730000001,
+    "lon": 135.8893808,
+    "display_name": "〒520-0801 滋賀県大津市におの浜４丁目７−７",
+    "source": "gmaps_places",
+    "place_id": "ChIJLzS9SN8MAWARIRNczJbvZvc",
+    "website": "http://www.princehotels.co.jp/otsu/restaurant/biona/",
+    "gmaps_url": "https://maps.google.com/?cid=17827199605945406241"
+  },
+  "大津湖岸なぎさ公園 大津市 滋賀 日本": {
+    "lat": 34.988626,
+    "lon": 135.8978889,
+    "display_name": "〒520-0834 滋賀県大津市御殿浜２３",
+    "source": "gmaps_places",
+    "place_id": "ChIJe8udcUkNAWARHILGxpeD3I8",
+    "website": "",
+    "gmaps_url": "https://maps.google.com/?cid=10366305130198237724"
+  },
+  "レストラン プルミエ 大津市 滋賀 日本": {
+    "lat": 35.0151301,
+    "lon": 135.8585445,
+    "display_name": "〒520-0032 滋賀県大津市観音寺１２−３３",
+    "source": "gmaps_places",
+    "place_id": "ChIJM4JMW9gNAWARQxyuR-JabEU",
+    "website": "https://beauty.hotpepper.jp/kr/slnH000550144/",
+    "gmaps_url": "https://maps.google.com/?cid=5002473214013480003"
+  },
+  "琵琶湖ホテル 大津市 滋賀 日本": {
+    "lat": 35.0102172,
+    "lon": 135.8682568,
+    "display_name": "〒520-0041 滋賀県大津市浜町２−４０",
+    "source": "gmaps_places",
+    "place_id": "ChIJpYxGAPUMAWARMNzImUutSfI",
+    "website": "https://www.keihanhotels-resorts.co.jp/biwakohotel/",
+    "gmaps_url": "https://maps.google.com/?cid=17458675970692668464"
+  },
+  "彦根城 彦根市 滋賀 日本": {
+    "lat": 35.276452,
+    "lon": 136.251846,
+    "display_name": "〒522-0061 滋賀県彦根市金亀町１−１",
+    "source": "gmaps_places",
+    "place_id": "ChIJw9u_XSsrAmARMIwpeAshKu4",
+    "website": "https://hikonecastle.com/",
+    "gmaps_url": "https://maps.google.com/?cid=17161565663193041968"
+  },
+  "彦根城近江料理 一福 彦根市 滋賀 日本": {
+    "lat": 35.2627735,
+    "lon": 136.2422338,
+    "display_name": "〒522-0052 滋賀県彦根市長曽根南町４８３−２",
+    "source": "gmaps_places",
+    "place_id": "ChIJdbOuW-TVA2ARO38tg2uaEbY",
+    "website": "https://tabelog.com/shiga/A2503/A250303/25010375/",
+    "gmaps_url": "https://maps.google.com/?cid=13119436976059940667"
+  },
+  "滋賀県立近代美術館 彦根市 滋賀 日本": {
+    "lat": 34.9703789,
+    "lon": 135.9419861,
+    "display_name": "〒520-2122 滋賀県大津市瀬田南大萱町１７４０−１",
+    "source": "gmaps_places",
+    "place_id": "ChIJddm7qaBtAWARGstGHkKVl4E",
+    "website": "https://www.shigamuseum.jp/",
+    "gmaps_url": "https://maps.google.com/?cid=9338096463584348954"
+  },
+  "近江牛ステーキあづま 彦根市 滋賀 日本": {
+    "lat": 35.2627735,
+    "lon": 136.2422338,
+    "display_name": "〒522-0052 滋賀県彦根市長曽根南町４８３−２",
+    "source": "gmaps_places",
+    "place_id": "ChIJdbOuW-TVA2ARO38tg2uaEbY",
+    "website": "https://tabelog.com/shiga/A2503/A250303/25010375/",
+    "gmaps_url": "https://maps.google.com/?cid=13119436976059940667"
+  },
+  "彦根キャッスルホテル 彦根市 滋賀 日本": {
+    "lat": 35.2736282,
+    "lon": 136.2569274,
+    "display_name": "〒522-0075 滋賀県彦根市佐和町１−８",
+    "source": "gmaps_places",
+    "place_id": "ChIJ3VnsB9LUA2ARyDbByNWul1s",
+    "website": "https://www.hch.jp/",
+    "gmaps_url": "https://maps.google.com/?cid=6599936012154123976"
+  },
+  "比叡山延暦寺 滋賀 滋賀 日本": {
+    "lat": 35.0704634,
+    "lon": 135.8411275,
+    "display_name": "〒520-0116 滋賀県大津市坂本本町４２２０",
+    "source": "gmaps_places",
+    "place_id": "ChIJMyzNoxsKAWARlcl_aAD9XZA",
+    "website": "https://www.hieizan.or.jp/",
+    "gmaps_url": "https://maps.google.com/?cid=10402748892490746261"
+  },
+  "琵琶湖大津プリンスホテルにてランチビュッフェ 滋賀 滋賀 日本": {
+    "lat": 35.00522730000001,
+    "lon": 135.8893808,
+    "display_name": "〒520-0801 滋賀県大津市におの浜４丁目７−７",
+    "source": "gmaps_places",
+    "place_id": "ChIJLzS9SN8MAWARIRNczJbvZvc",
+    "website": "http://www.princehotels.co.jp/otsu/restaurant/biona/",
+    "gmaps_url": "https://maps.google.com/?cid=17827199605945406241"
+  },
+  "大津湖岸なぎさ公園 滋賀 滋賀 日本": {
+    "lat": 34.988626,
+    "lon": 135.8978889,
+    "display_name": "〒520-0834 滋賀県大津市御殿浜２３",
+    "source": "gmaps_places",
+    "place_id": "ChIJe8udcUkNAWARHILGxpeD3I8",
+    "website": "",
+    "gmaps_url": "https://maps.google.com/?cid=10366305130198237724"
+  },
+  "レストラン プルミエ 滋賀 滋賀 日本": {
+    "lat": 35.1259696,
+    "lon": 136.0975732,
+    "display_name": "〒523-0894 滋賀県近江八幡市中村町２０−１８",
+    "source": "gmaps_places",
+    "place_id": "ChIJex9qcNJ7AWARKQOaJ33ybSs",
+    "website": "",
+    "gmaps_url": "https://maps.google.com/?cid=3129423935441601321"
+  },
+  "彦根城 滋賀 滋賀 日本": {
+    "lat": 35.276452,
+    "lon": 136.251846,
+    "display_name": "〒522-0061 滋賀県彦根市金亀町１−１",
+    "source": "gmaps_places",
+    "place_id": "ChIJw9u_XSsrAmARMIwpeAshKu4",
+    "website": "https://hikonecastle.com/",
+    "gmaps_url": "https://maps.google.com/?cid=17161565663193041968"
+  },
+  "彦根城近江料理 一福 滋賀 滋賀 日本": {
+    "lat": 35.2627735,
+    "lon": 136.2422338,
+    "display_name": "〒522-0052 滋賀県彦根市長曽根南町４８３−２",
+    "source": "gmaps_places",
+    "place_id": "ChIJdbOuW-TVA2ARO38tg2uaEbY",
+    "website": "https://tabelog.com/shiga/A2503/A250303/25010375/",
+    "gmaps_url": "https://maps.google.com/?cid=13119436976059940667"
+  },
+  "滋賀県立近代美術館 滋賀 滋賀 日本": {
+    "lat": 34.9703789,
+    "lon": 135.9419861,
+    "display_name": "〒520-2122 滋賀県大津市瀬田南大萱町１７４０−１",
+    "source": "gmaps_places",
+    "place_id": "ChIJddm7qaBtAWARGstGHkKVl4E",
+    "website": "https://www.shigamuseum.jp/",
+    "gmaps_url": "https://maps.google.com/?cid=9338096463584348954"
+  },
+  "近江牛ステーキあづま 滋賀 滋賀 日本": {
+    "lat": 35.0094623,
+    "lon": 135.8647583,
+    "display_name": "〒520-0043 滋賀県大津市中央１丁目７−３５",
+    "source": "gmaps_places",
+    "place_id": "ChIJTfc6vl8MAWARYnglrpGOdNg",
+    "website": "https://www.kadoman.net/",
+    "gmaps_url": "https://maps.google.com/?cid=15597248165833963618"
+  },
+  "移動（出発） 滋賀 滋賀 日本": {
+    "lat": 35.1579408,
+    "lon": 136.0681793,
+    "display_name": "〒523-0807 滋賀県近江八幡市中之庄町６３９−１",
+    "source": "gmaps_places",
+    "place_id": "ChIJZVp3HjN4AWARQ6kfebPy84g",
+    "website": "http://www.suigou.com/d_ship/index.html",
+    "gmaps_url": "https://maps.google.com/?cid=9868498061144074563"
+  },
+  "宿泊：琵琶湖大津プリンスホテル 滋賀 滋賀 日本": {
+    "lat": 35.0047516,
+    "lon": 135.8889193,
+    "display_name": "〒520-8520 滋賀県大津市におの浜４丁目７−７",
+    "source": "gmaps_places",
+    "place_id": "ChIJscfrFd8MAWARaCIXqAxmI4w",
+    "website": "http://www.princehotels.co.jp/otsu/",
+    "gmaps_url": "https://maps.google.com/?cid=10098026994040513128"
+  },
+  "移動（帰路） 滋賀 滋賀 日本": {
+    "lat": 35.3292014,
+    "lon": 136.0563212,
+    "display_name": "日本、滋賀県",
+    "source": "gmaps_geocode",
+    "place_id": "ChIJfRcKhFR_AWAR0Ih82zbkEkQ",
+    "website": "",
+    "gmaps_url": "https://maps.google.com/?cid=4905233868421630160"
+  },
+  "移動（出発） 琵琶湖周辺 滋賀 日本": {
+    "lat": 35.0123233,
+    "lon": 135.866313,
+    "display_name": "〒520-0047 滋賀県大津市浜大津５丁目１−１",
+    "source": "gmaps_places",
+    "place_id": "ChIJ67fDo4oMAWARc-gDBYgGj-M",
+    "website": "https://www.biwakokisen.co.jp/",
+    "gmaps_url": "https://maps.google.com/?cid=16397331949548726387"
+  },
+  "長浜城歴史博物館 琵琶湖周辺 滋賀 日本": {
+    "lat": 35.37766,
+    "lon": 136.261452,
+    "display_name": "〒526-0065 滋賀県長浜市公園町１０−１０",
+    "source": "gmaps_places",
+    "place_id": "ChIJg83tBxopAmARFFaPaO9rx5g",
+    "website": "https://nagahama-rekihaku.jp/",
+    "gmaps_url": "https://maps.google.com/?cid=11008886490126046740"
+  },
+  "湖岸亭 琵琶湖周辺 滋賀 日本": {
+    "lat": 35.1258937,
+    "lon": 135.9561994,
+    "display_name": "〒524-0101 滋賀県守山市今浜町",
+    "source": "gmaps_places",
+    "place_id": "ChIJR8qpKZd1AWAREPWMtaIqv4E",
+    "website": "",
+    "gmaps_url": "https://maps.google.com/?cid=9349238229763421456"
+  },
+  "彦根城 琵琶湖周辺 滋賀 日本": {
+    "lat": 35.276452,
+    "lon": 136.251846,
+    "display_name": "〒522-0061 滋賀県彦根市金亀町１−１",
+    "source": "gmaps_places",
+    "place_id": "ChIJw9u_XSsrAmARMIwpeAshKu4",
+    "website": "https://hikonecastle.com/",
+    "gmaps_url": "https://maps.google.com/?cid=17161565663193041968"
+  },
+  "ビワドリ 琵琶湖周辺 滋賀 日本": {
+    "lat": 35.2129605,
+    "lon": 135.8958791,
+    "display_name": "〒520-0514 滋賀県大津市木戸１５４７−１",
+    "source": "gmaps_places",
+    "place_id": "ChIJAzne1UqjAWARgfJ9daGJ250",
+    "website": "https://www.biwako-valley.com/",
+    "gmaps_url": "https://maps.google.com/?cid=11374836610408247937"
+  },
+  "琵琶湖マリオットホテル 琵琶湖周辺 滋賀 日本": {
+    "lat": 35.1251483,
+    "lon": 135.9552582,
+    "display_name": "〒524-0101 滋賀県守山市今浜町十軒家２８７６",
+    "source": "gmaps_places",
+    "place_id": "ChIJJ8FuX5Z1AWARluK0yV_zggg",
+    "website": "https://www.marriott.com/en-us/hotels/osalb-lake-biwa-marriott-hotel/overview/?scid=f2ae0541-1279-4f24-b197-a979c79310b0",
+    "gmaps_url": "https://maps.google.com/?cid=613320092007326358"
+  },
+  "大津市歴史博物館訪問 大津市内 滋賀 日本": {
+    "lat": 35.015446,
+    "lon": 135.852835,
+    "display_name": "〒520-0037 滋賀県大津市御陵町２−２",
+    "source": "gmaps_places",
+    "place_id": "ChIJtdo-lXEMAWAR6tjCSDknEIg",
+    "website": "http://www.rekihaku.otsu.shiga.jp/",
+    "gmaps_url": "https://maps.google.com/?cid=9804379515772917994"
+  },
+  "近江肉のかしわやで焼肉ランチ 大津市内 滋賀 日本": {
+    "lat": 34.9787133,
+    "lon": 135.9037235,
+    "display_name": "〒520-0831 滋賀県大津市松原町９−２９",
+    "source": "gmaps_places",
+    "place_id": "ChIJcaMoAcUNAWARnFOhHGwd11Y",
+    "website": "",
+    "gmaps_url": "https://maps.google.com/?cid=6257502557428601756"
+  },
+  "ホテルルートイン大津 チェックイン 大津市内 滋賀 日本": {
+    "lat": 32.876212,
+    "lon": 130.8647647,
+    "display_name": "〒869-1235 熊本県菊池郡大津町室２１４−９",
+    "source": "gmaps_places",
+    "place_id": "ChIJ2UzDDDHkQDUR11BJKN2Bwnw",
+    "website": "https://www.route-inn.co.jp/hotel_list/kumamoto/index_hotel_id_224/?utm_source=google&utm_medium=gbp&utm_campaign=web",
+    "gmaps_url": "https://maps.google.com/?cid=8989890593048580311"
+  },
+  "長浜城歴史博物館 滋賀 滋賀 日本": {
+    "lat": 35.37766,
+    "lon": 136.261452,
+    "display_name": "〒526-0065 滋賀県長浜市公園町１０−１０",
+    "source": "gmaps_places",
+    "place_id": "ChIJg83tBxopAmARFFaPaO9rx5g",
+    "website": "https://nagahama-rekihaku.jp/",
+    "gmaps_url": "https://maps.google.com/?cid=11008886490126046740"
+  },
+  "湖岸亭 滋賀 滋賀 日本": {
+    "lat": 35.0564996,
+    "lon": 135.925388,
+    "display_name": "〒525-0005 滋賀県草津市志那町他",
+    "source": "gmaps_places",
+    "place_id": "ChIJlfZgVl5zAWARctO8AAYPrMc",
+    "website": "http://www.ohmitetudo.co.jp/kogan/aboutus/shina/index.html/",
+    "gmaps_url": "https://maps.google.com/?cid=14387891427998487410"
+  },
+  "ビワドリ 滋賀 滋賀 日本": {
+    "lat": 35.216284,
+    "lon": 136.118362,
+    "display_name": "〒521-1135 滋賀県彦根市新海町３２６０",
+    "source": "gmaps_places",
+    "place_id": "ChIJP4N5IAqCAWARgOAJg7I5pLU",
+    "website": "https://www.biwadog.co.jp/?utm_source=googlemybusiness&utm_medium=biwadog&utm_campaign=maps",
+    "gmaps_url": "https://maps.google.com/?cid=13088649855910928512"
+  },
+  "琵琶湖マリオットホテル 滋賀 滋賀 日本": {
+    "lat": 35.1251483,
+    "lon": 135.9552582,
+    "display_name": "〒524-0101 滋賀県守山市今浜町十軒家２８７６",
+    "source": "gmaps_places",
+    "place_id": "ChIJJ8FuX5Z1AWARluK0yV_zggg",
+    "website": "https://www.marriott.com/en-us/hotels/osalb-lake-biwa-marriott-hotel/overview/?scid=f2ae0541-1279-4f24-b197-a979c79310b0",
+    "gmaps_url": "https://maps.google.com/?cid=613320092007326358"
+  },
+  "大津市歴史博物館訪問 滋賀 滋賀 日本": {
+    "lat": 35.015446,
+    "lon": 135.852835,
+    "display_name": "〒520-0037 滋賀県大津市御陵町２−２",
+    "source": "gmaps_places",
+    "place_id": "ChIJtdo-lXEMAWAR6tjCSDknEIg",
+    "website": "http://www.rekihaku.otsu.shiga.jp/",
+    "gmaps_url": "https://maps.google.com/?cid=9804379515772917994"
+  },
+  "近江肉のかしわやで焼肉ランチ 滋賀 滋賀 日本": {
+    "lat": 35.0094623,
+    "lon": 135.8647583,
+    "display_name": "〒520-0043 滋賀県大津市中央１丁目７−３５",
+    "source": "gmaps_places",
+    "place_id": "ChIJTfc6vl8MAWARYnglrpGOdNg",
+    "website": "https://www.kadoman.net/",
+    "gmaps_url": "https://maps.google.com/?cid=15597248165833963618"
+  },
+  "梅田焼肉 さくら 梅田 大阪 日本": {
+    "lat": 34.703231,
+    "lon": 135.505026,
+    "display_name": "〒530-0026 大阪府大阪市北区神山町９−６ Tm17ビル B1",
+    "source": "gmaps_places",
+    "place_id": "ChIJIe9gyOrmAGARWlMWzf3gUJc",
+    "website": "http://www.n27.jp/sakura_u/",
+    "gmaps_url": "https://maps.google.com/?cid=10903462078536110938"
+  },
+  "ヒルトン大阪 梅田 大阪 日本": {
+    "lat": 34.6998245,
+    "lon": 135.4959532,
+    "display_name": "〒530-0001 大阪府大阪市北区梅田１丁目８−８",
+    "source": "gmaps_places",
+    "place_id": "ChIJXUg-SY3mAGARGoOwO1U017E",
+    "website": "https://www.hilton.com/en/hotels/osahitw-hilton-osaka/?SEO_id=GMB-APAC-TW-OSAHITW",
+    "gmaps_url": "https://maps.google.com/?cid=12814768805384323866"
+  },
+  "ホテルモントレグラスミア大阪 難波 大阪 日本": {
+    "lat": 34.6666181,
+    "lon": 135.4965623,
+    "display_name": "〒556-0017 大阪府大阪市浪速区湊町１丁目２−３",
+    "source": "gmaps_places",
+    "place_id": "ChIJI_--Eg3nAGARcvVi6kRKyKM",
+    "website": "https://www.hotelmonterey.co.jp/grasmere_osaka/?utm_source=google&utm_medium=mybusiness&utm_campaign=website_mongro",
+    "gmaps_url": "https://maps.google.com/?cid=11801764483374970226"
+  },
+  "鶴橋風月 難波 大阪 日本": {
+    "lat": 34.66179750000001,
+    "lon": 135.5029323,
+    "display_name": "〒542-0076 大阪府大阪市中央区難波５丁目１−６０ なんばCITY南館 1F",
+    "source": "gmaps_places",
+    "place_id": "ChIJ17As9GvnAGARJkbVIBF9U7g",
+    "website": "https://fugetsu.jp/?shop=p166",
+    "gmaps_url": "https://maps.google.com/?cid=13282097238564488742"
+  },
+  "大阪名物たこ焼き道楽 難波 大阪 日本": {
+    "lat": 34.665218,
+    "lon": 135.5033693,
+    "display_name": "〒542-0075 大阪府大阪市中央区難波千日前１１−１９",
+    "source": "gmaps_places",
+    "place_id": "ChIJY971B2vnAGAR9orLBLBsj8Y",
+    "website": "http://takoyaki-wanaka.com/",
+    "gmaps_url": "https://maps.google.com/?cid=14307774044429847286"
+  },
+  "お好み焼き きじ 大阪 大阪 日本": {
+    "lat": 34.7034901,
+    "lon": 135.4978033,
+    "display_name": "〒530-0017 大阪府大阪市北区角田町９−２０ 新梅田 食道街",
+    "source": "gmaps_places",
+    "place_id": "ChIJgwKKQpLmAGAR8gTfdMBDo9g",
+    "website": "http://shinume.com/shop/%E3%81%8D%E3%81%98/",
+    "gmaps_url": "https://maps.google.com/?cid=15610395227269825778"
+  },
+  "梅田焼肉 さくら 大阪 大阪 日本": {
+    "lat": 34.703231,
+    "lon": 135.505026,
+    "display_name": "〒530-0026 大阪府大阪市北区神山町９−６ Tm17ビル B1",
+    "source": "gmaps_places",
+    "place_id": "ChIJIe9gyOrmAGARWlMWzf3gUJc",
+    "website": "http://www.n27.jp/sakura_u/",
+    "gmaps_url": "https://maps.google.com/?cid=10903462078536110938"
+  },
+  "ヒルトン大阪 大阪 大阪 日本": {
+    "lat": 34.6998245,
+    "lon": 135.4959532,
+    "display_name": "〒530-0001 大阪府大阪市北区梅田１丁目８−８",
+    "source": "gmaps_places",
+    "place_id": "ChIJXUg-SY3mAGARGoOwO1U017E",
+    "website": "https://www.hilton.com/en/hotels/osahitw-hilton-osaka/?SEO_id=GMB-APAC-TW-OSAHITW",
+    "gmaps_url": "https://maps.google.com/?cid=12814768805384323866"
+  },
+  "鶴橋風月 大阪 大阪 日本": {
+    "lat": 34.665608,
+    "lon": 135.529773,
+    "display_name": "〒543-0025 大阪府大阪市天王寺区下味原町２−１８",
+    "source": "gmaps_places",
+    "place_id": "ChIJifLU4qvgAGARLgb19Tg1KTg",
+    "website": "https://fugetsu.jp/",
+    "gmaps_url": "https://maps.google.com/?cid=4046824258930017838"
+  },
+  "大阪名物たこ焼き道楽 大阪 大阪 日本": {
+    "lat": 34.665218,
+    "lon": 135.5033693,
+    "display_name": "〒542-0075 大阪府大阪市中央区難波千日前１１−１９",
+    "source": "gmaps_places",
+    "place_id": "ChIJY971B2vnAGAR9orLBLBsj8Y",
+    "website": "http://takoyaki-wanaka.com/",
+    "gmaps_url": "https://maps.google.com/?cid=14307774044429847286"
   }
 }
