@@ -6,6 +6,7 @@ import GeneratingPlanPage from "./pages/GeneratingPlanPage";
 import PlanResult from "./pages/PlanResult";
 import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
+import PlanViewer from "./pages/PlanViewer";            // ★ 追加
 import { usePlan } from "./contexts/PlanContext";
 import { trackPageView, trackEvent } from "./utils/analytics";
 
@@ -15,20 +16,33 @@ const PAGE_INFO = {
   1:  { path: "/wizard",     title: "Wizard — AI Travel Planner" },
   2:  { path: "/generating", title: "Generating — AI Travel Planner" },
   3:  { path: "/result",     title: "Result — AI Travel Planner" },
+  4:  { path: "/p/:readId",  title: "Plan — AI Travel Planner" }, // ★ 追加（ダミー定義）
   10: { path: "/terms",      title: "利用規約 — AI Travel Planner" },
   11: { path: "/privacy",    title: "プライバシーポリシー — AI Travel Planner" },
 };
 
 export default function App() {
-  // 0: Top, 1: Wizard, 2: Generating, 3: Result, 10: Terms, 11: Privacy
+  // 0: Top, 1: Wizard, 2: Generating, 3: Result, 4: Viewer, 10: Terms, 11: Privacy
   const [step, setStep] = useState(0);
+  const [viewerReadId, setViewerReadId] = useState("");   // ★ 追加
   const { loadingStatus, error, planJsonResult } = usePlan();
+
+  // ハッシュ文字列から /p/:readId を抽出
+  const parseReadIdFromHash = () => {
+    const h = (window.location.hash || "").replace(/^#/, "");
+    const m = h.match(/^\/p\/([^/?#]+)/);
+    return m?.[1] || "";
+  };
 
   // Hash → step へ反映（初期化＋ハッシュ遷移対応）
   useEffect(() => {
     const applyFromHash = () => {
       const h = (window.location.hash || "").replace(/^#/, "");
-      if (h.startsWith("/wizard")) setStep(1);
+      if (h.startsWith("/p/")) {
+        const id = parseReadIdFromHash();
+        setViewerReadId(id);
+        setStep(4); // Viewer
+      } else if (h.startsWith("/wizard")) setStep(1);
       else if (h.startsWith("/generating")) setStep(2);
       else if (h.startsWith("/result")) setStep(3);
       else if (h.startsWith("/terms")) setStep(10);
@@ -56,6 +70,15 @@ export default function App() {
 
   // ステップ変化時：Hashを更新し、GAにpage_view送信＆タイトル設定
   useEffect(() => {
+    // Viewer は動的IDなので、固定の desiredHash 書き換えはスキップ
+    if (step === 4) {
+      const path = `/p/${viewerReadId || ""}`;
+      const title = `Plan — AI Travel Planner`;
+      document.title = title;
+      trackPageView(path, title);
+      return;
+    }
+
     const { path, title } = PAGE_INFO[step] || PAGE_INFO[0];
 
     // タイトル
@@ -69,7 +92,7 @@ export default function App() {
 
     // GA: page_view
     trackPageView(path, title);
-  }, [step]);
+  }, [step, viewerReadId]);
 
   const handleStart = () => {
     trackEvent("click_start");
@@ -100,6 +123,8 @@ export default function App() {
         return <GeneratingPlanPage />;
       case 3:
         return <PlanResult onBackToTop={handleBackToTop} />;
+      case 4: // ★ 追加：PlanViewer
+        return <PlanViewer readId={viewerReadId} />;
       case 10:
         return <TermsPage />;
       case 11:

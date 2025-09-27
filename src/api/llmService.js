@@ -3,48 +3,51 @@
 // 役割:
 //  - フロントエンドからバックエンド(API)を叩く薄いクライアント
 //  - 本番(GitHub Pages 等)では VITE_API_BASE or 既定の Render URL を使う
-//  - localhost では相対 /api を使い Vite の proxy に委譲
+//  - 開発(localhost)では Vite の proxy を前提に相対 /api を使う
 //  - 一部エンドポイントは POST が 405/404 のとき GET へ自動フォールバック
 // ------------------------------------------------------------
 
-// ============ ベースURL解決 ============
+// ============ ベースURL解決（/api まで含む） ============
 
 // 1) .env.* から（最優先）
-const fromEnv = (import.meta.env?.VITE_API_BASE ?? '').trim().replace(/\/+$/, '');
+//    ここには「/api まで含むURL」を入れる想定
+//    例: http://localhost:3001/api, https://xxx.onrender.com/api
+const FROM_ENV = (import.meta.env?.VITE_API_BASE ?? '').trim().replace(/\/+$/, '');
 
 // 2) 実行環境の判定
 const host = typeof window !== 'undefined' ? window.location.hostname : '';
 const isLocalhost = /^(localhost|127\.0\.0\.1)$/.test(host);
 const isGitHubPages = /\.github\.io$/.test(host);
 
-// 3) GitHub Pages 用の既定フォールバック（必要に応じて自分の Render URL に変更）
-const PROD_FALLBACK = 'https://travel-web-app-s2gj.onrender.com';
+// 3) GitHub Pages 用の既定フォールバック（自分の Render の API ルートに差し替えてOK）
+const PROD_FALLBACK = 'https://travel-web-app-s2gj.onrender.com/api';
 
 // 4) 最終決定
-// - env があればそれ
-// - localhost は相対 /api を使って Vite の proxy に委ねる（BASE は空のまま）
-// - GitHub Pages で env が無ければ Render 既定URLへ
-const _resolvedBase =
-  fromEnv ||
-  (isLocalhost ? '' : (isGitHubPages ? PROD_FALLBACK : ''));
+// - env があればそれ（/api を含む）
+// - localhost は相対 '/api'（Vite proxy）
+// - GitHub Pages で env が無ければ Render 既定URLへ（/api を含む）
+// - それ以外の環境でも、env が無ければ相対 '/api'
+const API_BASE = (() => {
+  if (FROM_ENV) return FROM_ENV.replace(/\/+$/, '');
+  if (isLocalhost) return '/api';
+  if (isGitHubPages) return PROD_FALLBACK;
+  return '/api';
+})();
 
-// デバッグ用に “今どこを向いているか”
-export const API_BASE = _resolvedBase; // 例: 'https://xxx.onrender.com' or ''（相対）
-export const API_TARGET_DESC = fromEnv
-  ? 'env:VITE_API_BASE'
-  : (isLocalhost
-      ? 'relative:/api (vite proxy)'
-      : (isGitHubPages ? 'fallback:render' : 'relative:/api (no-proxy)'));
+// デバッグ用: “今どこを向いているか”
+export const API_TARGET_DESC = FROM_ENV
+  ? `env:VITE_API_BASE(${API_BASE})`
+  : (isLocalhost ? 'relative:/api (vite proxy)' : (isGitHubPages ? `fallback:${API_BASE}` : 'relative:/api'));
 
-// 相対 /api を使えるのは基本「localhost のみ」
-export const API_ENABLED = !!(API_BASE || isLocalhost);
+// 相対 /api を使えるのは基本「localhost」のとき（ただし上で強制的に /api を返しているので true 扱い）
+export const API_ENABLED = !!API_BASE;
 
 // ============ 共通ユーティリティ ============
 
-const joinPath = (p) => (p.startsWith('/') ? p : `/${p}`);
-const buildUrl = (p) => {
-  const path = joinPath(p);
-  return API_BASE ? `${API_BASE}${path}` : path; // '' のときは相対 /api/xxx
+// API_BASE（末尾に /api を含む）と path（先頭に / を付けない）をクリーンに結合
+const api = (path = '') => {
+  const p = String(path || '').replace(/^\/+/, ''); // 先頭スラッシュを削る
+  return `${API_BASE}/${p}`;                         // /api + /path
 };
 
 const parseJsonSafe = async (res) => {
@@ -57,22 +60,23 @@ const makeQueryString = (obj = {}) =>
     .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
     .join('&');
 
-// POST→GET フォールバック対象（CDN/静的ホスティングで405になりやすい）
+// POST→GET フォールバック対象（CDN/静的ホスティングで405/404になりやすい）
 const FALLBACK_TO_GET = new Set([
-  '/api/estimate-fare',
-  '/api/get-areas',
+  'estimate-fare',
+  'get-areas',
 ]);
 
 // API 呼び出し（POST 基本、一部は GET フォールバック）
 async function apiFetch(path, { method = 'POST', body, headers } = {}) {
   if (!API_ENABLED) {
     throw new Error(
-      'API is not configured. Set VITE_API_BASE (e.g., Render URL). ' +
+      'API is not configured. Set VITE_API_BASE (e.g., https://your-backend/api). ' +
       `current: ${API_TARGET_DESC}`
     );
   }
 
-  const endpoint = buildUrl(path);
+  // ここに渡す path は 'get-areas' のように先頭スラなし
+  const endpoint = api(path);
   const opts = {
     method,
     headers: { 'Content-Type': 'application/json', ...(headers || {}) },
@@ -120,7 +124,7 @@ async function apiFetch(path, { method = 'POST', body, headers } = {}) {
 export const fetchAreasForDestination = async (destination, planId) => {
   if (!destination) return [];
   try {
-    const response = await apiFetch('/api/get-areas', { body: { destination, planId } });
+    const response = await apiFetch('get-areas', { body: { destination, planId } });
     return response?.areas || [];
   } catch (e) {
     console.error('エリア候補の取得に失敗:', e);
@@ -130,21 +134,21 @@ export const fetchAreasForDestination = async (destination, planId) => {
 
 // リソーススカウター群
 export const findDiningOptions = (conditions, planId) =>
-  apiFetch('/api/find-dining', { body: { ...conditions, planId } });
+  apiFetch('find-dining', { body: { ...conditions, planId } });
 
 export const findAccommodation = (conditions, planId) =>
-  apiFetch('/api/find-accommodation', { body: { ...conditions, planId } });
+  apiFetch('find-accommodation', { body: { ...conditions, planId } });
 
 export const findActivities = (conditions, planId) =>
-  apiFetch('/api/find-activities', { body: { ...conditions, planId } });
+  apiFetch('find-activities', { body: { ...conditions, planId } });
 
 // マスタープランナー
 export const createMasterPlan = (planConditions, planId, constraints = {}) =>
-  apiFetch('/api/create-master-plan', { body: { ...planConditions, planId, constraints } });
+  apiFetch('create-master-plan', { body: { ...planConditions, planId, constraints } });
 
 // デイリースケジューラー（バッチ）
 export const createDayPlans = (daysArray, planId, constraints = {}) =>
-  apiFetch('/api/create-day-plans', {
+  apiFetch('create-day-plans', {
     body: {
       days: (daysArray || []).map((d) => ({ ...d, constraints })),
       planId,
@@ -153,19 +157,19 @@ export const createDayPlans = (daysArray, planId, constraints = {}) =>
   });
 
 // Excel 連携
-export const startPlanSession = (meta) => apiFetch('/api/plan/start', { body: meta });
+export const startPlanSession = (meta) => apiFetch('plan/start', { body: meta });
 
 export const logUser = (planId, items) =>
-  apiFetch('/api/plan/log-user', { body: { planId, items } });
+  apiFetch('plan/log-user', { body: { planId, items } });
 
 export const logLLM = (planId, { agent, kind, summary, payload }) =>
-  apiFetch('/api/plan/log-llm', { body: { planId, agent, kind, summary, payload } });
+  apiFetch('plan/log-llm', { body: { planId, agent, kind, summary, payload } });
 
 export const logGeocode = (planId, results) =>
-  apiFetch('/api/plan/log-geocode', { body: { planId, results } });
+  apiFetch('plan/log-geocode', { body: { planId, results } });
 
 export const finalizePlan = (planId, finalPlan) =>
-  apiFetch('/api/plan/finalize', { body: { planId, finalPlan } });
+  apiFetch('plan/finalize', { body: { planId, finalPlan } });
 
 // ジオコーディング（バッチ/単品）
 export const geocodeItinerary = async (destination, itinerary, planId) => {
@@ -186,12 +190,12 @@ export const geocodeItinerary = async (destination, itinerary, planId) => {
       });
     }
   }
-  return apiFetch('/api/geocode-batch', { body: { destination, items, planId } });
+  return apiFetch('geocode-batch', { body: { destination, items, planId } });
 };
 
 // 単発地名
 export const geocodePlace = async (query, planId) => {
-  const j = await apiFetch('/api/geocode-place', { body: { query, planId } });
+  const j = await apiFetch('geocode-place', { body: { query, planId } });
   return j || null;
 };
 
@@ -203,8 +207,8 @@ export const getPlanState = async (planId) => {
       `current: ${API_TARGET_DESC}`
     );
   }
-  const endpoint = buildUrl(`/api/plan/state?planId=${encodeURIComponent(planId)}`);
-  const res = await fetch(endpoint);
+  const url = `${api('plan/state')}?${makeQueryString({ planId })}`;
+  const res = await fetch(url);
   if (!res.ok) throw new Error(`getPlanState failed: ${res.status}`);
   const j = await parseJsonSafe(res);
   return j ?? {};
@@ -212,7 +216,7 @@ export const getPlanState = async (planId) => {
 
 // 旅程の修正
 export async function revisePlan(planConditions, currentItinerary, instructions, planId) {
-  return apiFetch('/api/revise-plan', {
+  return apiFetch('revise-plan', {
     body: {
       planId,
       planConditions,
@@ -232,5 +236,5 @@ export async function estimateFare(arg1, arg2, arg3) {
     // 例: estimateFare(origin, destination, transport)
     payload = { origin: arg1, destination: arg2, transport: arg3 };
   }
-  return apiFetch('/api/estimate-fare', { body: payload });
+  return apiFetch('estimate-fare', { body: payload });
 }

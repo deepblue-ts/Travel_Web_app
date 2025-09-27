@@ -1,16 +1,20 @@
-// src/pages/TopPage.jsx
 import React, { useEffect, useState } from "react";
 import { trackEvent } from "../utils/analytics";
+import { listMyPlans, removeMyPlan, makePlanUrl } from "../api/planstore";
 
 export default function TopPage({ onStart }) {
   const [consented, setConsented] = useState(false);
+  const [myPlans, setMyPlans] = useState([]);
 
-  // 初回表示トラッキング＋過去の同意状態を復元
+  // 初回表示トラッキング＋過去の同意状態を復元＋保存プラン読込
   useEffect(() => {
     trackEvent("consent_view");
     try {
       const v = localStorage.getItem("atp_consent_v1");
       if (v === "true") setConsented(true);
+    } catch (_) {}
+    try {
+      setMyPlans(listMyPlans());
     } catch (_) {}
   }, []);
 
@@ -27,6 +31,19 @@ export default function TopPage({ onStart }) {
     } catch (_) {}
     trackEvent("consent_accept");
     onStart?.();
+  };
+
+  const handleRemovePlan = (readId) => {
+    const next = removeMyPlan(readId);
+    setMyPlans(next);
+  };
+
+  const handleCopyUrl = (readId) => {
+    const url = makePlanUrl(readId);
+    navigator.clipboard.writeText(url).then(
+      () => alert("URLをコピーしました！\n" + url),
+      () => window.prompt("このURLをコピーしてください", url)
+    );
   };
 
   return (
@@ -152,6 +169,89 @@ export default function TopPage({ onStart }) {
             ※ 同意はこのブラウザに保存されます（いつでも解除可）。
           </div>
         </div>
+
+        {/* 最近保存したプラン */}
+        {myPlans.length > 0 && (
+          <div style={{ marginTop: 28 }}>
+            <h2 style={{ fontSize: 18, margin: "0 0 12px", color: "#0f172a" }}>
+              最近保存したプラン
+            </h2>
+            <div style={{ display: "grid", gap: 10 }}>
+              {myPlans.map((p) => {
+                const hashUrl = `#/p/${p.readId}`; // そのままハッシュ遷移で開く
+                const date = p.savedAt ? new Date(p.savedAt) : null;
+                const when =
+                  date && !isNaN(date) ? date.toLocaleString() : "";
+                return (
+                  <div
+                    key={p.readId}
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr auto",
+                      gap: 10,
+                      alignItems: "center",
+                      border: "1px solid #e6eaef",
+                      borderRadius: 10,
+                      padding: "10px 12px",
+                      background: "#fff",
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontWeight: 600 }}>
+                        {p.title || "無題プラン"}
+                      </div>
+                      {when && (
+                        <div style={{ color: "#64748b", fontSize: 12 }}>
+                          {when}
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <a href={hashUrl} style={{ textDecoration: "none" }}>
+                        <button
+                          style={{
+                            padding: "6px 10px",
+                            borderRadius: 8,
+                            border: "1px solid #cbd5e1",
+                            background: "#f8fafc",
+                          }}
+                          title="閲覧ページを開く"
+                        >
+                          開く
+                        </button>
+                      </a>
+                      <button
+                        onClick={() => handleCopyUrl(p.readId)}
+                        style={{
+                          padding: "6px 10px",
+                          borderRadius: 8,
+                          border: "1px solid #cbd5e1",
+                          background: "#f8fafc",
+                        }}
+                        title="共有用リンクをコピー"
+                      >
+                        リンクをコピー
+                      </button>
+                      <button
+                        onClick={() => handleRemovePlan(p.readId)}
+                        style={{
+                          padding: "6px 10px",
+                          borderRadius: 8,
+                          border: "1px solid #fecaca",
+                          background: "#fff1f2",
+                          color: "#b91c1c",
+                        }}
+                        title="この一覧から削除（サーバからは削除されません）"
+                      >
+                        削除
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

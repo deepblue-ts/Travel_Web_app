@@ -5,6 +5,7 @@ import { Link as LinkIcon, ArrowLeft, Calendar, SendHorizonal, Loader2 } from 'l
 import moment from 'moment';
 import 'moment/locale/ja';
 import ItineraryMap from '../components/ItineraryMap';
+import { savePlan, makePlanUrl } from '../api/planstore';
 
 import {
   Wrapper,
@@ -42,7 +43,7 @@ const FallbackDisplay = ({ message }) => (
 const norm = (s) => String(s || '').replace(/\s+/g, '').toLowerCase();
 const makeKey = (day, name) => `${day}||${norm(name)}`;
 
-// 金額パース
+// 金額パース（文字列→数値JPY）
 const yen = (v) => {
   const n = parseInt(String(v ?? '').replace(/[^\d]/g, ''), 10);
   return Number.isFinite(n) ? n : 0;
@@ -63,10 +64,23 @@ function buildGmapsDirectionsUrl(origin, destination, transport) {
   return `https://www.google.com/maps/dir/?api=1&origin=${o}&destination=${d}&travelmode=${mode}`;
 }
 
+// 価格の安全取得：price_jpy（数値）→ fareYen（数値）→ 文字列 price/cost/fee をパース
+const getItemPriceJPY = (it) => {
+  if (Number.isFinite(it?.price_jpy)) return it.price_jpy;
+  if (Number.isFinite(it?.fareYen)) return it.fareYen;
+  const raw = it?.price ?? it?.cost ?? it?.fee ?? '';
+  const n = yen(raw);
+  return Number.isFinite(n) ? n : 0;
+};
+
 export default function PlanResult({ onBackToTop }) {
   const { plan, planJsonResult, error, loadingStatus, reviseItinerary } = usePlan();
   const [selected, setSelected] = useState(null); // { day, name }
   const [editText, setEditText] = useState('');
+
+  // 保存関連
+  const [savingPlan, setSavingPlan] = useState(false);
+  const [savedUrl, setSavedUrl] = useState('');
 
   moment.locale('ja');
 
@@ -103,13 +117,13 @@ export default function PlanResult({ onBackToTop }) {
     });
   }, [itinerary]);
 
-  // 見積合計：各アイテム（移動含む）を合算
+  // 見積合計：各アイテム（移動含む）を合算（price_jpy/ fareYen を最優先）
   const estimatedTotal = useMemo(
     () =>
       (itinerary || []).reduce(
         (sum, day) =>
           sum +
-          (day.schedule || []).reduce((s2, it) => s2 + yen(it.price), 0),
+          (day.schedule || []).reduce((s2, it) => s2 + getItemPriceJPY(it), 0),
         0
       ),
     [itinerary]
@@ -128,7 +142,7 @@ export default function PlanResult({ onBackToTop }) {
     return date.isValid() ? date.format('M月D日 (ddd)') : '日付不明';
   };
 
-  // ユーティリティ：トラベル項目か？
+  // トラベル項目か？
   const isTravel = (name, type) =>
     type === 'travel' || /移動|出発|帰路|到着/.test(String(name || ''));
 
@@ -139,6 +153,38 @@ export default function PlanResult({ onBackToTop }) {
     setSelected(null);
   };
 
+  // プラン保存
+  const onSavePlan = async () => {
+    try {
+      setSavingPlan(true);
+      const res = await savePlan({
+        title: title || '無題プラン',
+        // サーバには“プランJSON”なら何でも保存できる。ここでは結果全体を保存。
+        plan: planJsonResult,
+        // Topの一覧に出すメタ
+        meta: {
+          origin: plan?.origin,
+          destination: plan?.destination,
+          dates: plan?.dates,
+          transport: plan?.transport,
+          budget: plan?.budget,
+        },
+      });
+      const url = makePlanUrl(res.readId);
+      setSavedUrl(url);
+      try {
+        await navigator.clipboard.writeText(url);
+        alert('保存しました。URLをコピーしました！\n' + url);
+      } catch {
+        window.prompt('このURLをコピーしてください', url);
+      }
+    } catch (e) {
+      alert('保存に失敗しました: ' + (e?.message || e));
+    } finally {
+      setSavingPlan(false);
+    }
+  };
+
   return (
     <Wrapper>
       <ScheduleHighlightStyles />
@@ -147,7 +193,7 @@ export default function PlanResult({ onBackToTop }) {
         <Title>{title}</Title>
         <Introduction>{introduction}</Introduction>
 
-        {/* 予算サマリ（上部に表示） */}
+        {/* 予算サマリ */}
         <div
           style={{
             marginTop: 16,
@@ -171,6 +217,29 @@ export default function PlanResult({ onBackToTop }) {
               {variance.toLocaleString()} 円）
             </span>
           </div>
+        </div>
+
+        {/* 保存アクション */}
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 10 }}>
+          <button
+            onClick={onSavePlan}
+            disabled={savingPlan}
+            style={{
+              background: savingPlan ? '#94A3B8' : '#2563EB',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 8,
+              padding: '8px 12px',
+              cursor: savingPlan ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {savingPlan ? '保存中…' : 'このプランを保存'}
+          </button>
+          {savedUrl && (
+            <a href={savedUrl} target="_blank" rel="noreferrer" style={{ alignSelf: 'center', color: '#2563EB' }}>
+              保存したページを開く
+            </a>
+          )}
         </div>
       </Header>
 

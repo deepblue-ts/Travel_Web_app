@@ -1,20 +1,16 @@
 /**
- * server/routes.js — すべての公開APIルート定義
+ * server/routes.js — すべての公開APIルート定義（完全版）
  * ------------------------------------------------------------
- * 役割:
- *  - 既存の API パスを変更せずに Express へルーティングを一括登録
- *  - 実処理は services 層に委譲（LLM呼び出し / ジオコーディング / 運賃見積もり / URL補完 など）
- *  - ExcelLogger を使ったログ連携系エンドポイントもここに集約
- *
- * 外部からは registerRoutes(app, config) を呼び出すだけでOK。
- * config には openai / 各種キー・キャッシュパスを渡す（server.js 参照）。
  */
 
 import fs from 'fs/promises';
 import path from 'path';
+import crypto from 'crypto';
+
+import { prisma } from './prisma/client.js';
+import { ExcelLogger } from './excelLogger.js';
 
 import {
-  // 汎用ユーティリティ & LLM/Geocode/URL 補完ロジック
   createLLMHandler,
   getAreasWithCache,
   geocodeViaGoogle,
@@ -23,7 +19,11 @@ import {
   mergeGeocodesIntoItinerary,
   persistItineraryAndExport,
   estimateFare,
-} from './services.js';
+  normalizeDayPlanCosts,
+  rebudgetDayPlanIfOverBudget,
+  calcDayTotalJPY,
+  finalizeTripBudgetIfNeeded,
+} from './services/index.js';
 
 import {
   areaSystemPrompt,
@@ -35,7 +35,9 @@ import {
   revisePlanSystemPrompt,
 } from './prompts.js';
 
-import { ExcelLogger } from './excelLogger.js';
+// 共有ユーティリティ（Neon保存API用）
+const sha256 = (s) => crypto.createHash('sha256').update(s).digest('hex');
+const makeId = (n) => crypto.randomBytes(n).toString('base64url');
 
 export async function registerRoutes(app, cfg) {
   const {
@@ -98,14 +100,24 @@ export async function registerRoutes(app, cfg) {
   );
 
   // ========= /api/create-day-plans =========
+  // days/batchInput → 1日プラン生成 → 日別予算チェック → geocode → 旅行全体を 80〜100% に最終調整
   app.post('/api/create-day-plans', async (req, res) => {
-    const { planId, constraints } = req.body || {};
-    const days = Array.isArray(req.body?.batchInput)
-      ? req.body.batchInput
-      : req.body?.days;
-    if (!Array.isArray(days)) {
+    const {
+      planId,
+      constraints,
+      finalizeBudget = true,
+      targetMinRatio = 0.8,
+      targetMaxRatio = 1.0,
+      // 合計予算（フロントから飛んでくる場合がある）
+      budget: requestTotalBudget,
+    } = req.body || {};
+
+    const daysReq = Array.isArray(req.body?.batchInput) ? req.body.batchInput : req.body?.days;
+    if (!Array.isArray(daysReq)) {
       return res.status(400).json({ error: 'days/batchInput は配列である必要があります' });
     }
+
+    const daysCount = daysReq.length || 1;
 
     const pickDestination = (arr) => {
       for (const d of arr || []) {
@@ -114,8 +126,42 @@ export async function registerRoutes(app, cfg) {
       }
       return '';
     };
-    const destination = pickDestination(days);
 
+    // 代表の planConditions を構築（budgetPerDay が無い場合は合計予算から自動算出）
+    const pickPlanConditions = (arr) => {
+      const firstPC = (arr || []).find(d => d?.planConditions)?.planConditions || {};
+      const requestLevel = constraints || {};
+
+      const explicitPerDay =
+        Number(firstPC?.budgetPerDay ?? requestLevel?.budgetPerDay);
+
+      // 合計予算（リクエスト or day内 or constraints）を拾う
+      const totalBudgetCandidate = [
+        requestTotalBudget,
+        firstPC?.budget,
+        requestLevel?.budget,
+      ].map((v) => Number(v)).find((n) => Number.isFinite(n) && n > 0);
+
+      let budgetPerDay = Number.isFinite(explicitPerDay) && explicitPerDay > 0
+        ? explicitPerDay
+        : undefined;
+
+      if (!budgetPerDay && Number.isFinite(totalBudgetCandidate)) {
+        budgetPerDay = Math.floor(totalBudgetCandidate / daysCount);
+      }
+
+      return {
+        ...firstPC,
+        destination: firstPC?.destination || pickDestination(arr),
+        // ここで必ず budgetPerDay を確定させる（最終仕上げが動く）
+        ...(budgetPerDay ? { budgetPerDay } : {}),
+      };
+    };
+
+    const destination = pickDestination(daysReq);
+    const planConditions = pickPlanConditions(daysReq);
+
+    // LLM 呼び出し（raw JSON を受ける）
     const llmDayPlanner = createLLMHandler(
       openai,
       createDayPlanSystemPrompt,
@@ -125,35 +171,205 @@ export async function registerRoutes(app, cfg) {
     );
 
     const createOne = async (dayData) => {
-      const body = { ...dayData, constraints: dayData.constraints || constraints || {} };
-      const json = await llmDayPlanner.__call({ body, planId });
-      return json;
+      // constraints は day ごと > リクエスト全体 の順で上書き
+      const body = {
+        ...dayData,
+        constraints: { ...(constraints || {}), ...(dayData.constraints || {}) },
+      };
+
+      // 1) 下書き生成
+      const draft = await llmDayPlanner.__call({ body, planId });
+
+      // 2) 価格正規化＆合計算出
+      let plan = normalizeDayPlanCosts(draft);
+
+      // 3) 予算があればチェック→超過時は自動リバジェット（最大2回）
+      const budgetPerDay =
+        Number(body?.constraints?.budgetPerDay ??
+               body?.planConditions?.budgetPerDay ??
+               planConditions?.budgetPerDay);
+
+      if (Number.isFinite(budgetPerDay) && budgetPerDay > 0) {
+        const total = calcDayTotalJPY(plan);
+        if (total > budgetPerDay) {
+          plan = await rebudgetDayPlanIfOverBudget({
+            openai,
+            systemPrompt: createDayPlanSystemPrompt,
+            userBody: body,
+            draftPlan: plan,
+            budgetPerDay,
+            tries: 2,
+          });
+          plan = normalizeDayPlanCosts(plan);
+        }
+      }
+      return plan;
     };
 
     try {
       // 1) 並列生成
-      const settled = await Promise.allSettled(days.map((d) => createOne(d)));
+      const settled = await Promise.allSettled(daysReq.map((d) => createOne(d)));
       const results = settled.map((r, i) =>
         r.status === 'fulfilled'
           ? { ok: true, plan: r.value }
-          : { ok: false, day: days[i]?.day, error: r.reason?.message }
+          : { ok: false, day: daysReq[i]?.day, error: r.reason?.message }
       );
 
       // 2) 暫定 itinerary
-      const itinerary = results
+      let itinerary = results
         .filter((r) => r.ok && r.plan && Array.isArray(r.plan.schedule))
         .map((r) => r.plan);
 
-      // 3) geocode（URL 補完込み）
-      const items = [];
-      for (const d of itinerary) {
-        for (const s of d.schedule || []) {
-          items.push({
-            name: s.activity_name || s.name,
-            area: d.area,
-            day: d.day,
-            time: s.time,
+      // 3) geocode（URL 補完込み／初回）
+      const collectItems = (its) => {
+        const items = [];
+        for (const d of its || []) {
+          for (const s of d.schedule || []) {
+            items.push({ name: s.activity_name || s.name, area: d.area, day: d.day, time: s.time });
+          }
+        }
+        return items;
+      };
+      const items1 = collectItems(itinerary);
+      if (items1.length > 0) {
+        try {
+          const geos = await geocodeBatchInternal({
+            destination,
+            items: items1,
+            planId,
+            GEOCODE_CACHE_FILE,
+            GOOGLE_MAPS_API_KEY,
+            GOOGLE_MAPS_LANG,
+            GOOGLE_MAPS_REGION,
           });
+          mergeGeocodesIntoItinerary(destination, itinerary, geos);
+        } catch (e) {
+          console.warn('geocodeBatchInternal failed (ignored in create-day-plans stage1):', e.message);
+        }
+      }
+
+      // 4) 旅行全体の最終予算調整（80〜100%）
+      let finalReport = null;
+      if (finalizeBudget) {
+        try {
+          const { itinerary: fin, tripTotal } = await finalizeTripBudgetIfNeeded({
+            openai,
+            itinerary,
+            planConditions, // ← ここで budgetPerDay を“必ず”入れてある
+            targetMinRatio,
+            targetMaxRatio,
+          });
+          itinerary = fin;
+
+          // 4.1 最終調整後に geocode をもう一度（URL補完も）
+          const items2 = collectItems(itinerary);
+          if (items2.length > 0) {
+            try {
+              const geos2 = await geocodeBatchInternal({
+                destination,
+                items: items2,
+                planId,
+                GEOCODE_CACHE_FILE,
+                GOOGLE_MAPS_API_KEY,
+                GOOGLE_MAPS_LANG,
+                GOOGLE_MAPS_REGION,
+              });
+              mergeGeocodesIntoItinerary(destination, itinerary, geos2);
+            } catch (e) {
+              console.warn('geocodeBatchInternal failed (ignored in create-day-plans stage2):', e.message);
+            }
+          }
+
+          const perDay = Number(planConditions?.budgetPerDay);
+          const totalBudget = Number.isFinite(perDay) ? perDay * itinerary.length : null;
+          finalReport = {
+            tripTotal,
+            totalBudget,
+            minTarget: Number.isFinite(totalBudget) ? Math.floor(totalBudget * targetMinRatio) : null,
+            maxTarget: Number.isFinite(totalBudget) ? Math.floor(totalBudget * targetMaxRatio) : null,
+          };
+        } catch (e) {
+          console.warn('finalizeTripBudgetIfNeeded failed (ignored):', e.message);
+        }
+      }
+
+      // 5) 保存＆Excel再出力（失敗は握りつぶす）
+      let saved = null;
+      try {
+        saved = await persistItineraryAndExport(planId, itinerary, {});
+      } catch (e) {
+        console.warn('persist/export failed (ignored):', e.message);
+      }
+
+      // 6) 予算サマリー
+      const budgetSummaries = itinerary.map(d => {
+        const total = calcDayTotalJPY(d);
+        const budgetPerDay =
+          Number(d?.budgetPerDay ??
+                 d?.constraints?.budgetPerDay ??
+                 planConditions?.budgetPerDay);
+        return {
+          day: d.day,
+          date: d.date,
+          total_cost_jpy: total,
+          budgetPerDay: Number.isFinite(budgetPerDay) ? budgetPerDay : null,
+          under_budget: Number.isFinite(budgetPerDay) ? total <= budgetPerDay : null,
+        };
+      });
+
+      res.json({
+        results,
+        itinerary,
+        geocoded: (items1.length > 0),
+        destination,
+        saved: !!saved,
+        xlsxPath: saved?.xlsxPath || null,
+        budgetSummaries,
+        finalReport,
+      });
+    } catch (error) {
+      console.error('create-day-plans error:', error);
+      res.status(500).json({ error: `複数日プラン作成中にエラー: ${error?.message}` });
+    }
+  });
+
+  // ========= 旅行全体の予算最終調整だけを別途呼びたい場合 =========
+  app.post('/api/finalize-itinerary', async (req, res) => {
+    try {
+      const { planId, planConditions = {}, itinerary = [], targetMinRatio = 0.8, targetMaxRatio = 1.0 } = req.body || {};
+      if (!Array.isArray(itinerary) || itinerary.length === 0) {
+        return res.status(400).json({ error: 'itinerary は配列である必要があります' });
+      }
+
+      const destination =
+        planConditions?.destination ||
+        itinerary?.[0]?.destination ||
+        '';
+
+      // budgetPerDay が無ければ合計予算から補完
+      const days = itinerary.length || 1;
+      if (!Number.isFinite(planConditions?.budgetPerDay)) {
+        const totalBudget = Number(req.body?.budget ?? planConditions?.budget);
+        if (Number.isFinite(totalBudget) && totalBudget > 0) {
+          planConditions.budgetPerDay = Math.floor(totalBudget / days);
+        }
+      }
+
+      const norm = itinerary.map(normalizeDayPlanCosts);
+
+      const { itinerary: fin, tripTotal } = await finalizeTripBudgetIfNeeded({
+        openai,
+        itinerary: norm,
+        planConditions,
+        targetMinRatio,
+        targetMaxRatio,
+      });
+
+      // geocode & URL 補完
+      const items = [];
+      for (const d of fin || []) {
+        for (const s of d.schedule || []) {
+          items.push({ name: s.activity_name || s.name, area: d.area, day: d.day, time: s.time });
         }
       }
       if (items.length > 0) {
@@ -167,41 +383,34 @@ export async function registerRoutes(app, cfg) {
             GOOGLE_MAPS_LANG,
             GOOGLE_MAPS_REGION,
           });
-          mergeGeocodesIntoItinerary(destination, itinerary, geos);
+          mergeGeocodesIntoItinerary(destination, fin, geos);
         } catch (e) {
-          console.warn(
-            'geocodeBatchInternal failed (ignored in create-day-plans):',
-            e.message
-          );
+          console.warn('geocodeBatchInternal failed (ignored in finalize-itinerary):', e.message);
         }
       }
 
-      // 4) 保存＆Excel再出力（失敗は握りつぶす）
-      let saved = null;
-      try {
-        saved = await persistItineraryAndExport(planId, itinerary, {});
-      } catch (e) {
-        console.warn('persist/export failed (ignored):', e.message);
+      // 保存（任意）
+      if (planId) {
+        try { await persistItineraryAndExport(planId, fin, {}); } catch {}
       }
 
+      const perDay = Number(planConditions?.budgetPerDay);
+      const totalBudget = Number.isFinite(perDay) ? perDay * fin.length : null;
+
       res.json({
-        results,
-        itinerary,
-        geocoded: items.length > 0,
-        destination,
-        saved: !!saved,
-        xlsxPath: saved?.xlsxPath || null,
+        itinerary: fin,
+        tripTotal,
+        totalBudget,
+        minTarget: Number.isFinite(totalBudget) ? Math.floor(totalBudget * targetMinRatio) : null,
+        maxTarget: Number.isFinite(totalBudget) ? Math.floor(totalBudget * targetMaxRatio) : null,
       });
-    } catch (error) {
-      console.error('create-day-plans error:', error);
-      res
-        .status(500)
-        .json({ error: `複数日プラン作成中にエラー: ${error?.message}` });
+    } catch (e) {
+      console.error('finalize-itinerary error:', e);
+      res.status(500).json({ error: e?.message || 'finalize-itinerary failed' });
     }
   });
 
   // ========= /api/estimate-fare =========
-  // POST 版（既存）
   app.post('/api/estimate-fare', async (req, res) => {
     try {
       const { origin, destination, transport = 'public' } = req.body || {};
@@ -220,14 +429,11 @@ export async function registerRoutes(app, cfg) {
     }
   });
 
-  // GET 版（CDNの GET リライトやブラウザ直叩き対策）
   app.get('/api/estimate-fare', async (req, res) => {
     try {
       const { origin, destination, transport = 'public' } = req.query || {};
       if (!origin || !destination) {
-        return res
-          .status(400)
-          .json({ error: 'origin/destination required (query)' });
+        return res.status(400).json({ error: 'origin/destination required (query)' });
       }
       const out = await estimateFare({
         origin: String(origin),
@@ -237,9 +443,7 @@ export async function registerRoutes(app, cfg) {
       });
       res.json(out);
     } catch (e) {
-      res
-        .status(500)
-        .json({ error: e.message || 'estimate-fare failed (GET)' });
+      res.status(500).json({ error: e.message || 'estimate-fare failed (GET)' });
     }
   });
 
@@ -263,18 +467,37 @@ export async function registerRoutes(app, cfg) {
         planId,
       });
 
-      const revised = json?.revised_itinerary || [];
+      let revised = json?.revised_itinerary || [];
       if (!Array.isArray(revised) || revised.length === 0) {
-        return res
-          .status(500)
-          .json({ error: 'empty revised_itinerary', raw: json });
+        return res.status(500).json({ error: 'empty revised_itinerary', raw: json });
       }
 
-      // 必要なら geocode（戻り値はそのまま）
+      // 価格正規化＋予算検算（必要なら再調整）
+      const budgetPerDay = Number(planConditions?.budgetPerDay);
+      revised = await Promise.all(revised.map(async (d) => {
+        let norm = normalizeDayPlanCosts(d);
+        if (Number.isFinite(budgetPerDay) && budgetPerDay > 0) {
+          const total = calcDayTotalJPY(norm);
+          if (total > budgetPerDay) {
+            norm = await rebudgetDayPlanIfOverBudget({
+              openai,
+              systemPrompt: revisePlanSystemPrompt,
+              userBody: { planId, planConditions, itinerary, instructions },
+              draftPlan: norm,
+              budgetPerDay,
+              tries: 2,
+            });
+            norm = normalizeDayPlanCosts(norm);
+          }
+        }
+        return norm;
+      }));
+
+      // geocode（戻り値はそのまま）
       const items = [];
       for (const d of revised) {
         for (const s of d?.schedule || []) {
-          items.push({ name: s.activity_name, area: d.area });
+          items.push({ name: s.activity_name || s.name, area: d.area });
         }
       }
       await geocodeBatchInternal({
@@ -300,7 +523,7 @@ export async function registerRoutes(app, cfg) {
       const { query } = req.body || {};
       if (!query) return res.status(400).json({ error: 'query required' });
 
-      let hit = await geocodeViaGoogle(query, {
+    let hit = await geocodeViaGoogle(query, {
         GOOGLE_MAPS_API_KEY,
         GOOGLE_MAPS_LANG,
         GOOGLE_MAPS_REGION,
@@ -347,9 +570,7 @@ export async function registerRoutes(app, cfg) {
     try {
       const { destination, items, planId } = req.body || {};
       if (!Array.isArray(items)) {
-        return res
-          .status(400)
-          .json({ error: 'items は配列である必要があります' });
+        return res.status(400).json({ error: 'items は配列である必要があります' });
       }
 
       const results = await geocodeBatchInternal({
@@ -375,6 +596,100 @@ export async function registerRoutes(app, cfg) {
         error: e.message || 'geocode-batch failed',
         cacheDir: CACHE_DIR,
       });
+    }
+  });
+
+  // ========= ★ Neon(Postgres) に“プラン本体”を保存するAPI =========
+  app.post('/api/plan-saves', async (req, res) => {
+    try {
+      const { title, plan, meta } = req.body || {};
+      if (!plan) return res.status(400).json({ error: 'plan is required' });
+
+      const readId = makeId(6);
+      const editToken = makeId(24);
+
+      await prisma.plan.create({
+        data: {
+          readId,
+          editTokenHash: sha256(editToken),
+          title: title ?? '無題プラン',
+          planJson: plan,
+          meta: meta ?? {},
+          isPublic: true,
+        }
+      });
+
+      res.json({ readId, readUrl: `/p/${readId}`, editToken });
+    } catch (e) {
+      console.error('plan-saves POST error:', e);
+      res.status(500).json({ error: e.message || 'save failed' });
+    }
+  });
+
+  app.get('/api/plan-saves/:readId', async (req, res) => {
+    try {
+      const row = await prisma.plan.findUnique({ where: { readId: req.params.readId }});
+      if (!row) return res.status(404).json({ error: 'not found' });
+
+      res.json({
+        title: row.title,
+        plan: row.planJson,
+        meta: row.meta,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt
+      });
+    } catch (e) {
+      res.status(500).json({ error: e.message || 'load failed' });
+    }
+  });
+
+  app.put('/api/plan-saves/:readId', async (req, res) => {
+    try {
+      const t = req.header('Edit-Token');
+      if (!t) return res.status(401).json({ error: 'missing Edit-Token' });
+
+      const row = await prisma.plan.findUnique({
+        where: { readId: req.params.readId },
+        select: { id: true, editTokenHash: true }
+      });
+      if (!row) return res.status(404).json({ error: 'not found' });
+      if (sha256(t) !== row.editTokenHash) {
+        return res.status(403).json({ error: 'invalid token' });
+      }
+
+      const { title, plan, meta } = req.body || {};
+      await prisma.plan.update({
+        where: { id: row.id },
+        data: {
+          ...(title !== undefined ? { title } : {}),
+          ...(plan  !== undefined ? { planJson: plan } : {}),
+          ...(meta  !== undefined ? { meta } : {})
+        }
+      });
+      res.json({ ok: true });
+    } catch (e) {
+      res.status(500).json({ error: e.message || 'update failed' });
+    }
+  });
+
+  app.delete('/api/plan-saves/:readId', async (req, res) => {
+    try {
+      const t = req.header('Edit-Token');
+      if (!t) return res.status(401).json({ error: 'missing Edit-Token' });
+
+      const row = await prisma.plan.findUnique({
+        where: { readId: req.params.readId },
+        select: { id: true, editTokenHash: true }
+      });
+      if (!row) return res.status(404).json({ error: 'not found' });
+      if (sha256(t) !== row.editTokenHash) {
+        return res.status(403).json({ error: 'invalid token' });
+      }
+
+      await prisma.plan.delete({ where: { id: row.id } });
+      res.json({ ok: true });
+    } catch (e) {
+      res.status(500).json({ error: e.message || 'delete failed' });
     }
   });
 
@@ -457,16 +772,10 @@ export async function registerRoutes(app, cfg) {
     try {
       const { planId, finalPlan } = req.body || {};
       const logger = new ExcelLogger(planId);
-      try {
-        await logger.writeJson('finalPlan', finalPlan);
-      } catch {}
+      try { await logger.writeJson('finalPlan', finalPlan); } catch {}
       let filePath = null;
-      try {
-        filePath = await logger.exportXlsx(finalPlan);
-      } catch {}
-      try {
-        await ExcelLogger.updateStatus(planId, 'Done');
-      } catch {}
+      try { filePath = await logger.exportXlsx(finalPlan); } catch {}
+      try { await ExcelLogger.updateStatus(planId, 'Done'); } catch {}
       res.json({ ok: true, filePath });
     } catch (e) {
       res.status(500).json({ error: e.message });
@@ -507,9 +816,7 @@ export async function registerRoutes(app, cfg) {
     try {
       const { planId } = req.query || {};
       if (!planId) return res.status(400).json({ error: 'planId is required' });
-      const { meta, logs, finalPlan } = await ExcelLogger.readState(
-        String(planId)
-      );
+      const { meta, logs, finalPlan } = await ExcelLogger.readState(String(planId));
       res.json({ ok: true, meta, logs, finalPlan });
     } catch (e) {
       res.status(500).json({ error: e.message });

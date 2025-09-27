@@ -1,5 +1,305 @@
 [
   {
+    "planId": "20250927-171927-大阪-pmhh8a",
+    "createdAt": "2025-09-27T08:19:27.415Z",
+    "status": "Done",
+    "planPath": "20250927-171927-大阪-pmhh8a\\plan.xlsx",
+    "meta": {
+      "planId": "20250927-171927-大阪-pmhh8a",
+      "createdAt": "2025-09-27T08:19:27.415Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "大阪",
+      "dates": {
+        "start": "2025-09-29",
+        "end": "2025-09-30"
+      },
+      "duration": 2,
+      "budgetPerDay": 60000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250927-171006-大阪-fasqvs",
+    "createdAt": "2025-09-27T08:10:06.379Z",
+    "status": "Done",
+    "planPath": "20250927-171006-大阪-fasqvs\\plan.xlsx",
+    "meta": {
+      "planId": "20250927-171006-大阪-fasqvs",
+      "createdAt": "2025-09-27T08:10:06.379Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "大阪",
+      "dates": {
+        "start": "2025-09-29",
+        "end": "2025-09-30"
+      },
+      "duration": 2,
+      "budgetPerDay": 60000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250927-165525-奈良-2xexga",
+    "createdAt": "2025-09-27T07:55:25.897Z",
+    "status": "Done",
+    "planPath": "20250927-165525-奈良-2xexga\\plan.xlsx",
+    "meta": {
+      "planId": "20250927-165525-奈良-2xexga",
+      "createdAt": "2025-09-27T07:55:25.897Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "奈良",
+      "dates": {
+        "start": "2025-09-29",
+        "end": "2025-09-30"
+      },
+      "duration": 2,
+      "budgetPerDay": 62500,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250927-164622-大宮-8rpk72",
+    "createdAt": "2025-09-27T07:46:22.990Z",
+    "status": "Done",
+    "planPath": "20250927-164622-大宮-8rpk72\\plan.xlsx",
+    "meta": {
+      "planId": "20250927-164622-大宮-8rpk72",
+      "createdAt": "2025-09-27T07:46:22.990Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "大宮",
+      "dates": {
+        "start": "2025-10-08",
+        "end": "2025-10-09"
+      },
+      "duration": 2,
+      "budgetPerDay": 65000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250927-163514-大阪-0mzjh5",
+    "createdAt": "2025-09-27T07:35:14.914Z",
+    "status": "Done",
+    "planPath": "20250927-163514-大阪-0mzjh5\\plan.xlsx",
+    "meta": {
+      "planId": "20250927-163514-大阪-0mzjh5",
+      "createdAt": "2025-09-27T07:35:14.914Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "大阪",
+      "dates": {
+        "start": "2025-09-29",
+        "end": "2025-09-30"
+      },
+      "duration": 2,
+      "budgetPerDay": 65000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250927-155939-大阪-pyxvw6",
+    "createdAt": "2025-09-27T06:59:39.745Z",
+    "status": "Done",
+    "planPath": "20250927-155939-大阪-pyxvw6\\plan.xlsx",
+    "meta": {
+      "planId": "20250927-155939-大阪-pyxvw6",
+      "createdAt": "2025-09-27T06:59:39.745Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "大阪",
+      "dates": {
+        "start": "2025-09-29",
+        "end": "2025-09-30"
+      },
+      "duration": 2,
+      "budgetPerDay": 65000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250925-192600-京都-32j7bz",
+    "createdAt": "2025-09-25T10:26:00.966Z",
+    "status": "Done",
+    "planPath": "20250925-192600-京都-32j7bz\\plan.xlsx",
+    "meta": {
+      "planId": "20250925-192600-京都-32j7bz",
+      "createdAt": "2025-09-25T10:26:00.966Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "京都",
+      "dates": {
+        "start": "2025-09-29",
+        "end": "2025-09-30"
+      },
+      "duration": 2,
+      "budgetPerDay": 55000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250925-181057-京都-zauxrg",
+    "createdAt": "2025-09-25T09:10:57.654Z",
+    "status": "Done",
+    "planPath": "20250925-181057-京都-zauxrg\\plan.xlsx",
+    "meta": {
+      "planId": "20250925-181057-京都-zauxrg",
+      "createdAt": "2025-09-25T09:10:57.654Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "京都",
+      "dates": {
+        "start": "2025-09-26",
+        "end": "2025-09-27"
+      },
+      "duration": 2,
+      "budgetPerDay": 72500,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250925-180139-京都-isggr1",
+    "createdAt": "2025-09-25T09:01:39.021Z",
+    "status": "Done",
+    "planPath": "20250925-180139-京都-isggr1\\plan.xlsx",
+    "meta": {
+      "planId": "20250925-180139-京都-isggr1",
+      "createdAt": "2025-09-25T09:01:39.021Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "京都",
+      "dates": {
+        "start": "2025-09-26",
+        "end": "2025-09-27"
+      },
+      "duration": 2,
+      "budgetPerDay": 50000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250925-175235-大阪-w7wetp",
+    "createdAt": "2025-09-25T08:52:35.853Z",
+    "status": "Done",
+    "planPath": "20250925-175235-大阪-w7wetp\\plan.xlsx",
+    "meta": {
+      "planId": "20250925-175235-大阪-w7wetp",
+      "createdAt": "2025-09-25T08:52:35.853Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "大阪",
+      "dates": {
+        "start": "2025-10-16",
+        "end": "2025-10-17"
+      },
+      "duration": 2,
+      "budgetPerDay": 75000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250925-173741-大阪-mbxeic",
+    "createdAt": "2025-09-25T08:37:41.333Z",
+    "status": "Done",
+    "planPath": "20250925-173741-大阪-mbxeic\\plan.xlsx",
+    "meta": {
+      "planId": "20250925-173741-大阪-mbxeic",
+      "createdAt": "2025-09-25T08:37:41.333Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "大阪",
+      "dates": {
+        "start": "2025-10-09",
+        "end": "2025-10-10"
+      },
+      "duration": 2,
+      "budgetPerDay": 67500,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250925-172952-大阪-8lu1ji",
+    "createdAt": "2025-09-25T08:29:52.681Z",
+    "status": "Done",
+    "planPath": "20250925-172952-大阪-8lu1ji\\plan.xlsx",
+    "meta": {
+      "planId": "20250925-172952-大阪-8lu1ji",
+      "createdAt": "2025-09-25T08:29:52.681Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "大阪",
+      "dates": {
+        "start": "2025-09-26",
+        "end": "2025-09-27"
+      },
+      "duration": 2,
+      "budgetPerDay": 67500,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250925-170830-大阪-i2i31v",
+    "createdAt": "2025-09-25T08:08:30.983Z",
+    "status": "Done",
+    "planPath": "20250925-170830-大阪-i2i31v\\plan.xlsx",
+    "meta": {
+      "planId": "20250925-170830-大阪-i2i31v",
+      "createdAt": "2025-09-25T08:08:30.983Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "大阪",
+      "dates": {
+        "start": "2025-09-30",
+        "end": "2025-10-01"
+      },
+      "duration": 2,
+      "budgetPerDay": 65000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250918-133505-大阪-x0fh0e",
+    "createdAt": "2025-09-18T04:35:05.997Z",
+    "status": "Done",
+    "planPath": "20250918-133505-大阪-x0fh0e\\plan.xlsx",
+    "meta": {
+      "planId": "20250918-133505-大阪-x0fh0e",
+      "createdAt": "2025-09-18T04:35:05.997Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "大阪",
+      "dates": {
+        "start": "2025-09-24",
+        "end": "2025-09-25"
+      },
+      "duration": 2,
+      "budgetPerDay": 50000,
+      "transport": "public"
+    }
+  },
+  {
+    "planId": "20250918-133306-大阪-9pk60j",
+    "createdAt": "2025-09-18T04:33:06.667Z",
+    "status": "Done",
+    "planPath": "20250918-133306-大阪-9pk60j\\plan.xlsx",
+    "meta": {
+      "planId": "20250918-133306-大阪-9pk60j",
+      "createdAt": "2025-09-18T04:33:06.667Z",
+      "status": "In Progress",
+      "origin": "東京",
+      "destination": "大阪",
+      "dates": {
+        "start": "2025-09-24",
+        "end": "2025-09-25"
+      },
+      "duration": 2,
+      "budgetPerDay": 50000,
+      "transport": "public"
+    }
+  },
+  {
     "planId": "20250918-122950-大阪-2n13mx",
     "createdAt": "2025-09-18T03:29:50.355Z",
     "status": "Done",
