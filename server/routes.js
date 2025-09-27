@@ -1,5 +1,5 @@
 /**
- * server/routes.js — すべての公開APIルート定義（完全版）
+ * server/routes.js — すべての公開APIルート定義（完全版・詳細トレース対応）
  * ------------------------------------------------------------
  */
 
@@ -34,6 +34,14 @@ import {
   createDayPlanSystemPrompt,
   revisePlanSystemPrompt,
 } from './prompts.js';
+
+import {
+  traceMark,
+  traceStep,
+  traceError,
+  traceTimed,
+  traceSnapshot,
+} from './services/trace.js';
 
 // 共有ユーティリティ（Neon保存API用）
 const sha256 = (s) => crypto.createHash('sha256').update(s).digest('hex');
@@ -100,24 +108,24 @@ export async function registerRoutes(app, cfg) {
   );
 
   // ========= /api/create-day-plans =========
-  // days/batchInput → 1日プラン生成 → 日別予算チェック → geocode → 旅行全体を 80〜100% に最終調整
   app.post('/api/create-day-plans', async (req, res) => {
     const {
       planId,
       constraints,
       finalizeBudget = true,
       targetMinRatio = 0.8,
-      targetMaxRatio = 1.0,
-      // 合計予算（フロントから飛んでくる場合がある）
-      budget: requestTotalBudget,
+      targetMaxRatio = 1.0
     } = req.body || {};
-
     const daysReq = Array.isArray(req.body?.batchInput) ? req.body.batchInput : req.body?.days;
+
+    await traceMark(planId, 'create-day-plans', 'start', {
+      bodyKeys: Object.keys(req.body || {})
+    });
+
     if (!Array.isArray(daysReq)) {
+      await traceError(planId, 'create-day-plans:validate', new Error('days/batchInput must be array'), { daysReq });
       return res.status(400).json({ error: 'days/batchInput は配列である必要があります' });
     }
-
-    const daysCount = daysReq.length || 1;
 
     const pickDestination = (arr) => {
       for (const d of arr || []) {
@@ -126,42 +134,20 @@ export async function registerRoutes(app, cfg) {
       }
       return '';
     };
-
-    // 代表の planConditions を構築（budgetPerDay が無い場合は合計予算から自動算出）
     const pickPlanConditions = (arr) => {
-      const firstPC = (arr || []).find(d => d?.planConditions)?.planConditions || {};
-      const requestLevel = constraints || {};
-
-      const explicitPerDay =
-        Number(firstPC?.budgetPerDay ?? requestLevel?.budgetPerDay);
-
-      // 合計予算（リクエスト or day内 or constraints）を拾う
-      const totalBudgetCandidate = [
-        requestTotalBudget,
-        firstPC?.budget,
-        requestLevel?.budget,
-      ].map((v) => Number(v)).find((n) => Number.isFinite(n) && n > 0);
-
-      let budgetPerDay = Number.isFinite(explicitPerDay) && explicitPerDay > 0
-        ? explicitPerDay
-        : undefined;
-
-      if (!budgetPerDay && Number.isFinite(totalBudgetCandidate)) {
-        budgetPerDay = Math.floor(totalBudgetCandidate / daysCount);
-      }
-
+      const first = (arr || []).find(d => d?.planConditions)?.planConditions || {};
+      const inferredBudget = Number(first?.budgetPerDay ?? constraints?.budgetPerDay);
       return {
-        ...firstPC,
-        destination: firstPC?.destination || pickDestination(arr),
-        // ここで必ず budgetPerDay を確定させる（最終仕上げが動く）
-        ...(budgetPerDay ? { budgetPerDay } : {}),
+        ...first,
+        destination: first?.destination || pickDestination(arr),
+        budgetPerDay: Number.isFinite(inferredBudget) ? inferredBudget : undefined,
       };
     };
 
     const destination = pickDestination(daysReq);
     const planConditions = pickPlanConditions(daysReq);
+    await traceSnapshot(planId, 'create-day-plans:context', 'planConditions', planConditions);
 
-    // LLM 呼び出し（raw JSON を受ける）
     const llmDayPlanner = createLLMHandler(
       openai,
       createDayPlanSystemPrompt,
@@ -171,56 +157,87 @@ export async function registerRoutes(app, cfg) {
     );
 
     const createOne = async (dayData) => {
-      // constraints は day ごと > リクエスト全体 の順で上書き
-      const body = {
-        ...dayData,
-        constraints: { ...(constraints || {}), ...(dayData.constraints || {}) },
-      };
+      const body = { ...dayData, constraints: { ...(constraints || {}), ...(dayData.constraints || {}) } };
 
-      // 1) 下書き生成
-      const draft = await llmDayPlanner.__call({ body, planId });
+      // 1) LLM 下書き
+      const draft = await traceTimed(
+        planId,
+        `create-day-plans:llm:call:day${dayData?.day ?? ''}`,
+        () => llmDayPlanner.__call({ body, planId }),
+        { before: body }
+      );
 
-      // 2) 価格正規化＆合計算出
-      let plan = normalizeDayPlanCosts(draft);
+      // 2) 価格正規化
+      let plan = await traceTimed(
+        planId,
+        `create-day-plans:price-normalize:day${dayData?.day ?? ''}`,
+        () => Promise.resolve(normalizeDayPlanCosts(draft)),
+        { before: { draftSample: (draft?.schedule || []).slice(0, 3) } }
+      );
 
-      // 3) 予算があればチェック→超過時は自動リバジェット（最大2回）
-      const budgetPerDay =
-        Number(body?.constraints?.budgetPerDay ??
-               body?.planConditions?.budgetPerDay ??
-               planConditions?.budgetPerDay);
-
+      // 3) 日別予算超過ならリバジェット
+      const budgetPerDay = Number(body?.constraints?.budgetPerDay ?? body?.planConditions?.budgetPerDay);
       if (Number.isFinite(budgetPerDay) && budgetPerDay > 0) {
-        const total = calcDayTotalJPY(plan);
-        if (total > budgetPerDay) {
-          plan = await rebudgetDayPlanIfOverBudget({
-            openai,
-            systemPrompt: createDayPlanSystemPrompt,
-            userBody: body,
-            draftPlan: plan,
-            budgetPerDay,
-            tries: 2,
-          });
+        const total0 = calcDayTotalJPY(plan);
+        await traceStep(planId, `create-day-plans:budget-check:day${dayData?.day ?? ''}`, {
+          input: { budgetPerDay, total0 },
+          output: null
+        });
+
+        if (total0 > budgetPerDay) {
+          plan = await traceTimed(
+            planId,
+            `create-day-plans:rebudget:day${dayData?.day ?? ''}`,
+            () => rebudgetDayPlanIfOverBudget({
+              openai,
+              systemPrompt: createDayPlanSystemPrompt,
+              userBody: body,
+              draftPlan: plan,
+              budgetPerDay,
+              tries: 2,
+            }),
+            { before: { totalBefore: total0, budgetPerDay } }
+          );
           plan = normalizeDayPlanCosts(plan);
+          const total1 = calcDayTotalJPY(plan);
+          await traceStep(planId, `create-day-plans:rebudget:result:day${dayData?.day ?? ''}`, {
+            input: null,
+            output: { totalAfter: total1, budgetPerDay }
+          });
         }
       }
+
       return plan;
     };
 
     try {
-      // 1) 並列生成
-      const settled = await Promise.allSettled(daysReq.map((d) => createOne(d)));
+      // 1) 並列生成（各日）
+      const settled = await traceTimed(
+        planId,
+        'create-day-plans:days:generate',
+        () => Promise.allSettled(daysReq.map((d) => createOne(d))),
+        { before: { daysCount: daysReq.length } }
+      );
+
       const results = settled.map((r, i) =>
         r.status === 'fulfilled'
           ? { ok: true, plan: r.value }
           : { ok: false, day: daysReq[i]?.day, error: r.reason?.message }
       );
 
+      await traceSnapshot(planId, 'create-day-plans:days:results', 'results', results.slice(0, 3));
+
       // 2) 暫定 itinerary
       let itinerary = results
         .filter((r) => r.ok && r.plan && Array.isArray(r.plan.schedule))
         .map((r) => r.plan);
 
-      // 3) geocode（URL 補完込み／初回）
+      await traceStep(planId, 'create-day-plans:itinerary:assemble', {
+        input: null,
+        output: { days: itinerary.map(d => ({ day: d.day, total_cost: d.total_cost })) }
+      });
+
+      // 3) geocode（初回）
       const collectItems = (its) => {
         const items = [];
         for (const d of its || []) {
@@ -231,9 +248,12 @@ export async function registerRoutes(app, cfg) {
         return items;
       };
       const items1 = collectItems(itinerary);
+
       if (items1.length > 0) {
-        try {
-          const geos = await geocodeBatchInternal({
+        const geos = await traceTimed(
+          planId,
+          'create-day-plans:geocode:stage1',
+          () => geocodeBatchInternal({
             destination,
             items: items1,
             planId,
@@ -241,73 +261,87 @@ export async function registerRoutes(app, cfg) {
             GOOGLE_MAPS_API_KEY,
             GOOGLE_MAPS_LANG,
             GOOGLE_MAPS_REGION,
-          });
-          mergeGeocodesIntoItinerary(destination, itinerary, geos);
-        } catch (e) {
-          console.warn('geocodeBatchInternal failed (ignored in create-day-plans stage1):', e.message);
-        }
+          }),
+          { before: { items: items1.slice(0, 5) } }
+        );
+        mergeGeocodesIntoItinerary(destination, itinerary, geos);
+        await traceMark(planId, 'create-day-plans:geocode:stage1', 'end', { merged: true });
       }
 
       // 4) 旅行全体の最終予算調整（80〜100%）
       let finalReport = null;
       if (finalizeBudget) {
-        try {
-          const { itinerary: fin, tripTotal } = await finalizeTripBudgetIfNeeded({
+        const { itinerary: fin, tripTotal } = await traceTimed(
+          planId,
+          'create-day-plans:budget:finalize',
+          () => finalizeTripBudgetIfNeeded({
             openai,
             itinerary,
-            planConditions, // ← ここで budgetPerDay を“必ず”入れてある
+            planConditions,
             targetMinRatio,
             targetMaxRatio,
-          });
-          itinerary = fin;
-
-          // 4.1 最終調整後に geocode をもう一度（URL補完も）
-          const items2 = collectItems(itinerary);
-          if (items2.length > 0) {
-            try {
-              const geos2 = await geocodeBatchInternal({
-                destination,
-                items: items2,
-                planId,
-                GEOCODE_CACHE_FILE,
-                GOOGLE_MAPS_API_KEY,
-                GOOGLE_MAPS_LANG,
-                GOOGLE_MAPS_REGION,
-              });
-              mergeGeocodesIntoItinerary(destination, itinerary, geos2);
-            } catch (e) {
-              console.warn('geocodeBatchInternal failed (ignored in create-day-plans stage2):', e.message);
+          }),
+          {
+            before: {
+              planConditions,
+              targetMinRatio,
+              targetMaxRatio,
+              totalsBefore: itinerary.map(d => ({ day: d.day, total_cost: d.total_cost }))
             }
           }
+        );
+        itinerary = fin;
 
-          const perDay = Number(planConditions?.budgetPerDay);
-          const totalBudget = Number.isFinite(perDay) ? perDay * itinerary.length : null;
-          finalReport = {
-            tripTotal,
-            totalBudget,
-            minTarget: Number.isFinite(totalBudget) ? Math.floor(totalBudget * targetMinRatio) : null,
-            maxTarget: Number.isFinite(totalBudget) ? Math.floor(totalBudget * targetMaxRatio) : null,
-          };
-        } catch (e) {
-          console.warn('finalizeTripBudgetIfNeeded failed (ignored):', e.message);
+        // geocode 再実行（名称差替え対策）
+        const items2 = collectItems(itinerary);
+        if (items2.length > 0) {
+          const geos2 = await traceTimed(
+            planId,
+            'create-day-plans:geocode:stage2',
+            () => geocodeBatchInternal({
+              destination,
+              items: items2,
+              planId,
+              GEOCODE_CACHE_FILE,
+              GOOGLE_MAPS_API_KEY,
+              GOOGLE_MAPS_LANG,
+              GOOGLE_MAPS_REGION,
+            }),
+            { before: { items: items2.slice(0, 5) } }
+          );
+          mergeGeocodesIntoItinerary(destination, itinerary, geos2);
         }
+
+        const budgetPerDay = Number(planConditions?.budgetPerDay);
+        const totalBudget = Number.isFinite(budgetPerDay) ? budgetPerDay * itinerary.length : null;
+        finalReport = {
+          tripTotal,
+          totalBudget,
+          minTarget: Number.isFinite(totalBudget) ? Math.floor(totalBudget * targetMinRatio) : null,
+          maxTarget: Number.isFinite(totalBudget) ? Math.floor(totalBudget * targetMaxRatio) : null,
+        };
+        await traceStep(planId, 'create-day-plans:budget:final-report', {
+          output: finalReport
+        });
       }
 
-      // 5) 保存＆Excel再出力（失敗は握りつぶす）
+      // 5) 保存（Excel/JSON）
       let saved = null;
       try {
         saved = await persistItineraryAndExport(planId, itinerary, {});
+        await traceMark(planId, 'create-day-plans:persist', 'end', { ok: !!saved, xlsxPath: saved?.xlsxPath || null });
       } catch (e) {
-        console.warn('persist/export failed (ignored):', e.message);
+        await traceError(planId, 'create-day-plans:persist', e);
       }
 
       // 6) 予算サマリー
       const budgetSummaries = itinerary.map(d => {
         const total = calcDayTotalJPY(d);
-        const budgetPerDay =
-          Number(d?.budgetPerDay ??
-                 d?.constraints?.budgetPerDay ??
-                 planConditions?.budgetPerDay);
+        const budgetPerDay = Number(
+          d?.budgetPerDay ??
+          d?.constraints?.budgetPerDay ??
+          planConditions?.budgetPerDay
+        );
         return {
           day: d.day,
           date: d.date,
@@ -316,6 +350,10 @@ export async function registerRoutes(app, cfg) {
           under_budget: Number.isFinite(budgetPerDay) ? total <= budgetPerDay : null,
         };
       });
+
+      await traceSnapshot(planId, 'create-day-plans:budget:summaries', 'budgetSummaries', budgetSummaries);
+
+      await traceMark(planId, 'create-day-plans', 'end', { days: itinerary.length });
 
       res.json({
         results,
@@ -328,16 +366,17 @@ export async function registerRoutes(app, cfg) {
         finalReport,
       });
     } catch (error) {
-      console.error('create-day-plans error:', error);
+      await traceError(planId, 'create-day-plans:catch', error);
       res.status(500).json({ error: `複数日プラン作成中にエラー: ${error?.message}` });
     }
   });
 
-  // ========= 旅行全体の予算最終調整だけを別途呼びたい場合 =========
+  // ========= 旅行全体の最終調整だけ =========
   app.post('/api/finalize-itinerary', async (req, res) => {
     try {
       const { planId, planConditions = {}, itinerary = [], targetMinRatio = 0.8, targetMaxRatio = 1.0 } = req.body || {};
       if (!Array.isArray(itinerary) || itinerary.length === 0) {
+        await traceError(planId, 'finalize-itinerary:validate', new Error('itinerary empty'));
         return res.status(400).json({ error: 'itinerary は配列である必要があります' });
       }
 
@@ -346,26 +385,22 @@ export async function registerRoutes(app, cfg) {
         itinerary?.[0]?.destination ||
         '';
 
-      // budgetPerDay が無ければ合計予算から補完
-      const days = itinerary.length || 1;
-      if (!Number.isFinite(planConditions?.budgetPerDay)) {
-        const totalBudget = Number(req.body?.budget ?? planConditions?.budget);
-        if (Number.isFinite(totalBudget) && totalBudget > 0) {
-          planConditions.budgetPerDay = Math.floor(totalBudget / days);
-        }
-      }
-
       const norm = itinerary.map(normalizeDayPlanCosts);
+      await traceSnapshot(planId, 'finalize-itinerary:normalize', 'totals', norm.map(d => ({ day: d.day, total_cost: d.total_cost })));
 
-      const { itinerary: fin, tripTotal } = await finalizeTripBudgetIfNeeded({
-        openai,
-        itinerary: norm,
-        planConditions,
-        targetMinRatio,
-        targetMaxRatio,
-      });
+      const { itinerary: fin, tripTotal } = await traceTimed(
+        planId,
+        'finalize-itinerary:budget:finalize',
+        () => finalizeTripBudgetIfNeeded({
+          openai,
+          itinerary: norm,
+          planConditions,
+          targetMinRatio,
+          targetMaxRatio,
+        }),
+        { before: { planConditions, targetMinRatio, targetMaxRatio } }
+      );
 
-      // geocode & URL 補完
       const items = [];
       for (const d of fin || []) {
         for (const s of d.schedule || []) {
@@ -373,8 +408,10 @@ export async function registerRoutes(app, cfg) {
         }
       }
       if (items.length > 0) {
-        try {
-          const geos = await geocodeBatchInternal({
+        const geos = await traceTimed(
+          planId,
+          'finalize-itinerary:geocode',
+          () => geocodeBatchInternal({
             destination,
             items,
             planId,
@@ -382,20 +419,18 @@ export async function registerRoutes(app, cfg) {
             GOOGLE_MAPS_API_KEY,
             GOOGLE_MAPS_LANG,
             GOOGLE_MAPS_REGION,
-          });
-          mergeGeocodesIntoItinerary(destination, fin, geos);
-        } catch (e) {
-          console.warn('geocodeBatchInternal failed (ignored in finalize-itinerary):', e.message);
-        }
+          }),
+          { before: { items: items.slice(0, 5) } }
+        );
+        mergeGeocodesIntoItinerary(destination, fin, geos);
       }
 
-      // 保存（任意）
       if (planId) {
-        try { await persistItineraryAndExport(planId, fin, {}); } catch {}
+        try { await persistItineraryAndExport(planId, fin, {}); } catch (e) { await traceError(planId, 'finalize-itinerary:persist', e); }
       }
 
-      const perDay = Number(planConditions?.budgetPerDay);
-      const totalBudget = Number.isFinite(perDay) ? perDay * fin.length : null;
+      const budgetPerDay = Number(planConditions?.budgetPerDay);
+      const totalBudget = Number.isFinite(budgetPerDay) ? budgetPerDay * fin.length : null;
 
       res.json({
         itinerary: fin,
@@ -405,7 +440,7 @@ export async function registerRoutes(app, cfg) {
         maxTarget: Number.isFinite(totalBudget) ? Math.floor(totalBudget * targetMaxRatio) : null,
       });
     } catch (e) {
-      console.error('finalize-itinerary error:', e);
+      await traceError(req.body?.planId, 'finalize-itinerary:catch', e);
       res.status(500).json({ error: e?.message || 'finalize-itinerary failed' });
     }
   });
@@ -455,6 +490,8 @@ export async function registerRoutes(app, cfg) {
         return res.status(400).json({ error: 'invalid itinerary' });
       }
 
+      await traceMark(planId, 'revise-plan', 'start', { instructions });
+
       const llm = createLLMHandler(
         openai,
         revisePlanSystemPrompt,
@@ -462,57 +499,73 @@ export async function registerRoutes(app, cfg) {
         'gpt-4o-mini',
         { raw: true }
       );
-      const json = await llm.__call({
-        body: { planId, planConditions, itinerary, instructions },
+      const json = await traceTimed(
         planId,
-      });
+        'revise-plan:llm',
+        () => llm.__call({
+          body: { planId, planConditions, itinerary, instructions },
+          planId,
+        }),
+        { before: { planConditions, itinerarySample: itinerary.slice(0, 1) } }
+      );
 
       let revised = json?.revised_itinerary || [];
       if (!Array.isArray(revised) || revised.length === 0) {
+        await traceError(planId, 'revise-plan:validate', new Error('empty revised_itinerary'), { raw: json });
         return res.status(500).json({ error: 'empty revised_itinerary', raw: json });
       }
 
-      // 価格正規化＋予算検算（必要なら再調整）
       const budgetPerDay = Number(planConditions?.budgetPerDay);
       revised = await Promise.all(revised.map(async (d) => {
         let norm = normalizeDayPlanCosts(d);
         if (Number.isFinite(budgetPerDay) && budgetPerDay > 0) {
           const total = calcDayTotalJPY(norm);
           if (total > budgetPerDay) {
-            norm = await rebudgetDayPlanIfOverBudget({
-              openai,
-              systemPrompt: revisePlanSystemPrompt,
-              userBody: { planId, planConditions, itinerary, instructions },
-              draftPlan: norm,
-              budgetPerDay,
-              tries: 2,
-            });
+            norm = await traceTimed(
+              planId,
+              `revise-plan:rebudget:day${d?.day ?? ''}`,
+              () => rebudgetDayPlanIfOverBudget({
+                openai,
+                systemPrompt: revisePlanSystemPrompt,
+                userBody: { planId, planConditions, itinerary, instructions },
+                draftPlan: norm,
+                budgetPerDay,
+                tries: 2,
+              }),
+              { before: { totalBefore: total, budgetPerDay } }
+            );
             norm = normalizeDayPlanCosts(norm);
           }
         }
         return norm;
       }));
 
-      // geocode（戻り値はそのまま）
       const items = [];
       for (const d of revised) {
         for (const s of d?.schedule || []) {
           items.push({ name: s.activity_name || s.name, area: d.area });
         }
       }
-      await geocodeBatchInternal({
-        destination: planConditions?.destination || '',
-        items,
+      await traceTimed(
         planId,
-        GEOCODE_CACHE_FILE,
-        GOOGLE_MAPS_API_KEY,
-        GOOGLE_MAPS_LANG,
-        GOOGLE_MAPS_REGION,
-      });
+        'revise-plan:geocode',
+        () => geocodeBatchInternal({
+          destination: planConditions?.destination || '',
+          items,
+          planId,
+          GEOCODE_CACHE_FILE,
+          GOOGLE_MAPS_API_KEY,
+          GOOGLE_MAPS_LANG,
+          GOOGLE_MAPS_REGION,
+        }),
+        { before: { items: items.slice(0, 5) } }
+      );
+
+      await traceMark(planId, 'revise-plan', 'end', { days: revised.length });
 
       res.json({ revised_itinerary: revised });
     } catch (e) {
-      console.error('revise-plan error', e);
+      await traceError(req.body?.planId, 'revise-plan:catch', e);
       res.status(500).json({ error: e?.message || 'revise-plan failed' });
     }
   });
@@ -523,7 +576,7 @@ export async function registerRoutes(app, cfg) {
       const { query } = req.body || {};
       if (!query) return res.status(400).json({ error: 'query required' });
 
-    let hit = await geocodeViaGoogle(query, {
+      let hit = await geocodeViaGoogle(query, {
         GOOGLE_MAPS_API_KEY,
         GOOGLE_MAPS_LANG,
         GOOGLE_MAPS_REGION,
@@ -820,6 +873,27 @@ export async function registerRoutes(app, cfg) {
       res.json({ ok: true, meta, logs, finalPlan });
     } catch (e) {
       res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ========= 追加: トレース専用ビュー =========
+  // GET /api/plan/trace?planId=...&format=json | jsonl
+  app.get('/api/plan/trace', async (req, res) => {
+    try {
+      const { planId, format = 'json' } = req.query || {};
+      if (!planId) return res.status(400).json({ error: 'planId is required' });
+
+      const { logs } = await ExcelLogger.readState(String(planId));
+      const traces = (logs || []).filter((x) => x?.type === 'trace').map((x) => x?.payload || x);
+
+      if ((format || '').toLowerCase() === 'jsonl') {
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.send(traces.map((o) => JSON.stringify(o)).join('\n'));
+        return;
+      }
+      res.json({ ok: true, planId, count: traces.length, traces });
+    } catch (e) {
+      res.status(500).json({ error: e?.message || 'trace read failed' });
     }
   });
 }

@@ -10,20 +10,29 @@
 // ============ ベースURL解決（/api まで含む） ============
 
 // 1) .env.* から（最優先）
-//    ここには「/api まで含むURL」を入れる想定
-//    例: http://localhost:3001/api, https://xxx.onrender.com/api
-const FROM_ENV = (import.meta.env?.VITE_API_BASE ?? '').trim().replace(/\/+$/, '');
+//   ここには「/api まで含むURL」を入れる想定だが、誤って末尾に /api が無い時は補完する
+//   例: http://localhost:3001/api, https://xxx.onrender.com/api
+const RAW_FROM_ENV = (import.meta.env?.VITE_API_BASE ?? '').trim();
+
+// /api が含まれていなければ付ける保険
+const ensureApiSuffix = (u) => {
+  if (!u) return '';
+  const trimmed = u.replace(/\/+$/, '');
+  return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
+};
+
+const FROM_ENV = ensureApiSuffix(RAW_FROM_ENV);
 
 // 2) 実行環境の判定
 const host = typeof window !== 'undefined' ? window.location.hostname : '';
 const isLocalhost = /^(localhost|127\.0\.0\.1)$/.test(host);
 const isGitHubPages = /\.github\.io$/.test(host);
 
-// 3) GitHub Pages 用の既定フォールバック（自分の Render の API ルートに差し替えてOK）
+// 3) GitHub Pages 用の既定フォールバック（必ず /api を含む）
 const PROD_FALLBACK = 'https://travel-web-app-s2gj.onrender.com/api';
 
 // 4) 最終決定
-// - env があればそれ（/api を含む）
+// - env があればそれ（/api を含む／なければ補完済み）
 // - localhost は相対 '/api'（Vite proxy）
 // - GitHub Pages で env が無ければ Render 既定URLへ（/api を含む）
 // - それ以外の環境でも、env が無ければ相対 '/api'
